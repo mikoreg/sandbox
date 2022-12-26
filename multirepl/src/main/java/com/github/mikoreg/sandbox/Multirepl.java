@@ -3,9 +3,17 @@
  */
 package com.github.mikoreg.sandbox;
 
+import java.io.IOException;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -13,13 +21,15 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
+import static java.util.stream.Collectors.joining;
 
 /**
  *
  * @author m1k0
  */
 public class Multirepl {
-    public static void main(String[] args) {
+
+    public static void main(String[] args) throws IOException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Welcome in MultiREPL");
         System.out.print("Enter the number of examples: ");
@@ -32,71 +42,84 @@ public class Multirepl {
             System.out.println("Entered data is corrupted");
             System.exit(-1);
         }
-        Multirepl multirepl = new Multirepl(iteractions, secondMin, secondMax);
+        LocalTime startTime = LocalTime.now();
+        Multirepl multirepl = new Multirepl();
+        Collection<String> errors = multirepl.train(secondMin, secondMax, iteractions);
+        Path history = Path.of(System.getProperty("java.io.tmpdir"), "multirepl.history.txt");
+        String collect = errors.stream().collect(joining("\n"));
+        Duration testDuration = Duration.between(startTime, LocalTime.now());
+        collect = collect.concat("\nDuration: " + testDuration.toString() + "\n\n");
+        Files.write(history, collect.getBytes(UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        System.out.println("history is saved in file " + history);
         scanner.nextLine();
     }
 
-    public Multirepl(int iteractions, int secondMin, int secondMax) {
+    public Collection<String> train(int secondMin, int secondMax, int iteractions) {
         Producer producer = new Producer(secondMin, secondMax);
-        int errorsCount = 0;
+        LocalTime startTime = LocalTime.now();
+        List<String> errors = new ArrayList<>();
         for (int i = 0; i < iteractions; i++) {
             Factors czynniki = producer.next();
             int a = czynniki.a();
             int b = czynniki.b();
             int iloczyn = a * b;
-            int rnd = ThreadLocalRandom.current().nextInt(2);
+            int rnd = ThreadLocalRandom.current().nextInt(4);
             boolean error = false;
             do {
-                int percent = i*100/iteractions;
-                System.out.print("["+percent+"%] \t ");
+                int percent = i * 100 / iteractions;
+                final String question;
                 final int expected;
-                switch(rnd) {
+                switch (rnd) {
                     case 1: {
                         expected = iloczyn;
-                        System.out.print(b + " * " + a + " = ");
+                        question = b + " * " + a + " = ";
                         break;
                     }
                     case 2: {
                         expected = b;
-                        System.out.print(iloczyn + " / " + a + " = ");
+                        question = iloczyn + " / " + a + " = ";
                         break;
                     }
                     case 3: {
                         expected = a;
-                        System.out.print(iloczyn + " / " + b + " = ");
+                        question = iloczyn + " / " + b + " = ";
                         break;
                     }
                     default: {
                         expected = iloczyn;
-                        System.out.print(a + " * " + b + " = ");
+                        question = a + " * " + b + " = ";
                     }
                 }
+                final Duration between = Duration.between(startTime, LocalTime.now());
+                String duration = String.format("%02d:%02d", between.toMinutesPart(), between.toSecondsPart());
+                System.out.print(duration + " [" + percent + "%] \t ");
+                System.out.print(question);
 
                 Scanner scanner = new Scanner(System.in);
 
-                String input = scanner.nextLine();
+                String input = scanner.nextLine().trim();
                 try {
-                    int wynik = Integer.parseInt(input.trim());
+                    int wynik = Integer.parseInt(input);
                     if (wynik != expected) {
                         error = true;
-                        errorsCount++;
                     } else {
                         error = false;
                     }
                 } catch (NumberFormatException e) {
                     error = true;
-                    errorsCount++;
                 }
                 if (error) {
                     System.out.println("Błąd! Wynik poprawny to " + expected);
+                    errors.add(question + " " + input);
                 }
             } while (error);
         }
-        if (errorsCount == 0) {
+        if (errors.isEmpty()) {
             System.out.println("Gratulacje, zero błędów");
         } else {
-            System.out.println("Błędnych odpowiedzi " + errorsCount + " na " + iteractions + " przykładów");
+            System.out.println("Błędnych odpowiedzi " + errors.size() + " na " + iteractions + " przykładów");
         }
+        return errors;
     }
 
     record Factors(int a, int b) {
@@ -111,7 +134,7 @@ public class Multirepl {
         public Producer(int secondMin, int secondMax) {
             Set<Factors> numbers = new LinkedHashSet<>();
             for (int a = 2; a <= 9; a++) {
-                for (int b = secondMin; b <=secondMax; b++) {
+                for (int b = secondMin; b <= secondMax; b++) {
                     numbers.add(new Factors(min(a, b), max(a, b)));
                 }
             }
