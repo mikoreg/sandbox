@@ -15,6 +15,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Scanner;
@@ -32,6 +33,13 @@ public class Multirepl {
     public static void main(String[] args) throws IOException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Welcome in MultiREPL");
+        System.out.println("Lista możliwości:");
+        System.out.println("a - dodawanie");
+        System.out.println("b - odejmowanie");
+        System.out.println("c - mnożenie");
+        System.out.println("d - dzielenie");
+        System.out.print("Wprowadź wybór np. cd: ");
+        Set<Operation> choices = extractOperations(scanner.nextLine());
         System.out.print("Enter the number of examples: ");
         int iteractions = Integer.parseInt(scanner.nextLine().trim());
         System.out.print("Enter minimum factor: ");
@@ -44,7 +52,7 @@ public class Multirepl {
         }
         LocalTime startTime = LocalTime.now();
         Multirepl multirepl = new Multirepl();
-        Collection<String> errors = multirepl.train(secondMin, secondMax, iteractions);
+        Collection<String> errors = multirepl.train(choices, secondMin, secondMax, iteractions);
         Path history = Path.of(System.getProperty("java.io.tmpdir"), "multirepl.history.txt");
         String collect = errors.stream().collect(joining("\n"));
         Duration testDuration = Duration.between(startTime, LocalTime.now());
@@ -54,42 +62,38 @@ public class Multirepl {
         scanner.nextLine();
     }
 
-    public Collection<String> train(int secondMin, int secondMax, int iteractions) {
+    private static Set<Operation> extractOperations(String userInput) {
+        if (userInput == null || userInput.isBlank()) {
+            return Set.of();
+        }
+        Set<Operation> result = new HashSet<>();
+        String str = userInput.toLowerCase();
+        if (str.contains("a")) {
+            result.add(Operation.ADDITION);
+        }
+        if (str.contains("b")) {
+            result.add(Operation.SUBTRACTION);
+        }
+        if (str.contains("c")) {
+            result.add(Operation.MULTIPLICATION);
+        }
+        if (str.contains("d")) {
+            result.add(Operation.DIVISION);
+        }
+        return result;
+    }
+
+    public Collection<String> train(Set<Operation> choices, int secondMin, int secondMax, int iteractions) {
         Producer producer = new Producer(secondMin, secondMax);
         LocalTime startTime = LocalTime.now();
         List<String> errors = new ArrayList<>();
         for (int i = 0; i < iteractions; i++) {
             Factors czynniki = producer.next();
-            int a = czynniki.a();
-            int b = czynniki.b();
-            int iloczyn = a * b;
-            int rnd = ThreadLocalRandom.current().nextInt(4);
+            Operation operation = choices.toArray(new Operation[0])[ThreadLocalRandom.current().nextInt(choices.size())];
             boolean error = false;
             do {
                 int percent = i * 100 / iteractions;
-                final String question;
-                final int expected;
-                switch (rnd) {
-                    case 1: {
-                        expected = iloczyn;
-                        question = b + " * " + a + " = ";
-                        break;
-                    }
-                    case 2: {
-                        expected = b;
-                        question = iloczyn + " / " + a + " = ";
-                        break;
-                    }
-                    case 3: {
-                        expected = a;
-                        question = iloczyn + " / " + b + " = ";
-                        break;
-                    }
-                    default: {
-                        expected = iloczyn;
-                        question = a + " * " + b + " = ";
-                    }
-                }
+                final String question = operation.prompt(czynniki);
                 final Duration between = Duration.between(startTime, LocalTime.now());
                 String duration = String.format("%02d:%02d", between.toMinutesPart(), between.toSecondsPart());
                 System.out.print(duration + " [" + percent + "%] \t ");
@@ -98,18 +102,14 @@ public class Multirepl {
                 Scanner scanner = new Scanner(System.in);
 
                 String input = scanner.nextLine().trim();
-                try {
-                    int wynik = Integer.parseInt(input);
-                    if (wynik != expected) {
-                        error = true;
-                    } else {
-                        error = false;
-                    }
-                } catch (NumberFormatException e) {
+                int wynik = Integer.parseInt(input);
+                if (operation.check(czynniki, input)) {
+                    error = false;
+                } else {
                     error = true;
                 }
                 if (error) {
-                    System.out.println("Błąd! Wynik poprawny to " + expected);
+                    System.out.println("Błąd! Wynik poprawny to " + operation.expected(czynniki));
                     errors.add(question + " " + input);
                 }
             } while (error);
@@ -154,5 +154,54 @@ public class Multirepl {
             remaining.addAll(all);
             Collections.shuffle(remaining);
         }
+    }
+
+    enum Operation {
+        ADDITION {
+            String prompt(Factors factors) {
+                return factors.a + " + " + factors.b + " = ";
+            }
+
+            String expected(Factors factors) {
+                return String.valueOf(Math.addExact(factors.a, factors.b));
+            }
+        },
+        SUBTRACTION {
+            String prompt(Factors factors) {
+                int sum = Math.addExact(factors.a, factors.b);
+                return sum + " - " + factors.a + " = ";
+            }
+
+            String expected(Factors factors) {
+                return String.valueOf(Math.addExact(factors.a, factors.b) - factors.a);
+            }
+        },
+        MULTIPLICATION {
+            String prompt(Factors factors) {
+                return factors.a + " * " + factors.b + " = ";
+            }
+
+            String expected(Factors factors) {
+                return String.valueOf(Math.multiplyExact(factors.a, factors.b));
+            }
+        },
+        DIVISION {
+            String prompt(Factors factors) {
+                int sum = Math.addExact(factors.a, factors.b);
+                return sum + " / " + factors.a + " = ";
+            }
+
+            String expected(Factors factors) {
+                return String.valueOf(Math.multiplyExact(factors.a, factors.b) / factors.a);
+            }
+        };
+
+        abstract String prompt(Factors factors);
+        abstract String expected(Factors factors);
+
+        boolean check(Factors factors, String answer) {
+            return answer.equals(expected(factors));
+        }
+
     }
 }
