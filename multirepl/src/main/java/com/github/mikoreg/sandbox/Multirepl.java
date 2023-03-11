@@ -178,7 +178,7 @@ public class Multirepl {
         },
         MULTIPLICATION {
             String prompt(Factors factors) {
-                return factors.a + " ⋅ " + factors.b + " = ";
+                return factors.a + " • " + factors.b + " = ";
             }
 
             String expected(Factors factors) {
