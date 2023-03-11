@@ -178,7 +178,7 @@ public class Multirepl {
         },
         MULTIPLICATION {
             String prompt(Factors factors) {
-                return factors.a + " * " + factors.b + " = ";
+                return factors.a + " ⋅ " + factors.b + " = ";
             }
 
             String expected(Factors factors) {
@@ -187,8 +187,8 @@ public class Multirepl {
         },
         DIVISION {
             String prompt(Factors factors) {
-                int sum = Math.addExact(factors.a, factors.b);
-                return sum + " / " + factors.a + " = ";
+                int sum = Math.multiplyExact(factors.a, factors.b);
+                return sum + " : " + factors.a + " = ";
             }
 
             String expected(Factors factors) {
