@@ -59,6 +59,7 @@ public class Multirepl {
         collect = collect.concat("\nDuration: " + testDuration.toString() + "\n\n");
         Files.write(history, collect.getBytes(UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         System.out.println("history is saved in file " + history);
+        System.out.println("Please hit [ENTER] to exit.");
         scanner.nextLine();
     }
 
@@ -91,6 +92,7 @@ public class Multirepl {
             Factors czynniki = producer.next();
             Operation operation = choices.toArray(new Operation[0])[ThreadLocalRandom.current().nextInt(choices.size())];
             boolean error = false;
+            boolean digitError = false;
             do {
                 int percent = i * 100 / iteractions;
                 final String question = operation.prompt(czynniki);
@@ -102,17 +104,22 @@ public class Multirepl {
                 Scanner scanner = new Scanner(System.in);
 
                 String input = scanner.nextLine().trim();
-                int wynik = Integer.parseInt(input);
-                if (operation.check(czynniki, input)) {
-                    error = false;
+                if (!input.matches("^[0-9]+$")) {
+                    digitError = true;
                 } else {
-                    error = true;
+                    digitError = false;
+                    int wynik = Integer.parseInt(input.trim());
+                    if (operation.check(czynniki, input)) {
+                        error = false;
+                    } else {
+                        error = true;
+                    }
+                    if (error) {
+                        System.out.println("Błąd! Wynik poprawny to " + operation.expected(czynniki));
+                        errors.add(question + " " + input);
+                    }
                 }
-                if (error) {
-                    System.out.println("Błąd! Wynik poprawny to " + operation.expected(czynniki));
-                    errors.add(question + " " + input);
-                }
-            } while (error);
+            } while (error | digitError);
         }
         if (errors.isEmpty()) {
             System.out.println("Gratulacje, zero błędów");
@@ -197,6 +204,7 @@ public class Multirepl {
         };
 
         abstract String prompt(Factors factors);
+
         abstract String expected(Factors factors);
 
         boolean check(Factors factors, String answer) {
