@@ -1,0 +1,4 @@
+gTTS
+pydub
+# Note: some Python builds may lack the stdlib 'audioop' (e.g., certain Python 3.14 builds).
+# If pydub errors on 'audioop' consider using Python 3.11/3.10 or installing a compatible substitute.
