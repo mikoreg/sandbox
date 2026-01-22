@@ -1,6 +1,5 @@
 package com.github.mikoreg.timelineaudio.render.mlt;
 
-import com.github.mikoreg.timelineaudio.domain.DebugLogger;
 import com.github.mikoreg.timelineaudio.domain.RenderJob;
 import com.github.mikoreg.timelineaudio.domain.RenderResult;
 import com.github.mikoreg.timelineaudio.domain.RenderSegment;
@@ -8,17 +7,16 @@ import com.github.mikoreg.timelineaudio.render.AudioRenderer;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.lang.System.Logger.Level;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 
 public class MltXmlRenderer implements AudioRenderer {
-    private final DebugLogger logger;
+    private static final System.Logger LOG = System.getLogger(MltXmlRenderer.class.getName());
 
-    public MltXmlRenderer(DebugLogger logger) {
-        this.logger = logger;
-    }
+    public MltXmlRenderer() {}
 
     @Override
     public RenderResult render(RenderJob job) {
@@ -29,7 +27,7 @@ public class MltXmlRenderer implements AudioRenderer {
         double frameRate = job.frameRate();
         long timelineMs = job.timelineDurationMs();
 
-        logger.info("Rendering MLT XML to " + outputPath);
+        LOG.log(Level.INFO, "Rendering MLT XML to " + outputPath);
         try {
             Files.createDirectories(outputPath.getParent());
             try (BufferedWriter writer = Files.newBufferedWriter(outputPath)) {
@@ -67,7 +65,7 @@ public class MltXmlRenderer implements AudioRenderer {
                 writer.write("</mlt>\n");
             }
         } catch (IOException e) {
-            logger.error("Failed to write MLT XML", e);
+            LOG.log(Level.ERROR, "Failed to write MLT XML", e);
             throw new IllegalStateException("MLT rendering failed", e);
         }
 

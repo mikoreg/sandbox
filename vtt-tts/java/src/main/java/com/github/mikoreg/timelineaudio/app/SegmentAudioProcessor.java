@@ -1,22 +1,22 @@
 package com.github.mikoreg.timelineaudio.app;
 
-import com.github.mikoreg.timelineaudio.domain.DebugLogger;
 import com.github.mikoreg.timelineaudio.domain.SpeechSegment;
 import com.github.mikoreg.timelineaudio.domain.TimingDecision;
-
 import java.io.IOException;
+import java.lang.System.Logger.Level;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SegmentAudioProcessor {
-    private final DebugLogger logger;
+    private static final System.Logger LOG = System.getLogger(SegmentAudioProcessor.class.getName());
     private final AudioProbe probe;
+    private final String ffmpegLogLevel;
 
-    public SegmentAudioProcessor(DebugLogger logger, AudioProbe probe) {
-        this.logger = logger;
+    public SegmentAudioProcessor(AudioProbe probe, String ffmpegLogLevel) {
         this.probe = probe;
+        this.ffmpegLogLevel = ffmpegLogLevel;
     }
 
     public SpeechSegment process(SpeechSegment speech, TimingDecision decision, Path outputDir) {
@@ -39,6 +39,8 @@ public class SegmentAudioProcessor {
     private Path convertToWav(Path input, Path output) {
         List<String> command = new ArrayList<>();
         command.add("ffmpeg");
+        command.add("-loglevel");
+        command.add(ffmpegLogLevel);
         command.add("-y");
         command.add("-i");
         command.add(input.toString());
@@ -56,6 +58,8 @@ public class SegmentAudioProcessor {
         String filterSpec = buildAtempoFilter(speed);
         List<String> command = new ArrayList<>();
         command.add("ffmpeg");
+        command.add("-loglevel");
+        command.add(ffmpegLogLevel);
         command.add("-y");
         command.add("-i");
         command.add(input.toString());
@@ -74,6 +78,8 @@ public class SegmentAudioProcessor {
     private Path trimToLength(Path input, Path output, long trimToMs) {
         List<String> command = new ArrayList<>();
         command.add("ffmpeg");
+        command.add("-loglevel");
+        command.add(ffmpegLogLevel);
         command.add("-y");
         command.add("-i");
         command.add(input.toString());
@@ -111,7 +117,7 @@ public class SegmentAudioProcessor {
     }
 
     private void run(List<String> command, String label) {
-        logger.debug("ffmpeg " + label + ": " + String.join(" ", command));
+        LOG.log(Level.DEBUG, "ffmpeg " + label + ": " + String.join(" ", command));
         try {
             Process process = new ProcessBuilder(command).inheritIO().start();
             int exit = process.waitFor();

@@ -1,6 +1,5 @@
 package com.github.mikoreg.timelineaudio.render.ffmpeg;
 
-import com.github.mikoreg.timelineaudio.domain.DebugLogger;
 import com.github.mikoreg.timelineaudio.domain.RenderJob;
 import com.github.mikoreg.timelineaudio.domain.RenderResult;
 import com.github.mikoreg.timelineaudio.domain.RenderSegment;
@@ -8,6 +7,7 @@ import com.github.mikoreg.timelineaudio.render.AudioRenderer;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.lang.System.Logger.Level;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -15,10 +15,11 @@ import java.util.Comparator;
 import java.util.List;
 
 public class FfmpegConcatRenderer implements AudioRenderer {
-    private final DebugLogger logger;
+    private static final System.Logger LOG = System.getLogger(FfmpegConcatRenderer.class.getName());
+    private final String ffmpegLogLevel;
 
-    public FfmpegConcatRenderer(DebugLogger logger) {
-        this.logger = logger;
+    public FfmpegConcatRenderer(String ffmpegLogLevel) {
+        this.ffmpegLogLevel = ffmpegLogLevel;
     }
 
     @Override
@@ -29,7 +30,7 @@ public class FfmpegConcatRenderer implements AudioRenderer {
         Path outputPath = job.outputPath();
         long timelineMs = job.timelineDurationMs();
 
-        logger.info("Rendering timeline via ffmpeg concat to " + outputPath);
+        LOG.log(Level.INFO, "Rendering timeline via ffmpeg concat to " + outputPath);
         try {
             Files.createDirectories(outputPath.getParent());
             Path tempDir = Files.createTempDirectory(outputPath.getParent(), "concat_");
@@ -62,7 +63,7 @@ public class FfmpegConcatRenderer implements AudioRenderer {
 
             return new RenderResult(outputPath, timelineMs, sorted.size());
         } catch (IOException e) {
-            logger.error("Failed to render via ffmpeg concat", e);
+            LOG.log(Level.ERROR, "Failed to render via ffmpeg concat", e);
             throw new IllegalStateException("ffmpeg concat rendering failed", e);
         }
     }
@@ -70,6 +71,8 @@ public class FfmpegConcatRenderer implements AudioRenderer {
     private void createSilence(Path output, long durationMs) {
         List<String> command = new ArrayList<>();
         command.add("ffmpeg");
+        command.add("-loglevel");
+        command.add(ffmpegLogLevel);
         command.add("-y");
         command.add("-f");
         command.add("lavfi");
@@ -98,6 +101,8 @@ public class FfmpegConcatRenderer implements AudioRenderer {
     private void runFfmpegConcat(Path listFile, Path outputPath) {
         List<String> command = new ArrayList<>();
         command.add("ffmpeg");
+        command.add("-loglevel");
+        command.add(ffmpegLogLevel);
         command.add("-y");
         command.add("-f");
         command.add("concat");
@@ -113,7 +118,7 @@ public class FfmpegConcatRenderer implements AudioRenderer {
     }
 
     private void run(List<String> command, String label) {
-        logger.debug("ffmpeg " + label + ": " + String.join(" ", command));
+        LOG.log(Level.DEBUG, "ffmpeg " + label + ": " + String.join(" ", command));
         try {
             Process process = new ProcessBuilder(command).inheritIO().start();
             int exit = process.waitFor();

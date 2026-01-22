@@ -24,3 +24,5 @@ hs_err_pid*
 
 vtt-tts/java/output/*
 vtt-tts/java/target/*
+vtt-tts/output/*
+vtt-tts/java/src/output/*

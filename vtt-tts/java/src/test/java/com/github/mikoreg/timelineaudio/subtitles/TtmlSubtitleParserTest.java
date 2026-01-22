@@ -1,6 +1,5 @@
 package com.github.mikoreg.timelineaudio.subtitles;
 
-import com.github.mikoreg.timelineaudio.domain.NoOpDebugLogger;
 import com.github.mikoreg.timelineaudio.domain.SubtitleSegment;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +27,7 @@ class TtmlSubtitleParserTest {
         Path temp = Files.createTempFile("sample", ".ttml");
         Files.writeString(temp, xml);
 
-        TtmlSubtitleParser parser = new TtmlSubtitleParser(new NoOpDebugLogger());
+        TtmlSubtitleParser parser = new TtmlSubtitleParser();
         List<SubtitleSegment> segments = parser.parse(temp);
 
         assertEquals(2, segments.size());

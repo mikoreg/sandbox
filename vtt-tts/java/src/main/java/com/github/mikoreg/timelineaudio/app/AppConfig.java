@@ -11,13 +11,15 @@ public record AppConfig(
         String encodeCodec,
         String ttsProvider,
         String language,
-        boolean allowPushSegments,
+        boolean allowStretchSegments,
+        int stretchSegmentLimit,
         boolean debug,
         long previewMs,
         double speechSpeed,
         double charactersPerSecond,
         long minTrimMs,
         double maxSpeedFactor,
-        double frameRate
+        double frameRate,
+        String ffmpegLogLevelOverride
 ) {
 }

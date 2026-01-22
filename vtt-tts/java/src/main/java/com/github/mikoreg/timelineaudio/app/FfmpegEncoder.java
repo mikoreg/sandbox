@@ -1,17 +1,17 @@
 package com.github.mikoreg.timelineaudio.app;
 
-import com.github.mikoreg.timelineaudio.domain.DebugLogger;
-
 import java.io.IOException;
+import java.lang.System.Logger.Level;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FfmpegEncoder {
-    private final DebugLogger logger;
+    private static final System.Logger LOG = System.getLogger(FfmpegEncoder.class.getName());
+    private final String ffmpegLogLevel;
 
-    public FfmpegEncoder(DebugLogger logger) {
-        this.logger = logger;
+    public FfmpegEncoder(String ffmpegLogLevel) {
+        this.ffmpegLogLevel = ffmpegLogLevel;
     }
 
     public Path encode(Path inputWav, String codec) {
@@ -26,6 +26,8 @@ public class FfmpegEncoder {
 
         List<String> command = new ArrayList<>();
         command.add("ffmpeg");
+        command.add("-loglevel");
+        command.add(ffmpegLogLevel);
         command.add("-y");
         command.add("-i");
         command.add(inputWav.toString());
@@ -55,7 +57,7 @@ public class FfmpegEncoder {
 
         command.add(output.toString());
 
-        logger.info("Encoding audio via ffmpeg: " + String.join(" ", command));
+        LOG.log(Level.INFO, "Encoding audio via ffmpeg: " + String.join(" ", command));
         try {
             Process process = new ProcessBuilder(command).inheritIO().start();
             int exit = process.waitFor();

@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tt xmlns="http://www.w3.org/ns/ttml" xmlns:tts="http://www.w3.org/ns/ttml#styling" ttp:version="2" xmlns:ttm="http://www.w3.org/ns/ttml#metadata" xmlns:ttp="http://www.w3.org/ns/ttml#parameter" xml:lang="pl">
+ <head>
+  <styling>
+   <style xml:id="AmazonDefaultStyle" tts:fontFamily="monospace" tts:color="white" tts:fontSize="1c"></style>
+  </styling>
+  <layout>
+   <region xml:id="AmazonDefaultRegion" tts:extent="80% 15%" tts:origin="10% 80%" tts:displayAlign="after" tts:textAlign="center"></region>
+  </layout>
+ </head>
+ <body>
+  <div>
+   <p begin="00:00:08.260" end="00:00:10.785" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Dobra lekcja dla pyszałka</p>
+   <p begin="00:00:10.785" end="00:00:10.885" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Dobra lekcja dla pyszałka</p>
+   <p begin="00:00:11.593" end="00:00:16.260" region="AmazonDefaultRegion" style="AmazonDefaultStyle">W MFG widać różnicę doświadczenia<br />między debiutem,</p>
+   <p begin="00:00:16.343" end="00:00:18.551" region="AmazonDefaultRegion" style="AmazonDefaultStyle">a trzecim startem</p>
+   <p begin="00:00:18.843" end="00:00:23.176" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Najmocniejsze u Seny:<br />uczy się błyskawicznie</p>
+   <p begin="00:00:23.843" end="00:00:30.176" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Chłonie doświadczenie<br />i od razu je wykorzystuje</p>
+   <p begin="00:00:30.843" end="00:00:35.968" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Powiedziałeś Senie o słabości stylu<br />K. Kanaty, o której mówił szef?</p>
+   <p begin="00:00:36.051" end="00:00:41.218" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Nie. Jak sam nie wyczuje tego<br />w walce to po co tu jesteśmy?</p>
+   <p begin="00:00:47.343" end="00:00:49.010" region="AmazonDefaultRegion" style="AmazonDefaultStyle">To upokarzające</p>
+   <p begin="00:00:49.136" end="00:00:52.552" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Zjechał mnie psychicznie<br />nic nie mogłem zrobić</p>
+   <p begin="00:00:52.970" end="00:00:57.387" region="AmazonDefaultRegion" style="AmazonDefaultStyle">W dumie z Gunmy<br />Katagiri Kanata mnie przebił</p>
+   <p begin="00:01:00.305" end="00:01:02.555" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Kanata jest teraz z przodu?</p>
+   <p begin="00:01:02.890" end="00:01:06.473" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Szczerze? To on jest większym problemem</p>
+   <p begin="00:01:06.557" end="00:01:07.849" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Katagiri Kanata</p>
+   <p begin="00:01:07.932" end="00:01:10.974" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Skoro jest chwila<br />pogadajmy z Marie-chan—</p>
+   <p begin="00:01:11.058" end="00:01:14.558" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Czemu tak się palisz<br />żeby cię o to zapytać?</p>
+   <p begin="00:01:14.935" end="00:01:18.310" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Twoje plany na lato pewnie słabe<br />ale dobra, pytam</p>
+   <p begin="00:01:18.395" end="00:01:23.436" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ale jesteś wredny<br />Nie przesadzasz, Uehara-san?</p>
+   <p begin="00:01:24.480" end="00:01:26.563" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Moje plany na lato..</p>
+   <p begin="00:01:27.523" end="00:01:29.648" region="AmazonDefaultRegion" style="AmazonDefaultStyle">to zrzucić wagę!</p>
+   <p begin="00:01:29.940" end="00:01:32.857" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Czy chcę czy nie<br />idę na siłownię,</p>
+   <p begin="00:01:33.150" end="00:01:36.150" region="AmazonDefaultRegion" style="AmazonDefaultStyle">zrobię formę pod strój<br /></p>
+   <p begin="00:01:36.401" end="00:01:38.776" region="AmazonDefaultRegion" style="AmazonDefaultStyle">a potem cię uwiodę, Uehara-san</p>
+   <p begin="00:01:40.236" end="00:01:41.861" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Rozumiem</p>
+   <p begin="00:01:41.945" end="00:01:44.779" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Nie robię sobie nadziei<br />ale powodzenia</p>
+   <p begin="00:01:44.988" end="00:01:47.196" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Wracaj na stanowisko, okej?</p>
+   <p begin="00:01:47.281" end="00:01:49.781" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Wredny jesteś, Uehara-san!</p>
+   <p begin="00:01:52.366" end="00:01:55.824" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Jak wyprzedzisz to Porsche?</p>
+   <p begin="00:01:56.660" end="00:01:58.910" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Próbowałem wszystkiego<br />i nic</p>
+   <p begin="00:01:58.994" end="00:02:00.994" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ale ty dasz radę</p>
+   <p begin="00:02:01.120" end="00:02:03.412" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Pokaż mi to<br />Chcę się nauczyć</p>
+   <p begin="00:02:03.746" end="00:02:06.413" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Zabierz mnie w strefę<br />której nie znam</p>
+   <p begin="00:03:41.090" end="00:03:42.923" region="AmazonDefaultRegion" style="AmazonDefaultStyle">MF GHOST</p>
+   <p begin="00:03:44.425" end="00:03:48.842" region="AmazonDefaultRegion" style="AmazonDefaultStyle">OSTATNIE OKRĄŻENIE</p>
+   <p begin="00:03:51.388" end="00:03:53.805" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Trójka przechodzi zakręt przy ratuszu</p>
+   <p begin="00:03:53.890" end="00:03:56.682" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Kończą czwarty przejazd<br />przez półwysep</p>
+   <p begin="00:03:56.766" end="00:04:01.808" region="AmazonDefaultRegion" style="AmazonDefaultStyle">885 spada o pozycję<br />po nieudanym ataku na auto nr 1,</p>
+   <p begin="00:04:02.104" end="00:04:05.770" region="AmazonDefaultRegion" style="AmazonDefaultStyle">a 86 przejmuje inicjatywę<br />po drugim debiutancie</p>
+   <p begin="00:04:05.857" end="00:04:08.732" region="AmazonDefaultRegion" style="AmazonDefaultStyle">86 ma pozycję do ataku<br />na auto nr 1!</p>
+   <p begin="00:04:08.817" end="00:04:10.067" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Nie odrywajcie wzroku</p>
+   <p begin="00:04:10.150" end="00:04:13.234" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Kanata odpalił się<br />i tnie stawkę jak snajper,</p>
+   <p begin="00:04:13.320" end="00:04:15.070" region="AmazonDefaultRegion" style="AmazonDefaultStyle">idealnie w tempo</p>
+   <p begin="00:04:15.154" end="00:04:19.696" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Czy były mistrz zatrzyma<br />tę „czerwoną kulę”?</p>
+   <p begin="00:04:19.907" end="00:04:24.032" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Kanata ma talent<br />który straszy rywali</p>
+   <p begin="00:04:24.285" end="00:04:28.035" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ishigami pewnie się poci<br />choć nigdy się nie przyzna</p>
+   <p begin="00:04:28.538" end="00:04:32.038" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Przelatują koło poczty<br />na pełnym gazie</p>
+   <p begin="00:04:32.125" end="00:04:36.291" region="AmazonDefaultRegion" style="AmazonDefaultStyle">I znów pachnie ryzykiem</p>
+   <p begin="00:04:38.380" end="00:04:41.380" region="AmazonDefaultRegion" style="AmazonDefaultStyle">No. Będzie próba</p>
+   <p begin="00:04:41.632" end="00:04:44.632" region="AmazonDefaultRegion" style="AmazonDefaultStyle">86 aż kipi agresją</p>
+   <p begin="00:04:51.097" end="00:04:54.639" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Jedzie!<br />86 atakuje!</p>
+   <p begin="00:05:01.063" end="00:05:03.105" region="AmazonDefaultRegion" style="AmazonDefaultStyle">I jest przed nim!</p>
+   <p begin="00:05:03.356" end="00:05:07.356" region="AmazonDefaultRegion" style="AmazonDefaultStyle">86 wyprzedza auto nr 1!</p>
+   <p begin="00:05:08.277" end="00:05:13.443" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Błyskawiczny „kill”!<br />Nawet Ishigami Fujin go nie zatrzymał!</p>
+   <p begin="00:05:13.990" end="00:05:16.782" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Co my właśnie zobaczyliśmy<br />Akiyama-san?</p>
+   <p begin="00:05:16.867" end="00:05:18.367" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Zaskoczenie</p>
+   <p begin="00:05:18.451" end="00:05:21.243" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Nawet mi to nie przyszło do głowy</p>
+   <p begin="00:05:21.788" end="00:05:25.329" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Wykorzystał słabość<br />europejskich superaut</p>
+   <p begin="00:05:25.666" end="00:05:31.707" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Na drugim nawrocie jest wyraźna różnica<br />poziomu asfaltu,</p>
+   <p begin="00:05:31.796" end="00:05:37.212" region="AmazonDefaultRegion" style="AmazonDefaultStyle">więc niskie auto nie weźmie<br />najkrótszej linii</p>
+   <p begin="00:05:37.676" end="00:05:43.967" region="AmazonDefaultRegion" style="AmazonDefaultStyle">86 nie jest dużo wyższa<br />ale względem 911 GT3</p>
+   <p begin="00:05:44.056" end="00:05:46.389" region="AmazonDefaultRegion" style="AmazonDefaultStyle">miała dość prześwitu, by ciąć do środka</p>
+   <p begin="00:05:46.474" end="00:05:49.308" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Podwozie przytarło<br />To problem?</p>
+   <p begin="00:05:49.519" end="00:05:51.311" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Leciały iskry</p>
+   <p begin="00:05:52.021" end="00:05:53.729" region="AmazonDefaultRegion" style="AmazonDefaultStyle">O kurde</p>
+   <p begin="00:05:53.814" end="00:05:56.814" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Raczej nic mu nie będzie</p>
+   <p begin="00:05:57.358" end="00:06:00.567" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Dziś Kanata jedzie ostro</p>
+   <p begin="00:06:08.910" end="00:06:10.910" region="AmazonDefaultRegion" style="AmazonDefaultStyle">I wjeżdżają na prostą!</p>
+   <p begin="00:06:11.037" end="00:06:15.412" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Tu są drugie najwyższe prędkości</p>
+   <p begin="00:06:16.292" end="00:06:20.375" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Czy auto nr 1 odrobi<br />mocą?</p>
+   <p begin="00:06:20.629" end="00:06:24.796" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Do zakrętu Nushiya jest pełny gaz,</p>
+   <p begin="00:06:24.882" end="00:06:28.882" region="AmazonDefaultRegion" style="AmazonDefaultStyle">ale na pofałdowanej drodze<br />jest tylko jedna idealna linia</p>
+   <p begin="00:06:29.303" end="00:06:31.886" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Jestem pod wrażeniem Kanaty</p>
+   <p begin="00:06:32.264" end="00:06:36.139" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ustawia auto perfekcyjnie<br />blokuje wyprzedzanie</p>
+   <p begin="00:06:36.477" end="00:06:40.102" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Już wiadomo: 86 ma solidny<br />upgrade pod maską</p>
+   <p begin="00:06:40.188" end="00:06:44.146" region="AmazonDefaultRegion" style="AmazonDefaultStyle">na ten trzeci wyścig</p>
+   <p begin="00:06:44.609" end="00:06:47.817" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Inaczej, nawet z idealną linią,</p>
+   <p begin="00:06:47.903" end="00:06:51.903" region="AmazonDefaultRegion" style="AmazonDefaultStyle">nie utrzymałby auta nr 1<br />na tej prostej</p>
+   <p begin="00:06:52.867" end="00:06:55.033" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Wchodzą w Nushiya</p>
+   <p begin="00:06:55.702" end="00:06:59.410" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Najpierw sztuczki jak z ulicznych wyścigów,</p>
+   <p begin="00:06:59.831" end="00:07:03.831" region="AmazonDefaultRegion" style="AmazonDefaultStyle">a teraz jazda jak doświadczony kierowca</p>
+   <p begin="00:07:04.878" end="00:07:09.336" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Dobrze. Im mocniejszy rywal<br />tym lepsza wygrana</p>
+   <p begin="00:07:09.423" end="00:07:11.590" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Teraz dopiero się nakręcam!</p>
+   <p begin="00:07:14.345" end="00:07:17.887" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Starzenie się jest słabe</p>
+   <p begin="00:07:21.227" end="00:07:22.935" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Niesamowite</p>
+   <p begin="00:07:23.354" end="00:07:26.646" region="AmazonDefaultRegion" style="AmazonDefaultStyle">To inna forma niż w dwóch pierwszych</p>
+   <p begin="00:07:27.190" end="00:07:30.482" region="AmazonDefaultRegion" style="AmazonDefaultStyle">W Kanacie coś się obudziło</p>
+   <p begin="00:07:31.654" end="00:07:39.112" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Czy to tempo „sprintu” wychował<br />tamten geniusz zjazdów?</p>
+   <p begin="00:07:42.289" end="00:07:47.747" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Liderzy kończą czwarte okrążenie<br />i wjeżdżają na ostatnie</p>
+   <p begin="00:07:48.211" end="00:07:53.045" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Michael Beckenbauer<br />Sawatari Koki. Akaba Kaito</p>
+   <p begin="00:07:53.466" end="00:07:57.216" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Auto nr 2 prowadzi<br />Trójka bije się o P1</p>
+   <p begin="00:07:57.679" end="00:08:03.470" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Sześć sekund z tyłu jest 86<br />po świeżej przepychance!</p>
+   <p begin="00:08:03.560" end="00:08:08.310" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Wrócił na czwarte<br />i nie zwalnia</p>
+   <p begin="00:08:08.815" end="00:08:12.315" region="AmazonDefaultRegion" style="AmazonDefaultStyle">„Super rookie” dziś naprawdę zasługuje<br />na tę ksywę!</p>
+   <p begin="00:08:12.819" end="00:08:14.985" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Kanata jest kozakiem!</p>
+   <p begin="00:08:15.072" end="00:08:17.072" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Zdejmij Beckenbauera z tronu!</p>
+   <p begin="00:08:17.324" end="00:08:21.074" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ishigami (1) jest piąty<br />Moroboshi (885) szósty</p>
+   <p begin="00:08:21.411" end="00:08:24.911" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Oishi (3) siódmy<br />Yanagida (6) ósmy</p>
+   <p begin="00:08:24.957" end="00:08:28.873" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Maezono (13) dziewiąty<br />Sakamoto (14) dziesiąty</p>
+   <p begin="00:08:29.002" end="00:08:30.752" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Aiba (9) jedzie jedenasty</p>
+   <p begin="00:08:31.088" end="00:08:35.254" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Yashio (12) dwunasty<br />Kitahara (18) trzynasty</p>
+   <p begin="00:08:35.343" end="00:08:37.259" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Taylor (8) czternasty</p>
+   <p begin="00:08:37.345" end="00:08:39.470" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Otani (7) piętnasty</p>
+   <p begin="00:08:39.555" end="00:08:41.972" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ta piętnastka sprinterów<br />jedzie teraz na limicie..</p>
+   <p begin="00:08:42.057" end="00:08:45.765" region="AmazonDefaultRegion" style="AmazonDefaultStyle">żeby urwać każdy metr</p>
+   <p begin="00:08:49.774" end="00:08:54.108" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Akiyama-san, mam pytanie</p>
+   <p begin="00:08:54.195" end="00:08:55.237" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Dawaj</p>
+   <p begin="00:08:55.321" end="00:09:00.529" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Czemu w trzech tunelach<br />wyłączyli światła?</p>
+   <p begin="00:09:01.077" end="00:09:04.869" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Dobra okazja, by to wyjaśnić</p>
+   <p begin="00:09:05.332" end="00:09:07.790" region="AmazonDefaultRegion" style="AmazonDefaultStyle">MFG powstało m.in<br />po to,</p>
+   <p begin="00:09:07.877" end="00:09:12.127" region="AmazonDefaultRegion" style="AmazonDefaultStyle">by ożywić tereny dotknięte<br />erupcją Fuji</p>
+   <p begin="00:09:12.632" end="00:09:17.173" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Kibice wiedzą<br />że spora część zysków</p>
+   <p begin="00:09:17.262" end="00:09:20.137" region="AmazonDefaultRegion" style="AmazonDefaultStyle">trafia do najbardziej poszkodowanych</p>
+   <p begin="00:09:20.681" end="00:09:23.806" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Katastrofa odcięła infrastrukturę</p>
+   <p begin="00:09:23.894" end="00:09:28.269" region="AmazonDefaultRegion" style="AmazonDefaultStyle">i ludzie byli bez prądu<br />przez długi czas</p>
+   <p begin="00:09:29.107" end="00:09:33.524" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Zgaszone tunele mają o tym przypominać</p>
+   <p begin="00:09:33.612" end="00:09:36.362" region="AmazonDefaultRegion" style="AmazonDefaultStyle">— taki gest organizatorów</p>
+   <p begin="00:09:36.866" end="00:09:39.908" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Dlatego też</p>
+   <p begin="00:09:40.036" end="00:09:45.869" region="AmazonDefaultRegion" style="AmazonDefaultStyle">wszystkie trasy MFG mają przeszkody<br />nawiązujące do erupcji</p>
+   <p begin="00:09:46.251" end="00:09:50.626" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Już wiem, czemu wybrali pana na rzecznika<br />Akiyama-san</p>
+   <p begin="00:09:50.714" end="00:09:53.673" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ma pan świetne spojrzenie na ich ideę</p>
+   <p begin="00:09:54.968" end="00:09:59.552" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Wracamy do ścigania<br />Wjeżdżają w „Czarny i Biały”!</p>
+   <p begin="00:10:04.062" end="00:10:09.103" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Zostawił kuszącą lukę<br />Nie wiem, co knuje,</p>
+   <p begin="00:10:09.193" end="00:10:14.193" region="AmazonDefaultRegion" style="AmazonDefaultStyle">ale jak jest miejsce na wyprzedzanie<br />to wchodzę</p>
+   <p begin="00:10:15.825" end="00:10:20.325" region="AmazonDefaultRegion" style="AmazonDefaultStyle">No dawaj, królu koni<br />Pokaż prędkość maks</p>
+   <p begin="00:10:20.997" end="00:10:24.039" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Auto nr 2 wychodzi z cienia 12</p>
+   <p begin="00:10:24.126" end="00:10:26.626" region="AmazonDefaultRegion" style="AmazonDefaultStyle">A 4 siedzi mu na zderzaku!</p>
+   <p begin="00:10:27.672" end="00:10:30.005" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Celowałeś w ten „kieszeń” powietrza?</p>
+   <p begin="00:10:30.383" end="00:10:32.508" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Dobrze zagrane, Sawatari</p>
+   <p begin="00:10:32.885" end="00:10:34.177" region="AmazonDefaultRegion" style="AmazonDefaultStyle">I jak teraz?</p>
+   <p begin="00:10:34.554" end="00:10:38.096" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Smakuje te chore 670 koni?</p>
+   <p begin="00:10:38.183" end="00:10:43.683" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Prosta „Midnight” na ostatnim okrążeniu<br />to test siły</p>
+   <p begin="00:10:44.107" end="00:10:47.357" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Tunel podbija „muzykę” Ferrari</p>
+   <p begin="00:10:47.694" end="00:10:50.111" region="AmazonDefaultRegion" style="AmazonDefaultStyle">I wyprzedza oba auta!</p>
+   <p begin="00:10:50.197" end="00:10:53.697" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Pierwsza trójka miesza się miejscami!</p>
+   <p begin="00:11:00.208" end="00:11:02.375" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Oto liderzy</p>
+   <p begin="00:11:03.253" end="00:11:05.211" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Dogonię ich?</p>
+   <p begin="00:11:06.215" end="00:11:08.548" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Fujiwara-sensei zawsze mówił:</p>
+   <p begin="00:11:08.635" end="00:11:11.926" region="AmazonDefaultRegion" style="AmazonDefaultStyle">„Gdy czegoś chcesz<br />nie zadawaj pytania.”</p>
+   <p begin="00:11:12.639" end="00:11:14.889" region="AmazonDefaultRegion" style="AmazonDefaultStyle">„Powiedz to jak fakt w przyszłym czasie.”</p>
+   <p begin="00:11:16.184" end="00:11:19.309" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Dam radę. Dogonię ich</p>
+   <p begin="00:11:26.780" end="00:11:28.113" region="AmazonDefaultRegion" style="AmazonDefaultStyle">MF Ghost</p>
+   <p begin="00:11:49.765" end="00:11:52.432" region="AmazonDefaultRegion" style="AmazonDefaultStyle">I przechodzi!</p>
+   <p begin="00:11:53.018" end="00:11:57.393" region="AmazonDefaultRegion" style="AmazonDefaultStyle">885 wreszcie wyprzedza auto nr 1!</p>
+   <p begin="00:11:57.481" end="00:11:59.398" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Poszedł po zewnętrznej</p>
+   <p begin="00:11:59.484" end="00:12:03.526" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Skopiował linię<br />Katagiriego Kanaty</p>
+   <p begin="00:12:04.239" end="00:12:07.281" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Widział to może dwa, trzy razy,</p>
+   <p begin="00:12:07.368" end="00:12:10.660" region="AmazonDefaultRegion" style="AmazonDefaultStyle">a już prawie to ma</p>
+   <p begin="00:12:11.039" end="00:12:15.914" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Niespodzianka. To groźny debiutant</p>
+   <p begin="00:12:16.212" end="00:12:19.087" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Inny typ niż Kanata,</p>
+   <p begin="00:12:19.173" end="00:12:22.715" region="AmazonDefaultRegion" style="AmazonDefaultStyle">ale potencjał ma ogromny<br />i nieprzewidywalny</p>
+   <p begin="00:12:31.563" end="00:12:34.563" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Aiba Shun. Zaszedłeś daleko</p>
+   <p begin="00:12:34.942" end="00:12:38.025" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ale zatrzymam cię tu i teraz!</p>
+   <p begin="00:12:38.446" end="00:12:41.321" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ci dwaj często idą na zwarcie</p>
+   <p begin="00:12:41.407" end="00:12:44.574" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Obaj mają podobną moc</p>
+   <p begin="00:12:44.661" end="00:12:47.578" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Będzie kolejny kontakt?</p>
+   <p begin="00:12:48.791" end="00:12:50.583" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Wracamy do liderów!</p>
+   <p begin="00:12:50.918" end="00:12:54.502" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Moc auta nr 2 robi robotę</p>
+   <p begin="00:12:54.589" end="00:12:57.089" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Dwóch za nim nie daje rady</p>
+   <p begin="00:13:12.610" end="00:13:16.027" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Nie nadążam. Co on wyprawia?</p>
+   <p begin="00:13:16.114" end="00:13:19.531" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Auto nr 2 ucieka<br />a 4 i 15 gonią</p>
+   <p begin="00:13:20.828" end="00:13:23.328" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Akaba prowadzi</p>
+   <p begin="00:13:23.415" end="00:13:26.873" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Półwysep zdecyduje o wyniku</p>
+   <p begin="00:13:27.419" end="00:13:32.127" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Tam jego tempo jest dużo gorsze<br />niż Beckenbauera i Sawatariego</p>
+   <p begin="00:13:32.425" end="00:13:37.258" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Jeśli wyjedzie stamtąd nadal P1,</p>
+   <p begin="00:13:37.347" end="00:13:41.181" region="AmazonDefaultRegion" style="AmazonDefaultStyle">to ma pół ręki na pucharze</p>
+   <p begin="00:13:41.852" end="00:13:46.519" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ale dwójka z tyłu mu tego nie odda</p>
+   <p begin="00:13:46.608" end="00:13:51.858" region="AmazonDefaultRegion" style="AmazonDefaultStyle">To oni są topem tego sezonu MFG</p>
+   <p begin="00:13:53.282" end="00:13:54.782" region="AmazonDefaultRegion" style="AmazonDefaultStyle">I poszli</p>
+   <p begin="00:13:54.867" end="00:13:59.117" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Teraz sekcja półwyspu —<br />trasa nie bez powodu tak się nazywa</p>
+   <p begin="00:13:59.915" end="00:14:02.790" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ale spójrzcie na auto<br />które ich goni!</p>
+   <p begin="00:14:03.377" end="00:14:06.294" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Rekordzista tej sekcji: Kanata</p>
+   <p begin="00:14:06.756" end="00:14:10.131" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Najszybszy na półwyspie nadjeżdża!</p>
+   <p begin="00:14:11.178" end="00:14:14.220" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Tu Kanata jest szczególnie szybki</p>
+   <p begin="00:14:14.724" end="00:14:17.682" region="AmazonDefaultRegion" style="AmazonDefaultStyle">I po jego wcześniejszych kłopotach</p>
+   <p begin="00:14:17.769" end="00:14:22.269" region="AmazonDefaultRegion" style="AmazonDefaultStyle">prowadzenie Akaby<br />może mu tylko pomóc</p>
+   <p begin="00:14:22.358" end="00:14:24.691" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ile im urwie?</p>
+   <p begin="00:14:24.777" end="00:14:28.194" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Oczy wlepione w wyścig!</p>
+   <p begin="00:14:30.283" end="00:14:34.075" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Masakra. Tak się spinam<br />że boli mnie żołądek</p>
+   <p begin="00:14:34.163" end="00:14:35.580" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Zaraz zwymiotuję</p>
+   <p begin="00:14:35.664" end="00:14:38.123" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Tylko nie tutaj</p>
+   <p begin="00:14:38.793" end="00:14:41.960" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Z tego miejsca niewiele już zrobimy</p>
+   <p begin="00:14:42.381" end="00:14:45.506" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Idź do toalety, jak musisz</p>
+   <p begin="00:14:46.176" end="00:14:47.885" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Nie mogę</p>
+   <p begin="00:14:48.429" end="00:14:51.471" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Nie mogę teraz wyjść z kabiny</p>
+   <p begin="00:14:52.476" end="00:14:59.143" region="AmazonDefaultRegion" style="AmazonDefaultStyle">To ostatnie okrążenie<br />a mój partner jedzie jak w transie</p>
+   <p begin="00:15:02.487" end="00:15:03.695" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Zbliżają się!</p>
+   <p begin="00:15:03.989" end="00:15:07.697" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Różnice w top 3 topnieją!</p>
+   <p begin="00:15:08.076" end="00:15:12.493" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ale tu jest wąsko<br />Wyprzedzać będzie ciężko</p>
+   <p begin="00:15:14.167" end="00:15:18.000" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Akaba jedzie dumą zeszłorocznego P2</p>
+   <p begin="00:15:18.588" end="00:15:20.922" region="AmazonDefaultRegion" style="AmazonDefaultStyle">„Rasujący koń” chce uciec</p>
+   <p begin="00:15:21.384" end="00:15:23.551" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Co jest? Rusz się, Sawatari</p>
+   <p begin="00:15:23.636" end="00:15:27.261" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Auto nr 2 powinniśmy łyknąć bez problemu</p>
+   <p begin="00:15:27.515" end="00:15:31.557" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Daję ci pierwszy ruch</p>
+   <p begin="00:15:31.770" end="00:15:34.603" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Trzy auta zderzak w zderzak,</p>
+   <p begin="00:15:34.691" end="00:15:38.191" region="AmazonDefaultRegion" style="AmazonDefaultStyle">czuć, że zaraz coś się stanie</p>
+   <p begin="00:15:40.197" end="00:15:45.905" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Przewaga nad Ferrari?<br />Jest lżejszy</p>
+   <p begin="00:15:49.540" end="00:15:52.540" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Jak to wykorzystać..</p>
+   <p begin="00:15:55.755" end="00:15:59.047" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Najlepiej: zjazd w dół i hamowanie</p>
+   <p begin="00:16:02.888" end="00:16:04.513" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Nigdy nie lubiłem typów jak ty,</p>
+   <p begin="00:16:04.599" end="00:16:08.224" region="AmazonDefaultRegion" style="AmazonDefaultStyle">co gonią za każdą laską</p>
+   <p begin="00:16:12.358" end="00:16:14.358" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Gdzie w tym styl?</p>
+   <p begin="00:16:15.402" end="00:16:17.861" region="AmazonDefaultRegion" style="AmazonDefaultStyle">A mój Seventeen Complex..</p>
+   <p begin="00:16:17.947" end="00:16:20.322" region="AmazonDefaultRegion" style="AmazonDefaultStyle">to moja estetyka w czystej formie!</p>
+   <p begin="00:16:20.408" end="00:16:23.200" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Auto nr 4 wychodzi na prowadzenie!</p>
+   <p begin="00:16:23.286" end="00:16:26.536" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Sawatari Koki jest P1!</p>
+   <p begin="00:16:27.207" end="00:16:31.582" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Podrywacz bez zasad nigdy nie będzie tak cool..</p>
+   <p begin="00:16:32.255" end="00:16:33.838" region="AmazonDefaultRegion" style="AmazonDefaultStyle">jak fetyszysta</p>
+   <p begin="00:16:36.467" end="00:16:38.092" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Sawatari to bestia!</p>
+   <p begin="00:16:38.177" end="00:16:42.844" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Wola walki dała mu brutalne wyprzedzanie</p>
+   <p begin="00:16:43.267" end="00:16:46.808" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Akaba-san, przytrzymaj tego zadufanego Niemca,</p>
+   <p begin="00:16:47.479" end="00:16:49.729" region="AmazonDefaultRegion" style="AmazonDefaultStyle">żebym zbudował przewagę</p>
+   <p begin="00:16:51.609" end="00:16:55.401" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Chwila... to 12 rusza?</p>
+   <p begin="00:17:01.119" end="00:17:04.744" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Dwójka przecina za 12<br />i szykuje atak</p>
+   <p begin="00:17:04.831" end="00:17:08.248" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Liczy na moc i idzie szeroko, po zewnętrznej</p>
+   <p begin="00:17:10.504" end="00:17:16.671" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ale nie! Pierwsze rozwidlenie<br />blokuje mu linię!</p>
+   <p begin="00:17:16.761" end="00:17:19.719" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Akaba spada na trzecie!</p>
+   <p begin="00:17:19.806" end="00:17:21.097" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Cholera</p>
+   <p begin="00:17:26.939" end="00:17:29.564" region="AmazonDefaultRegion" style="AmazonDefaultStyle">O nie. Michael już siedzi mi na ogonie</p>
+   <p begin="00:17:29.942" end="00:17:34.025" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Niemożliwe. Akaba-san<br />co ty tam robisz?</p>
+   <p begin="00:17:34.112" end="00:17:37.529" region="AmazonDefaultRegion" style="AmazonDefaultStyle">To jednocześnie szok i demolka!</p>
+   <p begin="00:17:37.616" end="00:17:39.866" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Akaba został zmiażdżony</p>
+   <p begin="00:17:39.953" end="00:17:42.619" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Z szacunku do Akaby..</p>
+   <p begin="00:17:43.247" end="00:17:47.206" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Nie popełnił błędu<br />Jechał czysto</p>
+   <p begin="00:17:47.293" end="00:17:52.126" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Po prostu jego dwaj rywale<br />jadą na absurdalnym poziomie</p>
+   <p begin="00:17:52.382" end="00:17:54.716" region="AmazonDefaultRegion" style="AmazonDefaultStyle">To zupełnie inna liga</p>
+   <p begin="00:17:54.801" end="00:17:59.634" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Było to widać w kwalach —<br />obaj bili rekord trasy</p>
+   <p begin="00:17:59.931" end="00:18:03.223" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ten sezon robi się dziki</p>
+   <p begin="00:18:03.310" end="00:18:07.935" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Nowa generacja rośnie tak szybko<br />że starzy nie nadążają</p>
+   <p begin="00:18:07.982" end="00:18:10.065" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Zostali z tyłu</p>
+   <p begin="00:18:10.901" end="00:18:15.651" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ci wariaci nawet nie mrugną<br />gdy idą na ocierki,</p>
+   <p begin="00:18:16.156" end="00:18:20.448" region="AmazonDefaultRegion" style="AmazonDefaultStyle">i nie boją się przepychanek<br />za które leci flaga</p>
+   <p begin="00:18:20.536" end="00:18:23.911" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Tego wkurwu nie zapomnę</p>
+   <p begin="00:18:31.255" end="00:18:34.338" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Kanata? Skąd on się wziął?!</p>
+   <p begin="00:18:34.424" end="00:18:35.966" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Zakręt Mitsuishi!</p>
+   <p begin="00:18:36.426" end="00:18:38.135" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Jedzie!</p>
+   <p begin="00:18:38.220" end="00:18:41.845" region="AmazonDefaultRegion" style="AmazonDefaultStyle">86 pcha się do środka!</p>
+   <p begin="00:18:41.932" end="00:18:45.682" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Jadą bok w bok! Jest ciasno!</p>
+   <p begin="00:18:48.313" end="00:18:50.563" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Jest przed nim!</p>
+   <p begin="00:18:50.650" end="00:18:53.066" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Wyprzedzanie!</p>
+   <p begin="00:18:53.152" end="00:18:56.318" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Kanata odzyskuje trzecie!</p>
+   <p begin="00:18:56.697" end="00:18:58.447" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Cięcie jak brzytwa</p>
+   <p begin="00:18:58.532" end="00:19:04.407" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Przypomnienie: cała trójka<br />biła rekordy trasy!</p>
+   <p begin="00:19:05.205" end="00:19:09.455" region="AmazonDefaultRegion" style="AmazonDefaultStyle">A Kanata ma rekord<br />tej sekcji półwyspu!</p>
+   <p begin="00:19:09.543" end="00:19:13.709" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Jedzie tak, jakby chciał to podkreślić!</p>
+   <p begin="00:19:22.096" end="00:19:25.263" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Wyszedłem z zakrętu trochę szerzej<br />niż chciałem</p>
+   <p begin="00:19:25.892" end="00:19:28.267" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Zaczyna się podsterowność</p>
+   <p begin="00:19:31.439" end="00:19:33.272" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Co za wyścig</p>
+   <p begin="00:19:33.357" end="00:19:35.982" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Studio w Odawarze huczy</p>
+   <p begin="00:19:36.276" end="00:19:39.401" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Liderzy lecą już nadmorskim odcinkiem</p>
+   <p begin="00:19:39.738" end="00:19:43.197" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Spójrzcie na odstępy!<br />86 trzyma tempo!</p>
+   <p begin="00:19:43.283" end="00:19:47.283" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Tu już wszystko jest możliwe</p>
+   <p begin="00:19:47.704" end="00:19:51.912" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ta trójkolorowa grupa dalej się tłucze!</p>
+   <p begin="00:20:01.257" end="00:20:06.216" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Zwykle o tej porze opony Aiby<br />byłyby już zjechane</p>
+   <p begin="00:20:06.554" end="00:20:09.429" region="AmazonDefaultRegion" style="AmazonDefaultStyle">To czemu dziś nie zwalnia?</p>
+   <p begin="00:20:09.765" end="00:20:13.224" region="AmazonDefaultRegion" style="AmazonDefaultStyle">To moja oś przodu<br />zaczyna pływać</p>
+   <p begin="00:20:13.936" end="00:20:18.436" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Nie wierzę, że mój minus: centralny silnik 4x4<br />ugryzł mnie tak późno</p>
+   <p begin="00:20:19.858" end="00:20:23.316" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Dwa auta walczące o dziewiąte<br />dojeżdżają do trzeciego rozwidlenia</p>
+   <p begin="00:20:23.777" end="00:20:27.069" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Już tu było dużo dramy,</p>
+   <p begin="00:20:27.322" end="00:20:31.447" region="AmazonDefaultRegion" style="AmazonDefaultStyle">a wygląda na to, że Aiba (9)<br />ma coś w zanadrzu!</p>
+   <p begin="00:20:32.076" end="00:20:34.909" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ale czy to dowiezie?</p>
+   <p begin="00:20:37.831" end="00:20:39.123" region="AmazonDefaultRegion" style="AmazonDefaultStyle">O!</p>
+   <p begin="00:20:39.207" end="00:20:41.832" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Nie poszedł<br />Nawet nie spróbował</p>
+   <p begin="00:20:42.168" end="00:20:47.585" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Nie nastawiaj się<br />Ja nie jestem „technicznym” kierowcą</p>
+   <p begin="00:20:47.965" end="00:20:49.673" region="AmazonDefaultRegion" style="AmazonDefaultStyle">A teraz..</p>
+   <p begin="00:20:57.265" end="00:21:00.556" region="AmazonDefaultRegion" style="AmazonDefaultStyle">To 86!</p>
+   <p begin="00:21:04.729" end="00:21:11.562" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Król, Beckenbauer właśnie<br />został ograny przez debiutanta!</p>
+   <p begin="00:21:11.651" end="00:21:13.484" region="AmazonDefaultRegion" style="AmazonDefaultStyle">To wyprzedzanie było tak gładkie..</p>
+   <p begin="00:21:13.569" end="00:21:14.819" region="AmazonDefaultRegion" style="AmazonDefaultStyle">...jak magia!</p>
+   <p begin="00:21:15.946" end="00:21:18.571" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Trudno uwierzyć w to, co widziałem</p>
+   <p begin="00:21:18.823" end="00:21:21.198" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Co to było, Akiyama-san?</p>
+   <p begin="00:21:21.534" end="00:21:22.700" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Rynna</p>
+   <p begin="00:21:23.827" end="00:21:27.494" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Użył różnicy wysokości<br />między asfaltem a poboczem</p>
+   <p begin="00:21:27.580" end="00:21:29.789" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ale to mi się przypomniało..</p>
+   <p begin="00:21:31.167" end="00:21:34.292" region="AmazonDefaultRegion" style="AmazonDefaultStyle">To był ulubiony trik<br />Fujiwary Takumiego</p>
+   <p begin="00:21:34.669" end="00:21:38.210" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Ten dzieciak nie kończy z zaskoczeniami</p>
+   <p begin="00:21:39.006" end="00:21:41.256" region="AmazonDefaultRegion" style="AmazonDefaultStyle">To przez opony?</p>
+   <p begin="00:21:42.508" end="00:21:45.591" region="AmazonDefaultRegion" style="AmazonDefaultStyle">W innych wyścigach tego nie robił,</p>
+   <p begin="00:21:45.678" end="00:21:48.053" region="AmazonDefaultRegion" style="AmazonDefaultStyle">więc jeśli musiał teraz,</p>
+   <p begin="00:21:48.721" end="00:21:52.638" region="AmazonDefaultRegion" style="AmazonDefaultStyle">to czy opony kończą mu przyczepność?</p>
+   <p begin="00:23:37.417" end="00:23:41.709" region="AmazonDefaultRegion" style="AmazonDefaultStyle">Następnym razem: Zakręt 28 — Pierwszy pocałunek</p>
+  </div>
+ </body></tt>

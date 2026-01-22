@@ -1,13 +1,12 @@
 package com.github.mikoreg.timelineaudio.render.wav;
 
-import com.github.mikoreg.timelineaudio.domain.DebugLogger;
 import com.github.mikoreg.timelineaudio.domain.RenderJob;
 import com.github.mikoreg.timelineaudio.domain.RenderResult;
 import com.github.mikoreg.timelineaudio.domain.RenderSegment;
 import com.github.mikoreg.timelineaudio.render.AudioRenderer;
-
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.System.Logger.Level;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Files;
@@ -19,17 +18,15 @@ public class WavTimelineRenderer implements AudioRenderer {
     private static final short BITS_PER_SAMPLE = 16;
     private static final int HEADER_SIZE = 44;
 
-    private final DebugLogger logger;
+    private static final System.Logger LOG = System.getLogger(WavTimelineRenderer.class.getName());
 
-    public WavTimelineRenderer(DebugLogger logger) {
-        this.logger = logger;
-    }
+    public WavTimelineRenderer() {}
 
     @Override
     public RenderResult render(RenderJob job) {
         Path output = job.outputPath();
         long timelineMs = job.timelineDurationMs();
-        logger.info("Rendering WAV timeline to " + output);
+        LOG.log(Level.INFO, "Rendering WAV timeline to " + output);
 
         long totalSamples = Math.max(1, Math.round((timelineMs / 1000.0) * SAMPLE_RATE));
         long dataSize = totalSamples * (BITS_PER_SAMPLE / 8);
@@ -45,7 +42,7 @@ public class WavTimelineRenderer implements AudioRenderer {
                 }
             }
         } catch (IOException e) {
-            logger.error("Failed to render WAV timeline", e);
+            LOG.log(Level.ERROR, "Failed to render WAV timeline", e);
             throw new IllegalStateException("WAV rendering failed", e);
         }
 
@@ -61,7 +58,7 @@ public class WavTimelineRenderer implements AudioRenderer {
         double angular = 2.0 * Math.PI * frequency / SAMPLE_RATE;
         double amplitude = 0.2 * Short.MAX_VALUE;
 
-        logger.debug("Writing tone segment " + segment.id() + " start=" + segment.startMs()
+        LOG.log(Level.DEBUG, "Writing tone segment " + segment.id() + " start=" + segment.startMs()
                 + " ms duration=" + segment.durationMs() + " ms freq=" + frequency + " Hz");
 
         raf.seek(dataOffset);

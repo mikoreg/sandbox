@@ -1,10 +1,9 @@
 package com.github.mikoreg.timelineaudio.speech;
 
-import com.github.mikoreg.timelineaudio.domain.DebugLogger;
 import com.github.mikoreg.timelineaudio.domain.SpeechSegment;
 import com.github.mikoreg.timelineaudio.domain.SubtitleSegment;
-
 import java.io.IOException;
+import java.lang.System.Logger.Level;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
@@ -16,12 +15,11 @@ import java.nio.file.Path;
 
 public class GttsHttpSpeechSynthesizer implements SpeechSynthesizer {
     private final SpeechConfig config;
-    private final DebugLogger logger;
     private final HttpClient httpClient;
+    private static final System.Logger LOG = System.getLogger(GttsHttpSpeechSynthesizer.class.getName());
 
-    public GttsHttpSpeechSynthesizer(SpeechConfig config, DebugLogger logger) {
+    public GttsHttpSpeechSynthesizer(SpeechConfig config) {
         this.config = config;
-        this.logger = logger;
         this.httpClient = HttpClient.newHttpClient();
     }
 
@@ -35,7 +33,7 @@ public class GttsHttpSpeechSynthesizer implements SpeechSynthesizer {
         String url = "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl="
                 + config.language() + "&q=" + encoded;
 
-        logger.debug("Requesting gTTS for " + subtitle.id());
+        LOG.log(Level.DEBUG, "Requesting gTTS for " + subtitle.id());
         HttpRequest request = HttpRequest.newBuilder(URI.create(url))
                 .header("User-Agent", "Mozilla/5.0")
                 .GET()

@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tt xmlns="http://www.w3.org/ns/ttml" xmlns:tts="http://www.w3.org/ns/ttml#styling" ttp:version="2" xmlns:ttm="http://www.w3.org/ns/ttml#metadata" xmlns:ttp="http://www.w3.org/ns/ttml#parameter" xml:lang="en">
+ <head>
+  <styling>
+   <style xml:id="AmazonDefaultStyle" tts:fontFamily="monospace" tts:color="white" tts:fontSize="1c"></style>
+  </styling>
+  <layout>
+   <region xml:id="AmazonDefaultRegion" tts:extent="80% 15%" tts:origin="10% 80%" tts:displayAlign="after" tts:textAlign="center"></region>
+  </layout>
+ </head>
+ <body>
+  <div>
+   <p begin="00:00:08.260" end="00:00:10.785" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> This'll be a good lesson for that cocky kid. </p>
+   <p begin="00:00:10.785" end="00:00:10.885" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> This'll be a good lesson for that cocky kid. </p>
+   <p begin="00:00:11.593" end="00:00:16.260" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> There's a clear difference in experience<br /> between an MFG driver in his first race, </p>
+   <p begin="00:00:16.343" end="00:00:18.551" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> and one in his third. </p>
+   <p begin="00:00:18.843" end="00:00:23.176" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Sena's biggest strength is<br /> how monstrously quickly he learns. </p>
+   <p begin="00:00:23.843" end="00:00:30.176" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> He has a prodigious talent for absorbing<br /> what he experiences and using it himself. </p>
+   <p begin="00:00:30.843" end="00:00:35.968" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Did you tell Sena about the weakness in<br /> Katagiri Kanata's style the boss told us about? </p>
+   <p begin="00:00:36.051" end="00:00:41.218" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Hell no. If he can't figure it while he's out<br /> there racing him, there's no point doing this. </p>
+   <p begin="00:00:47.343" end="00:00:49.010" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> This is humiliating. </p>
+   <p begin="00:00:49.136" end="00:00:52.552" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> He overwhelmed me emotionally,<br /> and I couldn't do a damn thing. </p>
+   <p begin="00:00:52.970" end="00:00:57.387" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> When it comes to Gunma pride,<br /> Katagiri Kanata outdid me. </p>
+   <p begin="00:01:00.305" end="00:01:02.555" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Katagiri Kanata is ahead now? </p>
+   <p begin="00:01:02.890" end="00:01:06.473" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> In all honesty, he strikes me<br /> as the bigger problem. </p>
+   <p begin="00:01:06.557" end="00:01:07.849" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> KATAGIRI KANATA </p>
+   <p begin="00:01:07.932" end="00:01:10.974" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And now that she's available,<br /> let's chat with Marie-chan— </p>
+   <p begin="00:01:11.058" end="00:01:14.558" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I-Is there some reason you look so eager<br /> to be asked about this? </p>
+   <p begin="00:01:14.935" end="00:01:18.310" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I feel like your plans for summer<br /> won't amount to much, but I'll ask anyway. </p>
+   <p begin="00:01:18.395" end="00:01:23.436" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> So mean. Aren't you being<br /> a little harsh, Uehara-san? </p>
+   <p begin="00:01:24.480" end="00:01:26.563" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> My plans for summer... </p>
+   <p begin="00:01:27.523" end="00:01:29.648" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> involve a strategy for losing weight! </p>
+   <p begin="00:01:29.940" end="00:01:32.857" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Whether I like it or not,<br /> I'll go to the gym and sweat a bunch </p>
+   <p begin="00:01:33.150" end="00:01:36.150" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> until my body is perfect<br /> for a cute swimsuit, </p>
+   <p begin="00:01:36.401" end="00:01:38.776" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> and then, I'll seduce you, Uehara-san. </p>
+   <p begin="00:01:40.236" end="00:01:41.861" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I see. </p>
+   <p begin="00:01:41.945" end="00:01:44.779" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I won't get my hopes up,<br /> but I wish you luck. </p>
+   <p begin="00:01:44.988" end="00:01:47.196" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Now, head back to your position, yeah? </p>
+   <p begin="00:01:47.281" end="00:01:49.781" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> You're so mean, Uehara-san! </p>
+   <p begin="00:01:52.366" end="00:01:55.824" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> How are you going to<br /> get past that Porsche? </p>
+   <p begin="00:01:56.660" end="00:01:58.910" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I couldn't pull it off,<br /> no matter what I tried, </p>
+   <p begin="00:01:58.994" end="00:02:00.994" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> but I get the feeling you can. </p>
+   <p begin="00:02:01.120" end="00:02:03.412" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Show me what you've got,<br /> so I can learn from it. </p>
+   <p begin="00:02:03.746" end="00:02:06.413" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Take me into a zone<br /> I've never seen before. </p>
+   <p begin="00:03:41.090" end="00:03:42.923" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> MF GHOST </p>
+   <p begin="00:03:44.425" end="00:03:48.842" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> INTO THE FINAL LAP </p>
+   <p begin="00:03:51.388" end="00:03:53.805" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The trio negotiate City Hall corner. </p>
+   <p begin="00:03:53.890" end="00:03:56.682" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> They're almost done with<br /> the peninsula section for a fourth lap. </p>
+   <p begin="00:03:56.766" end="00:04:01.808" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The 885 car has fallen back a place<br /> after a failed overtake on the 1 car, </p>
+   <p begin="00:04:02.104" end="00:04:05.770" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> and almost as if taking up the baton<br /> from his fellow rookie, </p>
+   <p begin="00:04:05.857" end="00:04:08.732" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> the 86 is now in position<br /> to strike and pass the 1! </p>
+   <p begin="00:04:08.817" end="00:04:10.067" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Don't look away, folks. </p>
+   <p begin="00:04:10.150" end="00:04:13.234" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Since a fire was lit under Katagiri<br /> Kanata, he's shot through the field </p>
+   <p begin="00:04:13.320" end="00:04:15.070" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> with the precision of a sniper. </p>
+   <p begin="00:04:15.154" end="00:04:19.696" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Will the former champ manage to prevent<br /> the red bullet from hitting its mark? </p>
+   <p begin="00:04:19.907" end="00:04:24.032" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Katagiri Kanata has this uncanny knack<br /> that must frighten other drivers. </p>
+   <p begin="00:04:24.285" end="00:04:28.035" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Ishigami-kun's probably in a cold sweat,<br /> even if he'd never admit it. </p>
+   <p begin="00:04:28.538" end="00:04:32.038" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> They blast past the post office<br /> at full throttle. </p>
+   <p begin="00:04:32.125" end="00:04:36.291" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And once again, the scent<br /> of danger is in the air! </p>
+   <p begin="00:04:38.380" end="00:04:41.380" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> This is it. He's gonna try something. </p>
+   <p begin="00:04:41.632" end="00:04:44.632" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The 86 is pulsing with<br /> aggression right now. </p>
+   <p begin="00:04:51.097" end="00:04:54.639" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And there he goes!<br /> The 86 makes its move! </p>
+   <p begin="00:05:01.063" end="00:05:03.105" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And he's through! </p>
+   <p begin="00:05:03.356" end="00:05:07.356" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The 86 pulls ahead of the 1 car! </p>
+   <p begin="00:05:08.277" end="00:05:13.443" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Another split-second kill!<br /> Even Ishigami Fujin couldn't stop him! </p>
+   <p begin="00:05:13.990" end="00:05:16.782" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> What in the world did we<br /> just see, Akiyama-san? </p>
+   <p begin="00:05:16.867" end="00:05:18.367" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> A surprise, for sure. </p>
+   <p begin="00:05:18.451" end="00:05:21.243" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I never even considered<br /> that kind of maneuver. </p>
+   <p begin="00:05:21.788" end="00:05:25.329" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> He took advantage of an inherent<br /> weakness in European supercars. </p>
+   <p begin="00:05:25.666" end="00:05:31.707" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> There's a pronounced height difference<br /> in the roads on that second hairpin, </p>
+   <p begin="00:05:31.796" end="00:05:37.212" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> meaning a car with lower ground<br /> clearance can't take the shortest line. </p>
+   <p begin="00:05:37.676" end="00:05:43.967" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The 86 isn't that much higher off the<br /> ground, but relative to the 911 GT3, </p>
+   <p begin="00:05:44.056" end="00:05:46.389" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> it had enough to daringly cut inside. </p>
+   <p begin="00:05:46.474" end="00:05:49.308" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The chassis struck the road.<br /> Will that be a problem? </p>
+   <p begin="00:05:49.519" end="00:05:51.311" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I even saw sparks. </p>
+   <p begin="00:05:52.021" end="00:05:53.729" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Holy cow. </p>
+   <p begin="00:05:53.814" end="00:05:56.814" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I don't think it'll be a problem. </p>
+   <p begin="00:05:57.358" end="00:06:00.567" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Kanata's playing rough today. </p>
+   <p begin="00:06:08.910" end="00:06:10.910" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And onto the back straightaway! </p>
+   <p begin="00:06:11.037" end="00:06:15.412" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> This is the stretch with<br /> the second-highest recorded speeds. </p>
+   <p begin="00:06:16.292" end="00:06:20.375" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Can the 1 car with its superior<br /> horsepower come back at him? </p>
+   <p begin="00:06:20.629" end="00:06:24.796" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> This stretch until the Nushiya corner<br /> allows them to open the throttle, </p>
+   <p begin="00:06:24.882" end="00:06:28.882" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> but due to the undulating nature of<br /> the road, there's only one ideal line. </p>
+   <p begin="00:06:29.303" end="00:06:31.886" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I'm very impressed with Katagiri Kanata. </p>
+   <p begin="00:06:32.264" end="00:06:36.139" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> He's positioning his car perfectly<br /> to stop the 1 from getting past. </p>
+   <p begin="00:06:36.477" end="00:06:40.102" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I think we can now be sure that the 86<br /> has received a substantial upgrade </p>
+   <p begin="00:06:40.188" end="00:06:44.146" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> under the hood for this third race. </p>
+   <p begin="00:06:44.609" end="00:06:47.817" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Otherwise, no matter<br /> how perfect his line was, </p>
+   <p begin="00:06:47.903" end="00:06:51.903" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> he wouldn't be able to fend off<br /> the 1 car on this back straight. </p>
+   <p begin="00:06:52.867" end="00:06:55.033" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> They enter the Nushiya corner. </p>
+   <p begin="00:06:55.702" end="00:06:59.410" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> He first pulls the kinda tricks<br /> you only see in street racing, </p>
+   <p begin="00:06:59.831" end="00:07:03.831" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> and now he's showing the experience<br /> of a seasoned racing driver. </p>
+   <p begin="00:07:04.878" end="00:07:09.336" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Nice. The stronger the enemy,<br /> the more satisfying it is to beat 'em. </p>
+   <p begin="00:07:09.423" end="00:07:11.590" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Now I'm really fired up! </p>
+   <p begin="00:07:14.345" end="00:07:17.887" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Getting old is no fun at all. </p>
+   <p begin="00:07:21.227" end="00:07:22.935" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Incredible. </p>
+   <p begin="00:07:23.354" end="00:07:26.646" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> He's displaying a different kind<br /> of prowess from the first two races. </p>
+   <p begin="00:07:27.190" end="00:07:30.482" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Something must've awakened<br /> inside Katagiri Kanata. </p>
+   <p begin="00:07:31.654" end="00:07:39.112" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Was this otherworldy sprinting prowess<br /> nurtured by that genius downhill racer? </p>
+   <p begin="00:07:42.289" end="00:07:47.747" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Our lead group finishes up its fourth lap<br /> and heads into the final lap. </p>
+   <p begin="00:07:48.211" end="00:07:53.045" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Michael Beckenbauer.<br /> Sawatari Koki. And Akaba Kaito. </p>
+   <p begin="00:07:53.466" end="00:07:57.216" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> With the 2 leading the way,<br /> it's a three-way brawl for first. </p>
+   <p begin="00:07:57.679" end="00:08:03.470" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And six seconds back is the 86,<br /> fresh from its latest skirmish! </p>
+   <p begin="00:08:03.560" end="00:08:08.310" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> He's all the way back up to fourth,<br /> and is showing no signs of slowing down. </p>
+   <p begin="00:08:08.815" end="00:08:12.315" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The super rookie is really<br /> earning that title today! </p>
+   <p begin="00:08:12.819" end="00:08:14.985" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Katagiri Kanata's awesome! </p>
+   <p begin="00:08:15.072" end="00:08:17.072" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Knock Beckenbauer off his perch! </p>
+   <p begin="00:08:17.324" end="00:08:21.074" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Ishigami in the 1 car is in fifth,<br /> with Moroboshi's 885 in sixth. </p>
+   <p begin="00:08:21.411" end="00:08:24.911" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Oishi in the 3 is seventh.<br /> Yanagida in the 6 is eighth. </p>
+   <p begin="00:08:24.957" end="00:08:28.873" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Maezono's 13 car is in ninth.<br /> Sakamoto's 14 is in tenth. </p>
+   <p begin="00:08:29.002" end="00:08:30.752" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Aiba in the 9 runs 11th. </p>
+   <p begin="00:08:31.088" end="00:08:35.254" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Yashio's 12 is in 12th.<br /> Kitahara in the 18 car is 13th. </p>
+   <p begin="00:08:35.343" end="00:08:37.259" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Taylor in the 8 is 14th. </p>
+   <p begin="00:08:37.345" end="00:08:39.470" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And Otani's 7 car in 15th. </p>
+   <p begin="00:08:39.555" end="00:08:41.972" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> These 15 sprinters<br /> will now go flat-out... </p>
+   <p begin="00:08:42.057" end="00:08:45.765" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> to gain as much ground as they can. </p>
+   <p begin="00:08:49.774" end="00:08:54.108" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I'd like to ask about something<br /> that's been on my mind, Akiyama-san. </p>
+   <p begin="00:08:54.195" end="00:08:55.237" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Shoot. </p>
+   <p begin="00:08:55.321" end="00:09:00.529" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Is there a reason the lights in the<br /> three tunnels have been turned off? </p>
+   <p begin="00:09:01.077" end="00:09:04.869" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> This might be a good chance to explain. </p>
+   <p begin="00:09:05.332" end="00:09:07.790" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> MFG as a racing series<br /> was originally started </p>
+   <p begin="00:09:07.877" end="00:09:12.127" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> with the intention of reviving areas<br /> affected by the eruption of Mount Fuji. </p>
+   <p begin="00:09:12.632" end="00:09:17.173" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I'm sure fans are aware that<br /> a significant portion of the proceeds </p>
+   <p begin="00:09:17.262" end="00:09:20.137" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> is donated to the areas<br /> that were hardest hit. </p>
+   <p begin="00:09:20.681" end="00:09:23.806" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The natural disaster resulted<br /> in a protracted period </p>
+   <p begin="00:09:23.894" end="00:09:28.269" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> where infrastructure shut down, leaving<br /> residents without electricity for a time. </p>
+   <p begin="00:09:29.107" end="00:09:33.524" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Shutting off the lights in the tunnel<br /> is a reminder of those events </p>
+   <p begin="00:09:33.612" end="00:09:36.362" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> by MFG's organizers. </p>
+   <p begin="00:09:36.866" end="00:09:39.908" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> It's also for this very same reason </p>
+   <p begin="00:09:40.036" end="00:09:45.869" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> that all five MFG courses include<br /> hazards that reflect the Fuji eruption. </p>
+   <p begin="00:09:46.251" end="00:09:50.626" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I can see why the organizing committee<br /> chose you as a spokesman, Akiyama-san. </p>
+   <p begin="00:09:50.714" end="00:09:53.673" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> You have a wealth of fascinating<br /> insights into their vision. </p>
+   <p begin="00:09:54.968" end="00:09:59.552" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And now, back to the race.<br /> Into the Black and White they go! </p>
+   <p begin="00:10:04.062" end="00:10:09.103" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> He's left the most enticing line open.<br /> I'm not sure what he's planning, </p>
+   <p begin="00:10:09.193" end="00:10:14.193" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> but if there's space to overtake,<br /> my policy is to go for it. </p>
+   <p begin="00:10:15.825" end="00:10:20.325" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Go on, horsepower honcho.<br /> Give him a taste of your top speed. </p>
+   <p begin="00:10:20.997" end="00:10:24.039" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The 2 moves out from the 12's slipstream. </p>
+   <p begin="00:10:24.126" end="00:10:26.626" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And the 4's right behind him! </p>
+   <p begin="00:10:27.672" end="00:10:30.005" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> You were aiming for<br /> that pocket of air all along? </p>
+   <p begin="00:10:30.383" end="00:10:32.508" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Well played, Sawatari. </p>
+   <p begin="00:10:32.885" end="00:10:34.177" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> How d'ya like me now? </p>
+   <p begin="00:10:34.554" end="00:10:38.096" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> You enjoying your taste<br /> of that monstrous 670 horsepower? </p>
+   <p begin="00:10:38.183" end="00:10:43.683" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The Midnight Straight on this final lap<br /> is turning into an test of strength. </p>
+   <p begin="00:10:44.107" end="00:10:47.357" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The acoustics of the tunnel<br /> enhance the music of the Ferrari. </p>
+   <p begin="00:10:47.694" end="00:10:50.111" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And he passes both cars! </p>
+   <p begin="00:10:50.197" end="00:10:53.697" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> First down to third<br /> have all switched places! </p>
+   <p begin="00:11:00.208" end="00:11:02.375" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> There's the lead group. </p>
+   <p begin="00:11:03.253" end="00:11:05.211" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Will I be able to catch them? </p>
+   <p begin="00:11:06.215" end="00:11:08.548" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Fujiwara-sensei always told me: </p>
+   <p begin="00:11:08.635" end="00:11:11.926" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> "When you want to achieve something,<br /> don't frame it like a question." </p>
+   <p begin="00:11:12.639" end="00:11:14.889" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> "Make it a statement in the future tense." </p>
+   <p begin="00:11:16.184" end="00:11:19.309" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I can do this. I will catch them. </p>
+   <p begin="00:11:26.780" end="00:11:28.113" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> MF Ghost. </p>
+   <p begin="00:11:49.765" end="00:11:52.432" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And through he goes! </p>
+   <p begin="00:11:53.018" end="00:11:57.393" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The 885 finally blasts past the 1 car! </p>
+   <p begin="00:11:57.481" end="00:11:59.398" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> He passed him around the outside. </p>
+   <p begin="00:11:59.484" end="00:12:03.526" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I believe he imitated Katagiri Kanata<br /> in the line he took. </p>
+   <p begin="00:12:04.239" end="00:12:07.281" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Despite only seeing it two or three times, </p>
+   <p begin="00:12:07.368" end="00:12:10.660" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> he seems on the verge of<br /> getting that ability down pat. </p>
+   <p begin="00:12:11.039" end="00:12:15.914" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> It's a real surprise. He's proving<br /> to be a fearsome rookie. </p>
+   <p begin="00:12:16.212" end="00:12:19.087" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> He's a different type of driver<br /> than Katagiri Kanata, </p>
+   <p begin="00:12:19.173" end="00:12:22.715" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> but I sense huge potential for growth,<br /> albeit on a path that's hard to predict. </p>
+   <p begin="00:12:31.563" end="00:12:34.563" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Aiba Shun. So you've made it this far up. </p>
+   <p begin="00:12:34.942" end="00:12:38.025" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> But I'll stop you in your tracks<br /> if it's the last thing I do! </p>
+   <p begin="00:12:38.446" end="00:12:41.321" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Here we have two drivers<br /> who seem to butt heads regularly. </p>
+   <p begin="00:12:41.407" end="00:12:44.574" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Both are heavyweights<br /> with comparable power. </p>
+   <p begin="00:12:44.661" end="00:12:47.578" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Is this going to be another clash<br /> between the pair? </p>
+   <p begin="00:12:48.791" end="00:12:50.583" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And back to the lead group! </p>
+   <p begin="00:12:50.918" end="00:12:54.502" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The 2 car's superior power<br /> is on full display. </p>
+   <p begin="00:12:54.589" end="00:12:57.089" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The two cars behind can't catch him. </p>
+   <p begin="00:13:12.610" end="00:13:16.027" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I can't keep up. What's this guy's deal? </p>
+   <p begin="00:13:16.114" end="00:13:19.531" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The 2 car charges onward,<br /> with the 4 and the 15 giving chase. </p>
+   <p begin="00:13:20.828" end="00:13:23.328" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Akaba-kun's taken the lead, </p>
+   <p begin="00:13:23.415" end="00:13:26.873" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> and I reckon the peninsula section<br /> is where he'll win or lose it. </p>
+   <p begin="00:13:27.419" end="00:13:32.127" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> His previous best there is nowhere near<br /> Beckenbauer's or Sawatari-kun's. </p>
+   <p begin="00:13:32.425" end="00:13:37.258" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> So if Akaba-kun is still in the lead<br /> at the end of that section, </p>
+   <p begin="00:13:37.347" end="00:13:41.181" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I'd say he has one hand<br /> on the winner's trophy. </p>
+   <p begin="00:13:41.852" end="00:13:46.519" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The two cars behind<br /> won't make it easy, though. </p>
+   <p begin="00:13:46.608" end="00:13:51.858" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Those two have proven they're the<br /> cream of the crop in this season of MFG. </p>
+   <p begin="00:13:53.282" end="00:13:54.782" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And there they go. </p>
+   <p begin="00:13:54.867" end="00:13:59.117" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Next up, the peninsula section, and the<br /> course is named after it for good reason. </p>
+   <p begin="00:13:59.915" end="00:14:02.790" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> But we can't forget about this car<br /> that's chasing them down! </p>
+   <p begin="00:14:03.377" end="00:14:06.294" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The holder of the record<br /> for this section: Katagiri Kanata. </p>
+   <p begin="00:14:06.756" end="00:14:10.131" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The fastest man on the peninsula<br /> is coming their way! </p>
+   <p begin="00:14:11.178" end="00:14:14.220" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Katagiri-kun is particularly fast<br /> in this stretch. </p>
+   <p begin="00:14:14.724" end="00:14:17.682" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> You could even say, given his<br /> previous trouble in this area, </p>
+   <p begin="00:14:17.769" end="00:14:22.269" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Akaba-kun being in the lead presents<br /> an opportunity for Katagiri-kun. </p>
+   <p begin="00:14:22.358" end="00:14:24.691" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> How much ground can he gain on them? </p>
+   <p begin="00:14:24.777" end="00:14:28.194" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> You'll wanna keep your eyes<br /> glued to this race, folks! </p>
+   <p begin="00:14:30.283" end="00:14:34.075" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> This is bad. I'm so tense,<br /> my stomach's killing me. </p>
+   <p begin="00:14:34.163" end="00:14:35.580" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I'm gonna puke. </p>
+   <p begin="00:14:35.664" end="00:14:38.123" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Please don't. Not in here. </p>
+   <p begin="00:14:38.793" end="00:14:41.960" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> At this point, there's not a whole lot<br /> we can do from this end. </p>
+   <p begin="00:14:42.381" end="00:14:45.506" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Feel free to go to the bathroom<br /> to take care of business. </p>
+   <p begin="00:14:46.176" end="00:14:47.885" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I can't. </p>
+   <p begin="00:14:48.429" end="00:14:51.471" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I can't leave the booth. Not now. </p>
+   <p begin="00:14:52.476" end="00:14:59.143" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> We're on the final lap, and my partner's<br /> out there on a miracle run. </p>
+   <p begin="00:15:02.487" end="00:15:03.695" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> They're closing up! </p>
+   <p begin="00:15:03.989" end="00:15:07.697" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The gaps between<br /> the top three are shrinking! </p>
+   <p begin="00:15:08.076" end="00:15:12.493" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> But these peninsula roads are narrow,<br /> and overtaking will be a tall order. </p>
+   <p begin="00:15:14.167" end="00:15:18.000" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Akaba Kaito is spurred on by his pride<br /> as last year's second-placed driver. </p>
+   <p begin="00:15:18.588" end="00:15:20.922" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The prancing horse is<br /> determined to get away! </p>
+   <p begin="00:15:21.384" end="00:15:23.551" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> What's wrong? Shake a leg, Sawatari. </p>
+   <p begin="00:15:23.636" end="00:15:27.261" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Passing the 2 should<br /> be child's play for us. </p>
+   <p begin="00:15:27.515" end="00:15:31.557" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I'm letting you make the first move. </p>
+   <p begin="00:15:31.770" end="00:15:34.603" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> All three cars are bumper to bumper, </p>
+   <p begin="00:15:34.691" end="00:15:38.191" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> and it's hard to ignore the feeling<br /> that something's about to happen. </p>
+   <p begin="00:15:40.197" end="00:15:45.905" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The one advantage this car has<br /> over the Ferrari is that it's lighter. </p>
+   <p begin="00:15:49.540" end="00:15:52.540" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> If I wanna make the most<br /> of that advantage... </p>
+   <p begin="00:15:55.755" end="00:15:59.047" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> a downhill battle on the brakes<br /> seems the best way! </p>
+   <p begin="00:16:02.888" end="00:16:04.513" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I've never liked guys like you, </p>
+   <p begin="00:16:04.599" end="00:16:08.224" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> who chase any girls<br /> that cross their path. </p>
+   <p begin="00:16:12.358" end="00:16:14.358" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Where's the beauty in that? </p>
+   <p begin="00:16:15.402" end="00:16:17.861" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> My Seventeen Complex,<br /> on the other hand... </p>
+   <p begin="00:16:17.947" end="00:16:20.322" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> is the embodiment of my aesthetic! </p>
+   <p begin="00:16:20.408" end="00:16:23.200" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And the 4 car takes the lead! </p>
+   <p begin="00:16:23.286" end="00:16:26.536" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Sawatari Koki is now in first place! </p>
+   <p begin="00:16:27.207" end="00:16:31.582" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> If you ask me, a womanizer with<br /> no standards could never be as cool... </p>
+   <p begin="00:16:32.255" end="00:16:33.838" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> as a fetish enthusiast. </p>
+   <p begin="00:16:36.467" end="00:16:38.092" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Sawatari Koki is a beast! </p>
+   <p begin="00:16:38.177" end="00:16:42.844" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> His overflowing fighting spirit<br /> led to a fearsome overtake. </p>
+   <p begin="00:16:43.267" end="00:16:46.808" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Now try to hold that snotty German back<br /> for as long as you can, Akaba-san. </p>
+   <p begin="00:16:47.479" end="00:16:49.729" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> That way, I can build up a decent margin. </p>
+   <p begin="00:16:51.609" end="00:16:55.401" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And wait, is that the 12<br /> making its move? </p>
+   <p begin="00:17:01.119" end="00:17:04.744" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The 2 crosses behind the 12<br /> in an attempt to go on the attack. </p>
+   <p begin="00:17:04.831" end="00:17:08.248" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> He's relying on horsepower alone<br /> to pass him around the outside. </p>
+   <p begin="00:17:10.504" end="00:17:16.671" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> But he fails! The first fork on the<br /> course ends up blocking his path! </p>
+   <p begin="00:17:16.761" end="00:17:19.719" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Akaba Kaito drops to third! </p>
+   <p begin="00:17:19.806" end="00:17:21.097" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Damn it. </p>
+   <p begin="00:17:26.939" end="00:17:29.564" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Aw, crap. Michael's already on my tail. </p>
+   <p begin="00:17:29.942" end="00:17:34.025" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Unbelievable. What are you<br /> doing back there, Akaba-san? </p>
+   <p begin="00:17:34.112" end="00:17:37.529" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> This is every bit as<br /> shocking as it is brutal! </p>
+   <p begin="00:17:37.616" end="00:17:39.866" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Akaba Kaito has been crushed. </p>
+   <p begin="00:17:39.953" end="00:17:42.619" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Out of respect for Akaba-kun... </p>
+   <p begin="00:17:43.247" end="00:17:47.206" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I'll point out that he made no mistakes<br /> and there were no issues with his driving. </p>
+   <p begin="00:17:47.293" end="00:17:52.126" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> It's just the two drivers he's up against<br /> are driving at a truly absurd level. </p>
+   <p begin="00:17:52.382" end="00:17:54.716" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> They're fundamentally built different. </p>
+   <p begin="00:17:54.801" end="00:17:59.634" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> That was evident when they both<br /> set course records in qualifying. </p>
+   <p begin="00:17:59.931" end="00:18:03.223" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> This is really turning<br /> into a wild season. </p>
+   <p begin="00:18:03.310" end="00:18:07.935" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The new generation is improving too fast<br /> for the vets and journeymen to keep up. </p>
+   <p begin="00:18:07.982" end="00:18:10.065" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> They've been left behind. </p>
+   <p begin="00:18:10.901" end="00:18:15.651" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Those maniacs. They don't even hesitate<br /> at the thought of trading paint, </p>
+   <p begin="00:18:16.156" end="00:18:20.448" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> nor think twice about the kind of<br /> roughhousing that can get them flagged. </p>
+   <p begin="00:18:20.536" end="00:18:23.911" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I'll never forget how<br /> frustrating this feels. </p>
+   <p begin="00:18:31.255" end="00:18:34.338" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Katagiri Kanata? Where'd he spring from? </p>
+   <p begin="00:18:34.424" end="00:18:35.966" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The Mitsuishi corner! </p>
+   <p begin="00:18:36.426" end="00:18:38.135" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Here he goes! </p>
+   <p begin="00:18:38.220" end="00:18:41.845" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The 86 is making a move<br /> down the inside! </p>
+   <p begin="00:18:41.932" end="00:18:45.682" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> They're side-by-side! It's getting tight! </p>
+   <p begin="00:18:48.313" end="00:18:50.563" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And he's through! </p>
+   <p begin="00:18:50.650" end="00:18:53.066" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> An overtake! </p>
+   <p begin="00:18:53.152" end="00:18:56.318" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Katagiri Kanata reclaims third place! </p>
+   <p begin="00:18:56.697" end="00:18:58.447" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> That was razor-sharp. </p>
+   <p begin="00:18:58.532" end="00:19:04.407" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And a reminder that all three of<br /> these drivers set new course records! </p>
+   <p begin="00:19:05.205" end="00:19:09.455" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And lest we forget, Katagiri Kanata set<br /> the record for this peninsula section! </p>
+   <p begin="00:19:09.543" end="00:19:13.709" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> He's driving like he wants<br /> to remind us of that fact! </p>
+   <p begin="00:19:22.096" end="00:19:25.263" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I exited on a slightly wider<br /> line than I visualized. </p>
+   <p begin="00:19:25.892" end="00:19:28.267" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I'm starting to understeer. </p>
+   <p begin="00:19:31.439" end="00:19:33.272" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> What an incredible race. </p>
+   <p begin="00:19:33.357" end="00:19:35.982" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The Odawara studio is buzzing. </p>
+   <p begin="00:19:36.276" end="00:19:39.401" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Our leaders are now zooming<br /> through the coastal area. </p>
+   <p begin="00:19:39.738" end="00:19:43.197" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Look at the distances!<br /> The 86 has really dug in deep! </p>
+   <p begin="00:19:43.283" end="00:19:47.283" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> There's no telling what the outcome<br /> of this race might be at this point. </p>
+   <p begin="00:19:47.704" end="00:19:51.912" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And this tricolor group of cars<br /> continue to duke it out! </p>
+   <p begin="00:20:01.257" end="00:20:06.216" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> On any other day, Aiba's tires would be<br /> so worn, he'd be slowing down by now. </p>
+   <p begin="00:20:06.554" end="00:20:09.429" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> So why the hell isn't the same true today? </p>
+   <p begin="00:20:09.765" end="00:20:13.224" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> If anything, it's my front<br /> that's starting to feel jumpy. </p>
+   <p begin="00:20:13.936" end="00:20:18.436" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Can't believe my mid-engine 4x4 handicap<br /> has come to bite me so late in the game. </p>
+   <p begin="00:20:19.858" end="00:20:23.316" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The two cars fighting over ninth<br /> are approaching the third fork! </p>
+   <p begin="00:20:23.777" end="00:20:27.069" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> We've seen such drama<br /> at this point of the course already, </p>
+   <p begin="00:20:27.322" end="00:20:31.447" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> and now, it looks like Aiba in the 9<br /> has something up his sleeve! </p>
+   <p begin="00:20:32.076" end="00:20:34.909" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> But can he pull it off? </p>
+   <p begin="00:20:37.831" end="00:20:39.123" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Whoa! </p>
+   <p begin="00:20:39.207" end="00:20:41.832" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> He didn't go for it.<br /> Not even an attempt. </p>
+   <p begin="00:20:42.168" end="00:20:47.585" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Don't go getting your hopes up.<br /> I'm not a technical racer. </p>
+   <p begin="00:20:47.965" end="00:20:49.673" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> And now... </p>
+   <p begin="00:20:57.265" end="00:21:00.556" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> It's the 86! </p>
+   <p begin="00:21:04.729" end="00:21:11.562" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The king, Beckenbauer, has just<br /> been usurped by a rookie! </p>
+   <p begin="00:21:11.651" end="00:21:13.484" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> That pass was so smooth... </p>
+   <p begin="00:21:13.569" end="00:21:14.819" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> ...it was like magic! </p>
+   <p begin="00:21:15.946" end="00:21:18.571" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I'm having trouble believing<br /> what I just saw. </p>
+   <p begin="00:21:18.823" end="00:21:21.198" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> What the heck was that, Akiyama-san? </p>
+   <p begin="00:21:21.534" end="00:21:22.700" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> The gutter. </p>
+   <p begin="00:21:23.827" end="00:21:27.494" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> He used the height difference<br /> between the asphalt and the shoulder. </p>
+   <p begin="00:21:27.580" end="00:21:29.789" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> But boy, that really takes me back. </p>
+   <p begin="00:21:31.167" end="00:21:34.292" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> That was actually one of<br /> Fujiwara Takumi's favorite tricks. </p>
+   <p begin="00:21:34.669" end="00:21:38.210" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> I have to say, this kid<br /> never runs out of surprises. </p>
+   <p begin="00:21:39.006" end="00:21:41.256" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Is it because of his tires? </p>
+   <p begin="00:21:42.508" end="00:21:45.591" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> He never tried anything like that<br /> in any of the other races, </p>
+   <p begin="00:21:45.678" end="00:21:48.053" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> so if he was forced to do it here, </p>
+   <p begin="00:21:48.721" end="00:21:52.638" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> are his tires starting<br /> to run out of grip? </p>
+   <p begin="00:23:37.417" end="00:23:41.709" region="AmazonDefaultRegion" style="AmazonDefaultStyle"> Next time, Turn 28: Their First Kiss. </p>
+  </div>
+ </body></tt>

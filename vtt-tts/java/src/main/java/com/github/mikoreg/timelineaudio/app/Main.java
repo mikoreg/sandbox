@@ -1,6 +1,5 @@
 package com.github.mikoreg.timelineaudio.app;
 
-import com.github.mikoreg.timelineaudio.domain.DebugLogger;
 import com.github.mikoreg.timelineaudio.domain.RenderJob;
 import com.github.mikoreg.timelineaudio.domain.RenderResult;
 import com.github.mikoreg.timelineaudio.domain.RenderSegment;
@@ -23,18 +22,26 @@ import com.github.mikoreg.timelineaudio.timing.TimingPolicy;
 import com.github.mikoreg.timelineaudio.timing.TimingWindowResolver;
 import com.github.mikoreg.timelineaudio.timing.WindowedTimingPolicy;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.System.Logger.Level;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 public class Main {
+    private static final System.Logger LOG = System.getLogger(Main.class.getName());
+    private static final Path DEFAULT_CONFIG_PATH = Path.of("config.properties");
+
     public static void main(String[] args) {
         AppConfig config = parseArgs(args);
-        DebugLogger logger = new ConsoleDebugLogger(config.debug());
+        String ffmpegLogLevel = resolveFfmpegLogLevel(config);
 
-        SubtitleParser parser = new TtmlSubtitleParser(logger);
+        SubtitleParser parser = new TtmlSubtitleParser();
         List<SubtitleSegment> subtitles = parser.parse(config.inputPath());
-        List<SubtitleSegment> previewed = applyPreview(subtitles, config.previewMs(), logger);
+        List<SubtitleSegment> previewed = applyPreview(subtitles, config.previewMs());
 
         SpeechConfig speechConfig = new SpeechConfig(
                 config.language(),
@@ -42,21 +49,19 @@ public class Main {
                 config.charactersPerSecond(),
                 config.speechOutputDir()
         );
-        SpeechSynthesizer synthesizer = createSpeechSynthesizer(config, speechConfig, logger);
+        SpeechSynthesizer synthesizer = createSpeechSynthesizer(config, speechConfig);
 
         TimingConfig timingConfig = new TimingConfig(
                 config.minTrimMs(),
                 config.speechSpeed(),
                 config.maxSpeedFactor()
         );
-        TimingPolicy timingPolicy = new WindowedTimingPolicy(timingConfig, logger);
+        TimingPolicy timingPolicy = new WindowedTimingPolicy(timingConfig);
         TimingWindowResolver resolver = new TimingWindowResolver();
-        AudioProbe probe = new AudioProbe(logger);
-        SegmentAudioProcessor processor = new SegmentAudioProcessor(logger, probe);
+        AudioProbe probe = new AudioProbe();
+        SegmentAudioProcessor processor = new SegmentAudioProcessor(probe, ffmpegLogLevel);
 
-        List<RenderSegment> renderSegments = new ArrayList<>();
-        long timelineMs = 0L;
-        long cursorMs = 0L;
+        List<PreparedSegment> prepared = new ArrayList<>();
         for (int i = 0; i < previewed.size(); i++) {
             SubtitleSegment subtitle = previewed.get(i);
             SpeechSegment rawSpeech = synthesizer.synthesize(subtitle);
@@ -66,68 +71,51 @@ public class Main {
             TimingWindow window = resolver.resolve(previewed, i);
             TimingDecision decision = timingPolicy.decide(subtitle, speech, window);
             SpeechSegment processed = processor.process(speech, decision, config.processedOutputDir());
-
-            long startMs = resolveStart(subtitle.beginMs(), cursorMs, config.allowPushSegments(), logger, subtitle.id());
-            renderSegments.add(new RenderSegment(subtitle.id(), processed.audioPath(), startMs, processed.durationMs(), decision.speedFactor()));
-
-            long endMs = startMs + processed.durationMs();
-            cursorMs = Math.max(cursorMs, endMs);
-            timelineMs = Math.max(timelineMs, endMs);
-            if (subtitle.endMs() != null) {
-                timelineMs = Math.max(timelineMs, subtitle.endMs());
-            }
-
-            logger.debug("Segment " + subtitle.id() + " start=" + startMs + " ms duration=" + processed.durationMs()
-                    + " ms speed=" + decision.speedFactor());
+            prepared.add(new PreparedSegment(subtitle, processed, decision));
         }
 
-        RenderJob job = new RenderJob(renderSegments, config.outputPath(), timelineMs, config.frameRate());
-        AudioRenderer renderer = createRenderer(config, logger);
+        BuildResult build = buildTimeline(prepared, config.allowStretchSegments(), config.stretchSegmentLimit());
+        if (config.allowStretchSegments() && build.stretchedSegments() > config.stretchSegmentLimit()) {
+            LOG.log(Level.WARNING, "Stretch limit exceeded (" + build.stretchedSegments() + " > "
+                    + config.stretchSegmentLimit() + "); rebuilding without stretching.");
+            build = buildTimeline(prepared, false, 0);
+        }
+
+        RenderJob job = new RenderJob(build.segments(), config.outputPath(), build.timelineMs(), config.frameRate());
+        AudioRenderer renderer = createRenderer(config, ffmpegLogLevel);
         RenderResult result = renderer.render(job);
 
-        logger.info("Render complete: " + result.outputPath());
-        logger.info("Timeline duration: " + result.timelineDurationMs() + " ms");
-        logger.info("Segments rendered: " + result.segmentsRendered());
+        LOG.log(Level.INFO, "Render complete: " + result.outputPath());
+        LOG.log(Level.INFO, "Timeline duration: " + result.timelineDurationMs() + " ms");
+        LOG.log(Level.INFO, "Segments rendered: " + result.segmentsRendered());
 
         if (config.encodeCodec() != null && config.renderer().equals("ffmpeg")) {
-            FfmpegEncoder encoder = new FfmpegEncoder(logger);
+            FfmpegEncoder encoder = new FfmpegEncoder(ffmpegLogLevel);
             Path encoded = encoder.encode(result.outputPath(), config.encodeCodec());
-            logger.info("Encoded output: " + encoded);
+            LOG.log(Level.INFO, "Encoded output: " + encoded);
         } else if (config.encodeCodec() != null) {
-            logger.warn("Encoding requested but renderer is not ffmpeg; skipping encoding.");
+            LOG.log(Level.WARNING, "Encoding requested but renderer is not ffmpeg; skipping encoding.");
         }
     }
 
-    private static SpeechSynthesizer createSpeechSynthesizer(AppConfig config, SpeechConfig speechConfig, DebugLogger logger) {
+    private static SpeechSynthesizer createSpeechSynthesizer(AppConfig config, SpeechConfig speechConfig) {
         return switch (config.ttsProvider()) {
-            case "gtts" -> new GttsHttpSpeechSynthesizer(speechConfig, logger);
-            case "mock" -> new MockSpeechSynthesizer(speechConfig, logger);
+            case "gtts" -> new GttsHttpSpeechSynthesizer(speechConfig);
+            case "mock" -> new MockSpeechSynthesizer(speechConfig);
             default -> throw new IllegalArgumentException("Unknown TTS provider: " + config.ttsProvider());
         };
     }
 
-    private static AudioRenderer createRenderer(AppConfig config, DebugLogger logger) {
+    private static AudioRenderer createRenderer(AppConfig config, String ffmpegLogLevel) {
         return switch (config.renderer()) {
-            case "mlt" -> new MltXmlRenderer(logger);
-            case "wav" -> new WavTimelineRenderer(logger);
-            case "ffmpeg" -> new FfmpegConcatRenderer(logger);
+            case "mlt" -> new MltXmlRenderer();
+            case "wav" -> new WavTimelineRenderer();
+            case "ffmpeg" -> new FfmpegConcatRenderer(ffmpegLogLevel);
             default -> throw new IllegalArgumentException("Unknown renderer: " + config.renderer());
         };
     }
 
-    private static long resolveStart(long beginMs, long cursorMs, boolean allowPush, DebugLogger logger, String id) {
-        if (beginMs >= cursorMs) {
-            return beginMs;
-        }
-        if (allowPush) {
-            logger.warn("Segment " + id + " overlaps timeline; pushing to " + cursorMs + " ms.");
-        } else {
-            logger.warn("Segment " + id + " overlaps timeline; renderer uses concat so pushing to " + cursorMs + " ms.");
-        }
-        return cursorMs;
-    }
-
-    private static List<SubtitleSegment> applyPreview(List<SubtitleSegment> segments, long previewMs, DebugLogger logger) {
+    private static List<SubtitleSegment> applyPreview(List<SubtitleSegment> segments, long previewMs) {
         if (previewMs <= 0) {
             return segments;
         }
@@ -138,52 +126,39 @@ public class Main {
             }
             preview.add(segment);
         }
-        logger.info("Preview mode enabled, segments kept: " + preview.size());
+        LOG.log(Level.INFO, "Preview mode enabled, segments kept: " + preview.size());
         return preview;
     }
 
     private static AppConfig parseArgs(String[] args) {
-        Path inputPath = null;
-        Path outputPath = Path.of("output", "timeline.wav");
-        Path speechOutputDir = Path.of("output", "tts");
-        Path processedOutputDir = Path.of("output", "processed");
-        String renderer = "ffmpeg";
-        String encodeCodec = null;
-        String ttsProvider = "gtts";
-        String language = "pl";
-        boolean outputProvided = false;
-        boolean debug = false;
-        boolean allowPushSegments = false;
-        long previewMs = 0L;
-        double speechSpeed = 2.0;
-        double charactersPerSecond = 14.0;
-        long minTrimMs = 400L;
-        double maxSpeedFactor = 3.0;
-        double frameRate = 25.0;
-
+        Path configPath = DEFAULT_CONFIG_PATH;
+        String profile = null;
+        ConfigOverrides overrides = new ConfigOverrides();
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             switch (arg) {
-                case "--input" -> inputPath = Path.of(requireValue(args, ++i, "--input"));
-                case "--output" -> {
-                    outputPath = Path.of(requireValue(args, ++i, "--output"));
-                    outputProvided = true;
-                }
-                case "--speech-output" -> speechOutputDir = Path.of(requireValue(args, ++i, "--speech-output"));
-                case "--processed-output" -> processedOutputDir = Path.of(requireValue(args, ++i, "--processed-output"));
-                case "--renderer" -> renderer = requireValue(args, ++i, "--renderer").toLowerCase();
-                case "--encode" -> encodeCodec = requireValue(args, ++i, "--encode").toLowerCase();
-                case "--tts-provider" -> ttsProvider = requireValue(args, ++i, "--tts-provider").toLowerCase();
-                case "--language" -> language = requireValue(args, ++i, "--language");
-                case "--debug" -> debug = true;
-                case "--allow-push" -> allowPushSegments = true;
-                case "--preview-ms" -> previewMs = Long.parseLong(requireValue(args, ++i, "--preview-ms"));
-                case "--diagnostic-seconds" -> previewMs = Long.parseLong(requireValue(args, ++i, "--diagnostic-seconds")) * 1000L;
-                case "--speech-speed" -> speechSpeed = Double.parseDouble(requireValue(args, ++i, "--speech-speed"));
-                case "--chars-per-second" -> charactersPerSecond = Double.parseDouble(requireValue(args, ++i, "--chars-per-second"));
-                case "--min-trim-ms" -> minTrimMs = Long.parseLong(requireValue(args, ++i, "--min-trim-ms"));
-                case "--max-speed-factor" -> maxSpeedFactor = Double.parseDouble(requireValue(args, ++i, "--max-speed-factor"));
-                case "--frame-rate" -> frameRate = Double.parseDouble(requireValue(args, ++i, "--frame-rate"));
+                case "--config" -> configPath = Path.of(requireValue(args, ++i, "--config"));
+                case "--profile" -> profile = requireValue(args, ++i, "--profile");
+                case "--input" -> overrides.inputPath = Path.of(requireValue(args, ++i, "--input"));
+                case "--output" -> overrides.setOutput(Path.of(requireValue(args, ++i, "--output")));
+                case "--speech-output" -> overrides.speechOutputDir = Path.of(requireValue(args, ++i, "--speech-output"));
+                case "--processed-output" -> overrides.processedOutputDir = Path.of(requireValue(args, ++i, "--processed-output"));
+                case "--renderer" -> overrides.renderer = requireValue(args, ++i, "--renderer").toLowerCase();
+                case "--encode" -> overrides.encodeCodec = requireValue(args, ++i, "--encode").toLowerCase();
+                case "--tts-provider" -> overrides.ttsProvider = requireValue(args, ++i, "--tts-provider").toLowerCase();
+                case "--language" -> overrides.language = requireValue(args, ++i, "--language");
+                case "--ffmpeg-loglevel" -> overrides.ffmpegLogLevelOverride = requireValue(args, ++i, "--ffmpeg-loglevel").toLowerCase();
+                case "--allow-stretch" -> overrides.allowStretchSegments = true;
+                case "--no-stretch" -> overrides.allowStretchSegments = false;
+                case "--stretch-limit" -> overrides.stretchSegmentLimit = Integer.parseInt(requireValue(args, ++i, "--stretch-limit"));
+                case "--debug" -> overrides.debug = true;
+                case "--preview-ms" -> overrides.previewMs = Long.parseLong(requireValue(args, ++i, "--preview-ms"));
+                case "--diagnostic-seconds" -> overrides.previewMs = Long.parseLong(requireValue(args, ++i, "--diagnostic-seconds")) * 1000L;
+                case "--speech-speed" -> overrides.speechSpeed = Double.parseDouble(requireValue(args, ++i, "--speech-speed"));
+                case "--chars-per-second" -> overrides.charactersPerSecond = Double.parseDouble(requireValue(args, ++i, "--chars-per-second"));
+                case "--min-trim-ms" -> overrides.minTrimMs = Long.parseLong(requireValue(args, ++i, "--min-trim-ms"));
+                case "--max-speed-factor" -> overrides.maxSpeedFactor = Double.parseDouble(requireValue(args, ++i, "--max-speed-factor"));
+                case "--frame-rate" -> overrides.frameRate = Double.parseDouble(requireValue(args, ++i, "--frame-rate"));
                 case "--help" -> {
                     printUsageAndExit();
                 }
@@ -195,11 +170,74 @@ public class Main {
             }
         }
 
+        Properties properties = loadProperties(configPath);
+        if (profile == null) {
+            profile = properties.getProperty("profile");
+        }
+
+        Path inputPath = resolvePath(overrides.inputPath,
+                property(properties, profile, "input"));
         if (inputPath == null) {
             printUsageAndExit();
         }
 
-        if (!outputProvided) {
+        Path outputPath = resolvePath(overrides.outputPath,
+                property(properties, profile, "output"));
+        Path speechOutputDir = resolvePath(overrides.speechOutputDir,
+                property(properties, profile, "speechOutput"),
+                Path.of("output", "tts"));
+        Path processedOutputDir = resolvePath(overrides.processedOutputDir,
+                property(properties, profile, "processedOutput"),
+                Path.of("output", "processed"));
+
+        String renderer = resolveValue(overrides.renderer,
+                property(properties, profile, "renderer"),
+                "ffmpeg");
+        String encodeCodec = resolveValue(overrides.encodeCodec,
+                property(properties, profile, "encode"),
+                null);
+        String ttsProvider = resolveValue(overrides.ttsProvider,
+                property(properties, profile, "ttsProvider"),
+                "gtts");
+        String language = resolveValue(overrides.language,
+                property(properties, profile, "language"),
+                "pl");
+        String ffmpegLogLevelOverride = resolveValue(overrides.ffmpegLogLevelOverride,
+                property(properties, profile, "ffmpegLogLevel"),
+                null);
+        boolean debug = resolveBoolean(overrides.debug,
+                property(properties, profile, "debug"),
+                false);
+        boolean allowStretchSegments = resolveBoolean(overrides.allowStretchSegments,
+                property(properties, profile, "allowStretchSegments"),
+                true);
+        int stretchSegmentLimit = resolveInt(overrides.stretchSegmentLimit,
+                property(properties, profile, "stretchSegmentLimit"),
+                3);
+        long previewMs = resolveLong(overrides.previewMs,
+                property(properties, profile, "previewMs"),
+                0L);
+        double speechSpeed = resolveDouble(overrides.speechSpeed,
+                property(properties, profile, "speechSpeed"),
+                2.0);
+        double charactersPerSecond = resolveDouble(overrides.charactersPerSecond,
+                property(properties, profile, "charsPerSecond"),
+                14.0);
+        long minTrimMs = resolveLong(overrides.minTrimMs,
+                property(properties, profile, "minTrimMs"),
+                400L);
+        double maxSpeedFactor = resolveDouble(overrides.maxSpeedFactor,
+                property(properties, profile, "maxSpeedFactor"),
+                3.0);
+        double frameRate = resolveDouble(overrides.frameRate,
+                property(properties, profile, "frameRate"),
+                25.0);
+
+        if (stretchSegmentLimit < 0) {
+            throw new IllegalArgumentException("stretchSegmentLimit must be >= 0");
+        }
+
+        if (outputPath == null) {
             String timestamp = java.time.LocalDateTime.now()
                     .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             if (renderer.equals("mlt")) {
@@ -218,14 +256,16 @@ public class Main {
                 encodeCodec,
                 ttsProvider,
                 language,
-                allowPushSegments,
+                allowStretchSegments,
+                stretchSegmentLimit,
                 debug,
                 previewMs,
                 speechSpeed,
                 charactersPerSecond,
                 minTrimMs,
                 maxSpeedFactor,
-                frameRate
+                frameRate,
+                ffmpegLogLevelOverride
         );
     }
 
@@ -242,6 +282,8 @@ public class Main {
                   java -jar timeline-audio.jar --input <ttml-file> [options]
 
                 Options:
+                  --config <path>              Config properties file (default: config.properties)
+                  --profile <name>             Properties profile (overrides config profile)
                   --output <path>              Output path (default: output/timeline.wav or output/timeline.mlt.xml)
                   --speech-output <dir>        Directory for raw TTS audio (default: output/tts)
                   --processed-output <dir>     Directory for processed WAV segments (default: output/processed)
@@ -249,7 +291,10 @@ public class Main {
                   --encode <opus|mp3|aac>      Encode ffmpeg WAV output via ffmpeg
                   --tts-provider <gtts|mock>  TTS provider (default: gtts)
                   --language <code>           Language code for TTS (default: pl)
-                  --allow-push                Allow pushing segments when overlap occurs
+                  --ffmpeg-loglevel <level>   Override ffmpeg log level (trace|debug|info|warning|error|quiet)
+                  --allow-stretch             Allow stretching segments when overlap occurs
+                  --no-stretch                Disable stretching segments
+                  --stretch-limit <count>     Max segments allowed to stretch (default: 3)
                   --debug                      Enable debug logs
                   --preview-ms <ms>            Limit processing to subtitles starting before this time
                   --diagnostic-seconds <s>     Shortcut for preview seconds
@@ -261,5 +306,172 @@ public class Main {
                 """;
         System.out.println(usage);
         System.exit(1);
+    }
+
+    private static String resolveFfmpegLogLevel(AppConfig config) {
+        if (config.ffmpegLogLevelOverride() != null) {
+            return config.ffmpegLogLevelOverride();
+        }
+        return System.getProperty("timelineaudio.ffmpeg.loglevel", "info");
+    }
+
+    private static BuildResult buildTimeline(List<PreparedSegment> prepared,
+                                             boolean allowStretch,
+                                             int stretchLimit) {
+        List<RenderSegment> renderSegments = new ArrayList<>();
+        long timelineMs = 0L;
+        long cursorMs = 0L;
+        int stretchedSegments = 0;
+
+        for (PreparedSegment entry : prepared) {
+            SubtitleSegment subtitle = entry.subtitle();
+            SpeechSegment processed = entry.processed();
+            long startMs = subtitle.beginMs();
+
+            if (startMs < cursorMs) {
+                if (allowStretch) {
+                    stretchedSegments++;
+                    startMs = cursorMs;
+                    LOG.log(Level.WARNING, "Segment " + subtitle.id() + " overlaps timeline; stretching to "
+                            + cursorMs + " ms (" + stretchedSegments + "/" + stretchLimit + ").");
+                } else {
+                    LOG.log(Level.WARNING, "Segment " + subtitle.id() + " overlaps timeline; stretching disabled.");
+                }
+            }
+
+            renderSegments.add(new RenderSegment(subtitle.id(), processed.audioPath(), startMs,
+                    processed.durationMs(), entry.decision().speedFactor()));
+
+            long endMs = startMs + processed.durationMs();
+            cursorMs = Math.max(cursorMs, endMs);
+            timelineMs = Math.max(timelineMs, endMs);
+            if (subtitle.endMs() != null) {
+                timelineMs = Math.max(timelineMs, subtitle.endMs());
+            }
+
+            LOG.log(Level.DEBUG, "Segment " + subtitle.id() + " start=" + startMs + " ms duration="
+                    + processed.durationMs() + " ms speed=" + entry.decision().speedFactor());
+        }
+
+        return new BuildResult(renderSegments, timelineMs, stretchedSegments);
+    }
+
+    private static Properties loadProperties(Path configPath) {
+        if (configPath == null || !Files.exists(configPath)) {
+            return new Properties();
+        }
+        Properties properties = new Properties();
+        try (InputStream input = Files.newInputStream(configPath)) {
+            properties.load(input);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to read config file " + configPath, e);
+        }
+        return properties;
+    }
+
+    private static String property(Properties properties, String profile, String key) {
+        if (profile != null && !profile.isBlank()) {
+            String value = properties.getProperty(profile + "." + key);
+            if (value != null) {
+                return value;
+            }
+        }
+        return properties.getProperty(key);
+    }
+
+    private static Path resolvePath(Path override, String property) {
+        if (override != null) {
+            return override;
+        }
+        if (property != null && !property.isBlank()) {
+            return Path.of(property.trim());
+        }
+        return null;
+    }
+
+    private static Path resolvePath(Path override, String property, Path defaultValue) {
+        Path resolved = resolvePath(override, property);
+        return resolved != null ? resolved : defaultValue;
+    }
+
+    private static String resolveValue(String override, String property, String defaultValue) {
+        if (override != null) {
+            return override;
+        }
+        if (property != null && !property.isBlank()) {
+            return property.trim();
+        }
+        return defaultValue;
+    }
+
+    private static boolean resolveBoolean(Boolean override, String property, boolean defaultValue) {
+        if (override != null) {
+            return override;
+        }
+        if (property != null && !property.isBlank()) {
+            return Boolean.parseBoolean(property.trim());
+        }
+        return defaultValue;
+    }
+
+    private static long resolveLong(Long override, String property, long defaultValue) {
+        if (override != null) {
+            return override;
+        }
+        if (property != null && !property.isBlank()) {
+            return Long.parseLong(property.trim());
+        }
+        return defaultValue;
+    }
+
+    private static int resolveInt(Integer override, String property, int defaultValue) {
+        if (override != null) {
+            return override;
+        }
+        if (property != null && !property.isBlank()) {
+            return Integer.parseInt(property.trim());
+        }
+        return defaultValue;
+    }
+
+    private static double resolveDouble(Double override, String property, double defaultValue) {
+        if (override != null) {
+            return override;
+        }
+        if (property != null && !property.isBlank()) {
+            return Double.parseDouble(property.trim());
+        }
+        return defaultValue;
+    }
+
+    private record PreparedSegment(SubtitleSegment subtitle, SpeechSegment processed, TimingDecision decision) {
+    }
+
+    private record BuildResult(List<RenderSegment> segments, long timelineMs, int stretchedSegments) {
+    }
+
+    private static class ConfigOverrides {
+        Path inputPath;
+        Path outputPath;
+        Path speechOutputDir;
+        Path processedOutputDir;
+        String renderer;
+        String encodeCodec;
+        String ttsProvider;
+        String language;
+        String ffmpegLogLevelOverride;
+        Boolean allowStretchSegments;
+        Integer stretchSegmentLimit;
+        Boolean debug;
+        Long previewMs;
+        Double speechSpeed;
+        Double charactersPerSecond;
+        Long minTrimMs;
+        Double maxSpeedFactor;
+        Double frameRate;
+
+        void setOutput(Path output) {
+            this.outputPath = output;
+        }
     }
 }
