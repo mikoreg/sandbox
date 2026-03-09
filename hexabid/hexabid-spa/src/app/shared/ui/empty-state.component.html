@@ -1,0 +1,8 @@
+<section class="empty surface">
+  <div class="empty__glyph">◇</div>
+  <h2>{{ title() }}</h2>
+  <p>{{ description() }}</p>
+  @if (actionLabel() && actionHref()) {
+    <a [href]="actionHref()!">{{ actionLabel() }}</a>
+  }
+</section>

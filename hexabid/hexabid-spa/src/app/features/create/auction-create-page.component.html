@@ -1,0 +1,48 @@
+<section class="compose">
+  <article class="surface intro">
+    <span class="kicker">Create Auction</span>
+    <h1>Wystaw aukcję przez SPA</h1>
+    <p>
+      Ten ekran korzysta z osobnej komendy formularza i adaptera HTTP. W kolejnych iteracjach można tu dodać drafty,
+      upload plików i kroki publikacji bez rozszczelniania warstwy prezentacyjnej.
+    </p>
+  </article>
+
+  <article class="surface form-card">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
+      <label class="wide">
+        <span>Tytuł aukcji</span>
+        <input type="text" formControlName="title" placeholder="Komiks z limitowanej serii" />
+      </label>
+
+      <label>
+        <span>Cena wywoławcza</span>
+        <input type="text" formControlName="amount" />
+      </label>
+
+      <label>
+        <span>Waluta</span>
+        <select formControlName="currency">
+          <option value="PLN">PLN</option>
+          <option value="EUR">EUR</option>
+          <option value="USD">USD</option>
+        </select>
+      </label>
+
+      <label class="wide">
+        <span>Koniec aukcji</span>
+        <input type="datetime-local" formControlName="endsAt" />
+      </label>
+
+      @if (error()) {
+        <div class="wide inline-alert">{{ error() }}</div>
+      }
+
+      <div class="wide actions">
+        <button type="submit" [disabled]="submitting()">
+          {{ submitting() ? 'Publikowanie...' : 'Opublikuj aukcję' }}
+        </button>
+      </div>
+    </form>
+  </article>
+</section>

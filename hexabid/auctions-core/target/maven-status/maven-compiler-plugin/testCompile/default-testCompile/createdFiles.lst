@@ -1,0 +1,8 @@
+com/acme/auctions/core/auctioning/usecase/CreateAuctionServiceTest.class
+com/acme/auctions/core/auctioning/usecase/PlaceBidServiceTest$RecordingAuctionEventPublisher.class
+com/acme/auctions/core/auctioning/usecase/CloseExpiredAuctionsServiceTest.class
+com/acme/auctions/core/auctioning/usecase/CloseExpiredAuctionsServiceTest$RecordingAuctionEventPublisher.class
+com/acme/auctions/core/auctioning/usecase/CreateAuctionServiceTest$InMemoryAuctionRepository.class
+com/acme/auctions/core/auctioning/usecase/CloseExpiredAuctionsServiceTest$InMemoryAuctionRepository.class
+com/acme/auctions/core/auctioning/usecase/PlaceBidServiceTest.class
+com/acme/auctions/core/auctioning/usecase/PlaceBidServiceTest$InMemoryAuctionRepository.class

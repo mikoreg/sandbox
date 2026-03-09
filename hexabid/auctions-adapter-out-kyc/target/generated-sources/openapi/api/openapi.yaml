@@ -1,0 +1,47 @@
+openapi: 3.0.3
+info:
+  title: External KYC API
+  version: 1.0.0
+servers:
+- url: https://kyc.example.test
+tags:
+- name: KycVerification
+paths:
+  /api/kyc/actors/{actorId}:
+    get:
+      operationId: verifyActor
+      parameters:
+      - explode: false
+        in: path
+        name: actorId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KycVerificationResponse"
+          description: Verification result
+      tags:
+      - KycVerification
+      x-accepts:
+      - application/json
+components:
+  schemas:
+    KycVerificationResponse:
+      example:
+        actorId: actorId
+        verified: true
+      properties:
+        actorId:
+          type: string
+        verified:
+          type: boolean
+      required:
+      - actorId
+      - verified
+      type: object
+

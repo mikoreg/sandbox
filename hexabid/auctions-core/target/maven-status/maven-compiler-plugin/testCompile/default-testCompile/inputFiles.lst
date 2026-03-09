@@ -1,0 +1,3 @@
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-core/src/test/java/com/acme/auctions/core/auctioning/usecase/CloseExpiredAuctionsServiceTest.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-core/src/test/java/com/acme/auctions/core/auctioning/usecase/CreateAuctionServiceTest.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-core/src/test/java/com/acme/auctions/core/auctioning/usecase/PlaceBidServiceTest.java

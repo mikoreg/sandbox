@@ -1,0 +1,10 @@
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-auth-core/src/main/java/com/acme/auctions/auth/core/identityaccess/model/AuthenticatedUser.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-auth-core/src/main/java/com/acme/auctions/auth/core/identityaccess/model/package-info.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-auth-core/src/main/java/com/acme/auctions/auth/core/identityaccess/port/in/CurrentUserProfileView.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-auth-core/src/main/java/com/acme/auctions/auth/core/identityaccess/port/in/FindCurrentUserProfileUseCase.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-auth-core/src/main/java/com/acme/auctions/auth/core/identityaccess/port/in/package-info.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-auth-core/src/main/java/com/acme/auctions/auth/core/identityaccess/port/out/CurrentUserProvider.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-auth-core/src/main/java/com/acme/auctions/auth/core/identityaccess/port/out/UserVerificationStatusPort.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-auth-core/src/main/java/com/acme/auctions/auth/core/identityaccess/port/out/package-info.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-auth-core/src/main/java/com/acme/auctions/auth/core/identityaccess/usecase/FindCurrentUserProfileService.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-auth-core/src/main/java/com/acme/auctions/auth/core/identityaccess/usecase/package-info.java

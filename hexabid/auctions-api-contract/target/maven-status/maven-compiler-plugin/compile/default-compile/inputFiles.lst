@@ -1,0 +1,17 @@
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-api-contract/target/generated-sources/openapi/src/main/java/com/acme/auctions/contract/api/ApiUtil.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-api-contract/target/generated-sources/openapi/src/main/java/com/acme/auctions/contract/api/AuctionsApi.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-api-contract/target/generated-sources/openapi/src/main/java/com/acme/auctions/contract/api/AuctionsApiController.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-api-contract/target/generated-sources/openapi/src/main/java/com/acme/auctions/contract/api/AuctionsApiDelegate.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-api-contract/target/generated-sources/openapi/src/main/java/com/acme/auctions/contract/model/AuctionListItemResponse.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-api-contract/target/generated-sources/openapi/src/main/java/com/acme/auctions/contract/model/AuctionListResponse.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-api-contract/target/generated-sources/openapi/src/main/java/com/acme/auctions/contract/model/AuctionResponse.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-api-contract/target/generated-sources/openapi/src/main/java/com/acme/auctions/contract/model/AuctionSort.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-api-contract/target/generated-sources/openapi/src/main/java/com/acme/auctions/contract/model/AuctionStatus.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-api-contract/target/generated-sources/openapi/src/main/java/com/acme/auctions/contract/model/BidResponse.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-api-contract/target/generated-sources/openapi/src/main/java/com/acme/auctions/contract/model/CreateAuctionRequest.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-api-contract/target/generated-sources/openapi/src/main/java/com/acme/auctions/contract/model/CurrentUserProfileResponse.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-api-contract/target/generated-sources/openapi/src/main/java/com/acme/auctions/contract/model/Money.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-api-contract/target/generated-sources/openapi/src/main/java/org/openapitools/OpenApiGeneratorApplication.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-api-contract/target/generated-sources/openapi/src/main/java/org/openapitools/RFC3339DateFormat.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-api-contract/target/generated-sources/openapi/src/main/java/org/openapitools/configuration/EnumConverterConfiguration.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-api-contract/target/generated-sources/openapi/src/main/java/org/openapitools/configuration/HomeController.java

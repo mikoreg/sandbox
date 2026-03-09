@@ -1,0 +1,9 @@
+com/acme/auctions/adapter/out/db/JdbcAuctionReadModelAdapter.class
+com/acme/auctions/adapter/out/db/package-info.class
+com/acme/auctions/adapter/out/db/BidJpaEntity.class
+com/acme/auctions/adapter/out/db/JdbcAuctionReadModelAdapter$1.class
+com/acme/auctions/adapter/out/db/AuctionJpaMapper.class
+com/acme/auctions/adapter/out/db/AuctionJpaEntity.class
+com/acme/auctions/adapter/out/db/SpringDataAuctionJpaRepository.class
+com/acme/auctions/adapter/out/db/JdbcAuctionReadModelAdapter$Cursor.class
+com/acme/auctions/adapter/out/db/JpaAuctionRepositoryAdapter.class

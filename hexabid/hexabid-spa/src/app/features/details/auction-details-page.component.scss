@@ -1,0 +1,131 @@
+.details-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.9fr);
+  gap: 1.25rem;
+}
+
+.details-grid--secondary {
+  margin-top: 1.25rem;
+}
+
+.surface.loading-state {
+  padding: 2rem;
+}
+
+.surface {
+  padding: 1.5rem;
+}
+
+.spotlight {
+  background:
+    radial-gradient(circle at top left, rgba(255, 122, 89, 0.18), transparent 40%),
+    linear-gradient(160deg, rgba(11, 94, 215, 0.08), rgba(255, 255, 255, 0.9));
+}
+
+.eyebrow,
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  color: var(--text-muted);
+}
+
+.status-badge {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  background: rgba(22, 163, 74, 0.14);
+  color: #166534;
+  font-weight: 700;
+}
+
+.status-badge.closed {
+  background: rgba(107, 114, 128, 0.14);
+  color: #374151;
+}
+
+h1 {
+  margin: 1rem 0 0.75rem;
+  font: 700 clamp(2rem, 4vw, 3.4rem) / 0.95 var(--font-display);
+}
+
+.lede,
+.muted,
+.bid-panel p,
+.hint {
+  color: var(--text-muted);
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0 0;
+}
+
+.metrics div {
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.metrics dt {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.metrics dd {
+  margin: 0.45rem 0 0;
+  font: 700 1.25rem/1.2 var(--font-display);
+}
+
+.stack {
+  display: grid;
+  gap: 0.95rem;
+  margin-top: 1.25rem;
+}
+
+.timeline,
+.feed {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.timeline-item,
+.feed-item {
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-soft);
+  background: var(--surface-1);
+}
+
+.timeline-item span,
+.timeline-item small {
+  display: block;
+  color: var(--text-muted);
+}
+
+.feed-item.success {
+  border-color: rgba(22, 163, 74, 0.25);
+  background: rgba(22, 163, 74, 0.06);
+}
+
+.feed-item.error {
+  border-color: rgba(220, 38, 38, 0.25);
+  background: rgba(220, 38, 38, 0.05);
+}
+
+@media (max-width: 1024px) {
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+}

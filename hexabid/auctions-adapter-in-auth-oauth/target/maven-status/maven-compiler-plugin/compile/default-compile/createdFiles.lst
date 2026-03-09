@@ -1,0 +1,7 @@
+com/acme/auctions/adapter/in/auth/oauth/dev/DevAuthConfiguration.class
+com/acme/auctions/adapter/in/auth/oauth/dev/DevUserCatalog$DevUserEntry.class
+com/acme/auctions/adapter/in/auth/oauth/OAuth2SecurityConfiguration.class
+com/acme/auctions/adapter/in/auth/oauth/OAuth2CurrentUserProvider.class
+com/acme/auctions/adapter/in/auth/oauth/package-info.class
+com/acme/auctions/adapter/in/auth/oauth/dev/DevAuthController.class
+com/acme/auctions/adapter/in/auth/oauth/dev/DevUserCatalog.class

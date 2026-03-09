@@ -1,0 +1,81 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.0.3</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.acme.auctions</groupId>
+    <artifactId>hexabid</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>hexabid</name>
+    <description>Reference auction system with hexagonal architecture and contract-first approach.</description>
+
+    <modules>
+        <module>auctions-core</module>
+        <module>auctions-auth-core</module>
+        <module>auctions-api-contract</module>
+        <module>auctions-adapter-in-auth-oauth</module>
+        <module>auctions-adapter-in-rest</module>
+        <module>auctions-adapter-in-ws</module>
+        <module>auctions-adapter-in-job</module>
+        <module>auctions-adapter-out-db</module>
+        <module>auctions-adapter-out-kafka</module>
+        <module>auctions-adapter-out-kyc</module>
+        <module>auctions-bootstrap</module>
+        <module>auctions-architecture-tests</module>
+    </modules>
+
+    <properties>
+        <java.version>21</java.version>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
+        <openapi.generator.version>7.14.0</openapi.generator.version>
+        <archunit.version>1.4.1</archunit.version>
+        <swagger.version>2.2.31</swagger.version>
+        <jspecify.version>1.0.0</jspecify.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jspecify</groupId>
+                <artifactId>jspecify</artifactId>
+                <version>${jspecify.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openapitools</groupId>
+                <artifactId>jackson-databind-nullable</artifactId>
+                <version>0.2.8</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations-jakarta</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-models-jakarta</artifactId>
+                <version>${swagger.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.openapitools</groupId>
+                    <artifactId>openapi-generator-maven-plugin</artifactId>
+                    <version>${openapi.generator.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

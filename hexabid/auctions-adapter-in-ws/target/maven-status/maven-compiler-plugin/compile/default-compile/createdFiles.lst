@@ -1,0 +1,7 @@
+com/acme/auctions/adapter/in/ws/AuctionWebSocketConfig.class
+com/acme/auctions/adapter/in/ws/PlaceBidWebSocketMessage.class
+com/acme/auctions/adapter/in/ws/AuctionBiddingWebSocketController.class
+com/acme/auctions/adapter/in/ws/BidAcceptedWebSocketMessage.class
+com/acme/auctions/adapter/in/ws/AuctionEventWebSocketMessage.class
+com/acme/auctions/adapter/in/ws/BidRejectedWebSocketMessage.class
+com/acme/auctions/adapter/in/ws/AuctionWebSocketEventPublisher.class

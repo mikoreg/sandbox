@@ -1,0 +1,10 @@
+com/acme/auctions/auth/core/identityaccess/usecase/FindCurrentUserProfileService.class
+com/acme/auctions/auth/core/identityaccess/port/in/package-info.class
+com/acme/auctions/auth/core/identityaccess/port/in/FindCurrentUserProfileUseCase.class
+com/acme/auctions/auth/core/identityaccess/port/out/CurrentUserProvider.class
+com/acme/auctions/auth/core/identityaccess/port/in/CurrentUserProfileView.class
+com/acme/auctions/auth/core/identityaccess/model/package-info.class
+com/acme/auctions/auth/core/identityaccess/model/AuthenticatedUser.class
+com/acme/auctions/auth/core/identityaccess/port/out/package-info.class
+com/acme/auctions/auth/core/identityaccess/port/out/UserVerificationStatusPort.class
+com/acme/auctions/auth/core/identityaccess/usecase/package-info.class

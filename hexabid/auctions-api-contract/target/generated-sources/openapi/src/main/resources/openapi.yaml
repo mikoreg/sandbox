@@ -1,0 +1,452 @@
+openapi: 3.0.3
+info:
+  title: Auctions API
+  version: 1.0.0
+servers:
+- url: http://localhost:8080
+tags:
+- name: Auctions
+paths:
+  /api/auctions:
+    get:
+      operationId: browseAuctions
+      parameters:
+      - explode: true
+        in: query
+        name: query
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          $ref: "#/components/schemas/AuctionStatus"
+        style: form
+      - explode: true
+        in: query
+        name: sort
+        required: false
+        schema:
+          $ref: "#/components/schemas/AuctionSort"
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          maximum: 50
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: after
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuctionListResponse"
+          description: Auction list page
+      summary: Browse auctions for search and listing screens
+      tags:
+      - Auctions
+      x-accepts:
+      - application/json
+      x-tags:
+      - tag: Auctions
+    post:
+      operationId: createAuction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAuctionRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuctionResponse"
+          description: Auction created
+      summary: Create a new auction
+      tags:
+      - Auctions
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+      x-tags:
+      - tag: Auctions
+  /api/auctions/{auctionId}:
+    get:
+      operationId: getAuctionById
+      parameters:
+      - explode: false
+        in: path
+        name: auctionId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuctionResponse"
+          description: Auction details
+        "404":
+          description: Auction not found
+      summary: Get auction details
+      tags:
+      - Auctions
+      x-accepts:
+      - application/json
+      x-tags:
+      - tag: Auctions
+  /api/me:
+    get:
+      operationId: getCurrentUserProfile
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentUserProfileResponse"
+          description: Current user profile
+        "401":
+          description: Authentication required
+      summary: Get current authenticated user profile
+      tags:
+      - Auctions
+      x-accepts:
+      - application/json
+      x-tags:
+      - tag: Auctions
+  /api/me/auctions:
+    get:
+      operationId: browseMyAuctions
+      parameters:
+      - explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          $ref: "#/components/schemas/AuctionStatus"
+        style: form
+      - explode: true
+        in: query
+        name: sort
+        required: false
+        schema:
+          $ref: "#/components/schemas/AuctionSort"
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          maximum: 50
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: after
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuctionListResponse"
+          description: Current user auctions
+        "401":
+          description: Authentication required
+      summary: Browse auctions created by current user
+      tags:
+      - Auctions
+      x-accepts:
+      - application/json
+      x-tags:
+      - tag: Auctions
+  /api/me/bids:
+    get:
+      operationId: browseMyBids
+      parameters:
+      - explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          $ref: "#/components/schemas/AuctionStatus"
+        style: form
+      - explode: true
+        in: query
+        name: sort
+        required: false
+        schema:
+          $ref: "#/components/schemas/AuctionSort"
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          maximum: 50
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: after
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuctionListResponse"
+          description: Current user bid auctions
+        "401":
+          description: Authentication required
+      summary: Browse auctions where current user placed bids
+      tags:
+      - Auctions
+      x-accepts:
+      - application/json
+      x-tags:
+      - tag: Auctions
+components:
+  schemas:
+    AuctionStatus:
+      enum:
+      - OPEN
+      - CLOSED
+      type: string
+    AuctionSort:
+      enum:
+      - ENDING_SOON
+      - ENDING_LATEST
+      type: string
+    Money:
+      example:
+        amount: "120.00"
+        currency: PLN
+      properties:
+        amount:
+          example: "120.00"
+          type: string
+        currency:
+          example: PLN
+          maxLength: 3
+          minLength: 3
+          type: string
+      required:
+      - amount
+      - currency
+      type: object
+    CreateAuctionRequest:
+      example:
+        startingPrice:
+          amount: "120.00"
+          currency: PLN
+        title: title
+        endsAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        title:
+          type: string
+        startingPrice:
+          $ref: "#/components/schemas/Money"
+        endsAt:
+          format: date-time
+          type: string
+      required:
+      - endsAt
+      - startingPrice
+      - title
+      type: object
+    BidResponse:
+      example:
+        amount: amount
+        bidderId: bidderId
+        currency: currency
+        placedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        bidderId:
+          type: string
+        amount:
+          type: string
+        currency:
+          type: string
+        placedAt:
+          format: date-time
+          type: string
+      required:
+      - amount
+      - bidderId
+      - currency
+      - placedAt
+      type: object
+    AuctionResponse:
+      example:
+        auctionId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        sellerId: sellerId
+        leadingBidderId: leadingBidderId
+        bids:
+        - amount: amount
+          bidderId: bidderId
+          currency: currency
+          placedAt: 2000-01-23T04:56:07.000+00:00
+        - amount: amount
+          bidderId: bidderId
+          currency: currency
+          placedAt: 2000-01-23T04:56:07.000+00:00
+        currentPrice: currentPrice
+        currency: currency
+        title: title
+        endsAt: 2000-01-23T04:56:07.000+00:00
+        status: OPEN
+      properties:
+        auctionId:
+          format: uuid
+          type: string
+        sellerId:
+          type: string
+        title:
+          type: string
+        currentPrice:
+          type: string
+        currency:
+          type: string
+        endsAt:
+          format: date-time
+          type: string
+        status:
+          $ref: "#/components/schemas/AuctionStatus"
+        leadingBidderId:
+          type: string
+        bids:
+          items:
+            $ref: "#/components/schemas/BidResponse"
+          type: array
+      required:
+      - auctionId
+      - bids
+      - currency
+      - currentPrice
+      - endsAt
+      - sellerId
+      - status
+      - title
+      type: object
+    AuctionListItemResponse:
+      example:
+        auctionId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        sellerId: sellerId
+        leadingBidderId: leadingBidderId
+        currentPrice: currentPrice
+        currency: currency
+        title: title
+        endsAt: 2000-01-23T04:56:07.000+00:00
+        status: OPEN
+      properties:
+        auctionId:
+          format: uuid
+          type: string
+        sellerId:
+          type: string
+        title:
+          type: string
+        currentPrice:
+          type: string
+        currency:
+          type: string
+        endsAt:
+          format: date-time
+          type: string
+        status:
+          $ref: "#/components/schemas/AuctionStatus"
+        leadingBidderId:
+          type: string
+      required:
+      - auctionId
+      - currency
+      - currentPrice
+      - endsAt
+      - sellerId
+      - status
+      - title
+      type: object
+    AuctionListResponse:
+      example:
+        nextCursor: nextCursor
+        items:
+        - auctionId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          sellerId: sellerId
+          leadingBidderId: leadingBidderId
+          currentPrice: currentPrice
+          currency: currency
+          title: title
+          endsAt: 2000-01-23T04:56:07.000+00:00
+          status: OPEN
+        - auctionId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          sellerId: sellerId
+          leadingBidderId: leadingBidderId
+          currentPrice: currentPrice
+          currency: currency
+          title: title
+          endsAt: 2000-01-23T04:56:07.000+00:00
+          status: OPEN
+      properties:
+        items:
+          items:
+            $ref: "#/components/schemas/AuctionListItemResponse"
+          type: array
+        nextCursor:
+          type: string
+      required:
+      - items
+      type: object
+    CurrentUserProfileResponse:
+      example:
+        provider: provider
+        displayName: displayName
+        verified: true
+        partyId: partyId
+        email: email
+      properties:
+        partyId:
+          type: string
+        provider:
+          type: string
+        displayName:
+          type: string
+        email:
+          type: string
+        verified:
+          type: boolean
+      required:
+      - displayName
+      - partyId
+      - provider
+      - verified
+      type: object

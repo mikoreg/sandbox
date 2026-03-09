@@ -1,0 +1,62 @@
+@if (loading() && !session.profile()) {
+  <section class="surface">Ładowanie dashboardu...</section>
+} @else if (!session.profile()) {
+  <app-empty-state
+    title="Zaloguj się, aby otworzyć dashboard"
+    description="Backend udostępnia już profil `me`, moje aukcje i moje licytacje. Po logowaniu ten ekran stanie się centralnym miejscem pracy użytkownika."
+    actionLabel="Wróć do rynku"
+    actionHref="/"
+  />
+} @else {
+  <section class="surface profile-card">
+    <span class="kicker">My Workspace</span>
+    <h1>{{ session.profile()!.displayName }}</h1>
+    <div class="profile-meta">
+      <span>{{ session.profile()!.providerLabel }}</span>
+      <span>{{ session.profile()!.verifiedLabel }}</span>
+      @if (session.profile()!.email) {
+        <span>{{ session.profile()!.email }}</span>
+      }
+    </div>
+  </section>
+
+  @if (error()) {
+    <section class="surface inline-alert">{{ error() }}</section>
+  }
+
+  <section class="dashboard-grid">
+    <article class="surface">
+      <div class="section-heading">
+        <h2>Moje aukcje</h2>
+        <a routerLink="/sell">Nowa aukcja</a>
+      </div>
+
+      @if (myAuctions().items.length) {
+        <div class="cards">
+          @for (auction of myAuctions().items; track auction.auctionId) {
+            <app-auction-card [auction]="auction" />
+          }
+        </div>
+      } @else {
+        <p class="muted">Brak aukcji wystawionych przez bieżącego użytkownika.</p>
+      }
+    </article>
+
+    <article class="surface">
+      <div class="section-heading">
+        <h2>Moje licytacje</h2>
+        <a routerLink="/">Przeglądaj rynek</a>
+      </div>
+
+      @if (myBids().items.length) {
+        <div class="cards">
+          @for (auction of myBids().items; track auction.auctionId) {
+            <app-auction-card [auction]="auction" />
+          }
+        </div>
+      } @else {
+        <p class="muted">Brak aukcji, w których bieżący użytkownik licytował.</p>
+      }
+    </article>
+  </section>
+}

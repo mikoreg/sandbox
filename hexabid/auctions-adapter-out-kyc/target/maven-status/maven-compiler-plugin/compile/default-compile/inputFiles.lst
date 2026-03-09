@@ -1,0 +1,15 @@
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-kyc/src/main/java/com/acme/auctions/adapter/out/kyc/GeneratedKycClientAdapter.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-kyc/target/generated-sources/openapi/src/main/java/com/acme/auctions/kyc/client/api/KycVerificationApi.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-kyc/target/generated-sources/openapi/src/main/java/com/acme/auctions/kyc/client/invoker/ApiClient.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-kyc/target/generated-sources/openapi/src/main/java/com/acme/auctions/kyc/client/invoker/ApiException.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-kyc/target/generated-sources/openapi/src/main/java/com/acme/auctions/kyc/client/invoker/ApiResponse.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-kyc/target/generated-sources/openapi/src/main/java/com/acme/auctions/kyc/client/invoker/Configuration.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-kyc/target/generated-sources/openapi/src/main/java/com/acme/auctions/kyc/client/invoker/JSON.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-kyc/target/generated-sources/openapi/src/main/java/com/acme/auctions/kyc/client/invoker/Pair.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-kyc/target/generated-sources/openapi/src/main/java/com/acme/auctions/kyc/client/invoker/RFC3339DateFormat.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-kyc/target/generated-sources/openapi/src/main/java/com/acme/auctions/kyc/client/invoker/RFC3339InstantDeserializer.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-kyc/target/generated-sources/openapi/src/main/java/com/acme/auctions/kyc/client/invoker/RFC3339JavaTimeModule.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-kyc/target/generated-sources/openapi/src/main/java/com/acme/auctions/kyc/client/invoker/ServerConfiguration.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-kyc/target/generated-sources/openapi/src/main/java/com/acme/auctions/kyc/client/invoker/ServerVariable.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-kyc/target/generated-sources/openapi/src/main/java/com/acme/auctions/kyc/client/model/AbstractOpenApiSchema.java
+/work/Projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-kyc/target/generated-sources/openapi/src/main/java/com/acme/auctions/kyc/client/model/KycVerificationResponse.java

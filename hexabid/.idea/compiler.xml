@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="auctions-adapter-out-kyc" />
+        <module name="auctions-adapter-out-db" />
+        <module name="auctions-api-contract" />
+        <module name="auctions-bootstrap" />
+        <module name="auctions-adapter-in-ws" />
+        <module name="auctions-adapter-in-auth-oauth" />
+        <module name="auctions-adapter-in-job" />
+        <module name="auctions-adapter-in-rest" />
+        <module name="auctions-core" />
+        <module name="auctions-auth-core" />
+        <module name="auctions-adapter-out-kafka" />
+        <module name="auctions-architecture-tests" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="auctions-adapter-in-auth-oauth" options="-parameters" />
+      <module name="auctions-adapter-in-job" options="-parameters" />
+      <module name="auctions-adapter-in-rest" options="-parameters" />
+      <module name="auctions-adapter-in-ws" options="-parameters" />
+      <module name="auctions-adapter-out-db" options="-parameters" />
+      <module name="auctions-adapter-out-kafka" options="-parameters" />
+      <module name="auctions-adapter-out-kyc" options="-parameters" />
+      <module name="auctions-api-contract" options="-parameters" />
+      <module name="auctions-architecture-tests" options="-parameters" />
+      <module name="auctions-auth-core" options="-parameters" />
+      <module name="auctions-bootstrap" options="-parameters" />
+      <module name="auctions-core" options="-parameters" />
+    </option>
+  </component>
+</project>

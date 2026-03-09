@@ -1,0 +1,116 @@
+:root {
+  --font-display: 'Space Grotesk', 'Segoe UI', sans-serif;
+  --font-body: 'Manrope', 'Segoe UI', sans-serif;
+
+  --brand-strong: #0b5ed7;
+  --brand-accent: #ff7a59;
+  --ink-strong: #0f172a;
+  --surface-0: #f5f7fb;
+  --surface-1: #ffffff;
+  --border-soft: rgba(15, 23, 42, 0.08);
+  --border-strong: rgba(15, 23, 42, 0.18);
+  --text-default: #0f172a;
+  --text-muted: #5b6474;
+  --text-accent: #fdd9ca;
+  --radius-xl: 1.75rem;
+  --shadow-card: 0 24px 48px rgba(15, 23, 42, 0.08);
+  --shadow-hero: 0 48px 80px rgba(12, 59, 114, 0.25);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--text-default);
+  background:
+    radial-gradient(circle at top left, rgba(11, 94, 215, 0.08), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(255, 122, 89, 0.08), transparent 22%),
+    var(--surface-0);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+.button-secondary,
+input,
+select {
+  border-radius: 1rem;
+}
+
+button {
+  padding: 0.95rem 1.25rem;
+  border: 0;
+  background: linear-gradient(135deg, var(--brand-strong), #1841b8);
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 18px 30px rgba(11, 94, 215, 0.18);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+  box-shadow: none;
+}
+
+.button-secondary {
+  padding: 0.95rem 1.25rem;
+  background: var(--surface-1);
+  color: var(--text-default);
+  border: 1px solid var(--border-strong);
+  box-shadow: none;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-1);
+  color: var(--text-default);
+  outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--brand-strong);
+  box-shadow: 0 0 0 4px rgba(11, 94, 215, 0.12);
+}
+
+label {
+  display: grid;
+  gap: 0.5rem;
+}
+
+label span {
+  font-weight: 700;
+}
+
+.surface {
+  border-radius: var(--radius-xl);
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(16px);
+}
+
+a {
+  color: inherit;
+}
