@@ -454,7 +454,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </ul>
 </li>
 <li><a href="#_decyzje_architektoniczne">7. Decyzje architektoniczne</a></li>
-<li><a href="#_renderowanie_dokumentu">8. Renderowanie dokumentu</a></li>
+<li><a href="#_mechanizm_wtyczek_uwierzytelniania">8. Mechanizm wtyczek uwierzytelniania</a>
+<ul class="sectlevel2">
+<li><a href="#_składanie_w_czasie_budowy_maven_profiles">8.1. Składanie w czasie budowy (Maven Profiles)</a></li>
+<li><a href="#_automatyczna_rejestracja_spring_component_scanning">8.2. Automatyczna rejestracja (Spring Component Scanning)</a></li>
+<li><a href="#_ekran_logowania">8.3. Ekran logowania</a></li>
+</ul>
+</li>
+<li><a href="#_renderowanie_dokumentu">9. Renderowanie dokumentu</a></li>
 </ul>
 </div>
 </div>
@@ -516,8 +523,11 @@ Zakres obejmuje:</p>
 <div class="sectionbody">
 <div class="imageblock">
 <div class="content">
-<img src="c4-system-context.png" alt="c4 system context" width="783" height="744">
+<img src="c4-system-context.png" alt="c4 system context" width="905" height="760">
 </div>
+</div>
+<div class="paragraph">
+<p>Na poziomie <strong>System Context</strong> system może korzystać z zewnętrznych dostawców tożsamości (Google, GitHub) lub wewnętrznego mechanizmu dla celów deweloperskich (Local Auth). Wybór konkretnej metody zależy od wariantu budowy aplikacji.</p>
 </div>
 <div class="paragraph">
 <p>Na poziomie <strong>System Context</strong> nie pokazuję <code>Job</code> jako osobnego inicjatora, ponieważ w tej aplikacji scheduler jest elementem wewnętrznym systemu, a nie zewnętrznym aktorem lub osobnym systemem. Dlatego pojawia się dopiero na poziomie <strong>Container</strong>.</p>
@@ -529,7 +539,7 @@ Zakres obejmuje:</p>
 <div class="sectionbody">
 <div class="imageblock">
 <div class="content">
-<img src="c4-container.png" alt="c4 container" width="1891" height="1229">
+<img src="c4-container.png" alt="c4 container" width="2172" height="1210">
 </div>
 </div>
 </div>
@@ -539,7 +549,7 @@ Zakres obejmuje:</p>
 <div class="sectionbody">
 <div class="imageblock">
 <div class="content">
-<img src="c4-component-core.png" alt="c4 component core" width="2069" height="1399">
+<img src="c4-component-core.png" alt="c4 component core" width="2163" height="1399">
 </div>
 </div>
 </div>
@@ -659,12 +669,82 @@ Zakres obejmuje:</p>
 <li>
 <p>pakiety domenowe są zorientowane na język biznesowy, a nie na technologię.</p>
 </li>
+<li>
+<p>uwierzytelnianie jest realizowane w modelu "wtyczkowym" (plugin architecture):</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Wybór dostawcy (OAuth2 vs Local) odbywa się w czasie asemblacji za pomocą profilu Maven.</p>
+</li>
+<li>
+<p>Kod niepożądanych adapterów (np. deweloperskiego) nie trafia do paczki produkcyjnej.</p>
+</li>
+<li>
+<p>Rdzeń aplikacji (<code>auctions-auth-core</code>) pozostaje nieświadomy użytej implementacji dzięki portom.</p>
+</li>
+</ul>
+</div>
+</li>
 </ul>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_renderowanie_dokumentu">8. Renderowanie dokumentu</h2>
+<h2 id="_mechanizm_wtyczek_uwierzytelniania">8. Mechanizm wtyczek uwierzytelniania</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>System wspiera dynamiczny wybór mechanizmu uwierzytelniania na etapie budowania aplikacji. Pozwala to na całkowite odseparowanie kodu deweloperskiego od produkcyjnego.</p>
+</div>
+<div class="sect2">
+<h3 id="_składanie_w_czasie_budowy_maven_profiles">8.1. Składanie w czasie budowy (Maven Profiles)</h3>
+<div class="paragraph">
+<p>W module <code>auctions-bootstrap/pom.xml</code> zdefiniowano profile Maven, które warunkowo dołączają odpowiednie adaptery jako zależności:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>auth-oauth</code> (aktywny domyślnie): Dołącza <code>auctions-adapter-in-auth-oauth</code>.</p>
+</li>
+<li>
+<p><code>auth-local</code>: Dołącza <code>auctions-adapter-in-auth-local</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Dzięki temu, budując aplikację poleceniem <code>mvn clean package -P auth-local</code>, otrzymujemy artefakt JAR, który fizycznie wewnątrz <code>BOOT-INF/lib</code> nie posiada bibliotek związanych z OAuth2, a zawiera kod logowania lokalnego.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_automatyczna_rejestracja_spring_component_scanning">8.2. Automatyczna rejestracja (Spring Component Scanning)</h3>
+<div class="paragraph">
+<p>Aplikacja wykorzystuje mechanizm <code>scanBasePackages = "com.acme.auctions"</code>. Ponieważ oba adaptery (<code>oauth</code> i <code>local</code>) znajdują się w podpakietach tej ścieżki, Spring Boot automatycznie wykrywa i rejestruje:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><strong>Konfigurację Security</strong>: Klasy oznaczone <code>@Configuration</code> (np. <code>LocalSecurityConfiguration</code> lub <code>OAuth2SecurityConfiguration</code>).</p>
+</li>
+<li>
+<p><strong>Implementację Portów</strong>: Klasy implementujące <code>CurrentUserProvider</code>.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Jeżeli na ścieżce klas (classpath) znajdzie się tylko jeden z tych modułów, Spring utworzy beany tylko dla niego. W przypadku znalezienia obu (co jest możliwe w środowisku IDE bez poprawnie ustawionych profili), mechanizm Springowy może wymagać użycia <code>@ConditionalOnMissingBean</code> lub <code>@Primary</code>, jednak w docelowym artefakcie (buildzie) znajduje się zawsze tylko jedna wtyczka.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ekran_logowania">8.3. Ekran logowania</h3>
+<div class="paragraph">
+<p>Spring Security automatycznie generuje stronę <code>/login</code> na podstawie aktywnych filtrów:
+* Gdy aktywny jest <code>formLogin()</code>, generowany jest formularz logowania.
+* Gdy aktywny jest <code>oauth2Login()</code>, generowana jest lista dostawców (GitHub, Google).</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_renderowanie_dokumentu">9. Renderowanie dokumentu</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>HTML:</p>
@@ -714,7 +794,7 @@ Zakres obejmuje:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2026-03-06 20:20:05 +0100
+Last updated 2026-03-15 17:53:50 +0100
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

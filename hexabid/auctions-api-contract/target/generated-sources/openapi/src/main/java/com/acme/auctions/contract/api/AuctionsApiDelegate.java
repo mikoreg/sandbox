@@ -25,7 +25,7 @@ import jakarta.annotation.Generated;
  * A delegate to be called by the {@link AuctionsApiController}}.
  * Implement this interface with a {@link org.springframework.stereotype.Service} annotated class.
  */
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-03-07T00:19:55.094556016+01:00[Europe/Warsaw]", comments = "Generator version: 7.14.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-03-15T22:32:57.773440636+01:00[Europe/Warsaw]", comments = "Generator version: 7.14.0")
 public interface AuctionsApiDelegate {
 
     default Optional<NativeWebRequest> getRequest() {

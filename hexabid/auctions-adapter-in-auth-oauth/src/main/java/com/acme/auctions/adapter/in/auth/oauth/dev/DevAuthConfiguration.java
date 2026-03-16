@@ -11,6 +11,11 @@ import java.util.List;
 class DevAuthConfiguration {
 
     @Bean
+    DevOAuth2UserService devOauth2UserService(final DevUserCatalog devUserCatalog) {
+        return new DevOAuth2UserService(devUserCatalog);
+    }
+
+    @Bean
     DevUserCatalog devUserCatalog() {
         return new DevUserCatalog(List.of(
                 new DevUserCatalog.DevUserEntry(

@@ -22,15 +22,18 @@ public class OAuth2CurrentUserProvider implements CurrentUserProvider {
         if (authentication == null || !authentication.isAuthenticated()) {
             return Optional.empty();
         }
-        if (authentication.getPrincipal() instanceof AuthenticatedUser authenticatedUser) {
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof AuthenticatedUser authenticatedUser) {
             return Optional.of(authenticatedUser);
+        }
+        if (principal instanceof OAuth2AuthenticatedUser wrapper) {
+            return Optional.of(wrapper.user());
         }
         if (!(authentication instanceof OAuth2AuthenticationToken oauth2AuthenticationToken)) {
             return Optional.empty();
         }
-        Object principal = oauth2AuthenticationToken.getPrincipal();
         if (!(principal instanceof OAuth2User oauth2User)) {
-            return Optional.empty();
+            return Optional.of(new AuthenticatedUser(new PartyId("unknown"), "unknown", "unknown", "Unknown", null));
         }
         String provider = oauth2AuthenticationToken.getAuthorizedClientRegistrationId();
         String subject = subjectOf(oauth2User);

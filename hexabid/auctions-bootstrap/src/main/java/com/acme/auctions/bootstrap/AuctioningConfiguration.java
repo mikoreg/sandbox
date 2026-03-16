@@ -5,6 +5,7 @@ import com.acme.auctions.adapter.out.kafka.KafkaAuctionEventPublisher;
 import com.acme.auctions.auth.core.identityaccess.port.in.FindCurrentUserProfileUseCase;
 import com.acme.auctions.auth.core.identityaccess.port.out.CurrentUserProvider;
 import com.acme.auctions.auth.core.identityaccess.port.out.UserVerificationStatusPort;
+import com.acme.auctions.auth.core.identityaccess.usecase.CompositeCurrentUserProvider;
 import com.acme.auctions.auth.core.identityaccess.usecase.FindCurrentUserProfileService;
 import com.acme.auctions.core.auctioning.event.AuctionDomainEvent;
 import com.acme.auctions.core.auctioning.port.in.BrowseAuctionsUseCase;
@@ -21,17 +22,18 @@ import com.acme.auctions.core.auctioning.usecase.CloseExpiredAuctionsService;
 import com.acme.auctions.core.auctioning.usecase.CreateAuctionService;
 import com.acme.auctions.core.auctioning.usecase.FindAuctionDetailsService;
 import com.acme.auctions.core.auctioning.usecase.PlaceBidService;
-import com.acme.auctions.kyc.client.api.KycVerificationApi;
-import com.acme.auctions.kyc.client.invoker.ApiClient;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.time.Clock;
+import java.util.List;
 
 @Configuration
 class AuctioningConfiguration {
@@ -102,20 +104,19 @@ class AuctioningConfiguration {
     }
 
     @Bean
-    KycVerificationApi kycVerificationApi(@Value("${auctions.kyc.base-url:https://kyc.example.test}") String baseUrl) {
-        ApiClient apiClient = new ApiClient();
-        apiClient.setBasePath(baseUrl);
-        return new KycVerificationApi(apiClient);
-    }
-
-    @Bean
     UserVerificationStatusPort userVerificationStatusPort(KycClient kycClient) {
         return kycClient::isVerified;
     }
 
     @Bean
+    @Primary
+    CurrentUserProvider compositeCurrentUserProvider(List<CurrentUserProvider> providers) {
+        return new CompositeCurrentUserProvider(providers);
+    }
+
+    @Bean
     FindCurrentUserProfileUseCase findCurrentUserProfileUseCase(
-            CurrentUserProvider currentUserProvider,
+            @Qualifier("compositeCurrentUserProvider") CurrentUserProvider currentUserProvider,
             UserVerificationStatusPort userVerificationStatusPort
     ) {
         return new FindCurrentUserProfileService(currentUserProvider, userVerificationStatusPort);

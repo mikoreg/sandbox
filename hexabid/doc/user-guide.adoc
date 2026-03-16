@@ -19,8 +19,9 @@ Dostępni dostawcy:
 
 - Google
 - GitHub
+- Local Auth (tylko w wariancie deweloperskim)
 
-Tożsamość użytkownika jest pobierana z sesji OAuth2/OpenID Connect. Klient nie przekazuje `sellerId` w REST ani `bidderId` w komunikatach WebSocket.
+Tożsamość użytkownika jest pobierana z sesji (OAuth2/OpenID Connect lub Local Form Login). Klient nie przekazuje `sellerId` w REST ani `bidderId` w komunikatach WebSocket.
 
 == Podstawowy przepływ
 

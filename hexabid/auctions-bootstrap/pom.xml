@@ -27,11 +27,7 @@
             <artifactId>auctions-api-contract</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.acme.auctions</groupId>
-            <artifactId>auctions-adapter-in-auth-oauth</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>com.acme.auctions</groupId>
             <artifactId>auctions-adapter-in-rest</artifactId>
@@ -59,7 +55,7 @@
         </dependency>
         <dependency>
             <groupId>com.acme.auctions</groupId>
-            <artifactId>auctions-adapter-out-kyc</artifactId>
+            <artifactId>auctions-adapter-in-auth-oauth</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -73,6 +69,50 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <!-- ═══════════════════════════════════════════════════════════
+             AUTHENTICATION ADAPTERS (wzorzec LISTY — wielu dostawców obok siebie)
+             OAuth2 jest zawsze obecny. Profil auth-local DODAJE lokalną wtyczkę.
+             ═══════════════════════════════════════════════════════════ -->
+        <profile>
+            <id>auth-local</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.acme.auctions</groupId>
+                    <artifactId>auctions-adapter-in-auth-local</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             KYC ADAPTER (wzorzec SINGLETONA — tylko jeden dostawca naraz)
+             Profil kyc-prod (domyślny) lub kyc-local — wzajemnie się wykluczają.
+             ═══════════════════════════════════════════════════════════ -->
+        <profile>
+            <id>kyc-prod</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.acme.auctions</groupId>
+                    <artifactId>auctions-adapter-out-kyc</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>kyc-local</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.acme.auctions</groupId>
+                    <artifactId>auctions-adapter-out-kyc-local</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
     <build>
         <plugins>
             <plugin>

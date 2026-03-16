@@ -23,12 +23,14 @@
         <module>auctions-auth-core</module>
         <module>auctions-api-contract</module>
         <module>auctions-adapter-in-auth-oauth</module>
+        <module>auctions-adapter-in-auth-local</module>
         <module>auctions-adapter-in-rest</module>
         <module>auctions-adapter-in-ws</module>
         <module>auctions-adapter-in-job</module>
         <module>auctions-adapter-out-db</module>
         <module>auctions-adapter-out-kafka</module>
         <module>auctions-adapter-out-kyc</module>
+        <module>auctions-adapter-out-kyc-local</module>
         <module>auctions-bootstrap</module>
         <module>auctions-architecture-tests</module>
     </modules>

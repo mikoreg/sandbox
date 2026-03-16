@@ -18,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * Gets or Sets AuctionStatus
  */
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-03-07T00:19:55.094556016+01:00[Europe/Warsaw]", comments = "Generator version: 7.14.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-03-15T22:32:57.773440636+01:00[Europe/Warsaw]", comments = "Generator version: 7.14.0")
 public enum AuctionStatus {
   
   OPEN("OPEN"),

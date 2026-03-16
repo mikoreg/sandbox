@@ -15,7 +15,7 @@ package com.acme.auctions.kyc.client.invoker;
 
 import java.net.http.HttpHeaders;
 
-@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-03-07T00:19:59.035885222+01:00[Europe/Warsaw]", comments = "Generator version: 7.14.0")
+@jakarta.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-03-15T21:57:26.051691563+01:00[Europe/Warsaw]", comments = "Generator version: 7.14.0")
 public class ApiException extends Exception {
     private static final long serialVersionUID = 1L;
 

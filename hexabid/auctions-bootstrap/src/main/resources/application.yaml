@@ -1,3 +1,13 @@
+logging:
+  file:
+    name: /work/var/log/hexabid.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
+  level:
+    root: INFO
+    com.acme.auctions: DEBUG
+
 spring:
   application:
     name: hexabid
@@ -37,6 +47,24 @@ spring:
             scope:
               - read:user
               - user:email
+          dev:
+            client-id: dev-client
+            client-secret: dev-secret
+            provider: custom-dev
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            authorization-grant-type: authorization_code
+            scope:
+              - openid
+              - profile
+              - email
+        provider:
+          custom-dev:
+            authorization-uri: http://localhost:8080/auth/realms/dev/protocol/openid-connect/auth
+            token-uri: http://localhost:8080/auth/realms/dev/protocol/openid-connect/token
+            user-info-uri: http://localhost:8080/auth/realms/dev/protocol/openid-connect/userinfo
+            jwk-set-uri: http://localhost:8080/auth/realms/dev/protocol/openid-connect/certs
+            user-name-attribute: preferred_username
+
 
 auctions:
   jobs:

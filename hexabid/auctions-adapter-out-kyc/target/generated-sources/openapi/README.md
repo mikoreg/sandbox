@@ -4,7 +4,7 @@ External KYC API
 
 - API version: 1.0.0
 
-- Build date: 2026-03-07T00:19:59.035885222+01:00[Europe/Warsaw]
+- Build date: 2026-03-15T21:57:26.051691563+01:00[Europe/Warsaw]
 
 - Generator version: 7.14.0
 
