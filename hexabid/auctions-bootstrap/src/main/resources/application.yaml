@@ -1,0 +1,80 @@
+logging:
+  file:
+    name: /work/var/log/hexabid.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
+  level:
+    root: INFO
+    com.acme.auctions: DEBUG
+
+spring:
+  application:
+    name: hexabid
+  datasource:
+    url: jdbc:h2:mem:auctions;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+  h2:
+    console:
+      enabled: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:change-me}
+            client-secret: ${GOOGLE_CLIENT_SECRET:change-me}
+            scope:
+              - openid
+              - profile
+              - email
+          github:
+            client-id: ${GITHUB_CLIENT_ID:change-me}
+            client-secret: ${GITHUB_CLIENT_SECRET:change-me}
+            scope:
+              - read:user
+              - user:email
+          dev:
+            client-id: dev-client
+            client-secret: dev-secret
+            provider: custom-dev
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            authorization-grant-type: authorization_code
+            scope:
+              - openid
+              - profile
+              - email
+        provider:
+          custom-dev:
+            authorization-uri: http://localhost:8080/auth/realms/dev/protocol/openid-connect/auth
+            token-uri: http://localhost:8080/auth/realms/dev/protocol/openid-connect/token
+            user-info-uri: http://localhost:8080/auth/realms/dev/protocol/openid-connect/userinfo
+            jwk-set-uri: http://localhost:8080/auth/realms/dev/protocol/openid-connect/certs
+            user-name-attribute: preferred_username
+
+
+auctions:
+  jobs:
+    close-expired:
+      delay: 60000
+  seed:
+    enabled: false
+  kafka:
+    topics:
+      outbid: auctions.outbid
+      ended: auctions.ended
+  kyc:
+    base-url: http://localhost:8081

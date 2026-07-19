@@ -1,0 +1,17 @@
+<article class="card">
+  <div class="card__glow"></div>
+  <div class="card__header">
+    <span class="status-pill" [class.closed]="auction().statusTone === 'closed'">{{ auction().statusLabel }}</span>
+    <span>{{ auction().timeLeftLabel }}</span>
+  </div>
+
+  <h3>{{ auction().title }}</h3>
+  <p class="meta">Sprzedający: {{ auction().sellerId }}</p>
+
+  <div class="card__price">
+    <strong>{{ auction().priceLabel }}</strong>
+    <small>{{ auction().endsAtLabel }}</small>
+  </div>
+
+  <a [routerLink]="['/auction', auction().auctionId]">Otwórz aukcję</a>
+</article>

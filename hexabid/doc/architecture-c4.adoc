@@ -1,0 +1,337 @@
+= Hexabid Architecture
+:toc:
+:toclevels: 3
+:sectnums:
+:source-highlighter: highlight.js
+
+== Cel dokumentu
+
+Ten dokument opisuje architekturę systemu `Hexabid` w modelu C4.
+Zakres obejmuje:
+
+- kontekst systemowy
+- kontenery aplikacyjne i integracyjne
+- główne komponenty wewnątrz rdzenia i adapterów
+
+Dokument jest zapisany w AsciiDoc, a diagramy są osadzone jako PlantUML z biblioteką `C4-PlantUML`.
+
+== Założenia
+
+- system jest budowany jako wielomodułowy projekt Maven
+- domena aukcyjna pozostaje niezależna od Springa i JPA
+- wspólny archetyp `Party` znajduje się w rdzeniu i reprezentuje uczestnika biznesowego niezależnie od mechanizmu logowania
+- uwierzytelnianie jest adapterem wejściowym, a tożsamość użytkownika jest dostarczana do aplikacji przez port
+- kontrakty HTTP są definiowane przed implementacją
+- adaptery wejściowe i wyjściowe komunikują się z `auctions-core` wyłącznie przez porty
+
+== Widok 1: System Context
+
+[plantuml, c4-system-context, png]
+....
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title System Context - Hexabid
+skinparam defaultFontName Noto Sans
+
+LAYOUT_WITH_LEGEND()
+
+Person(buyer, "Kupujący", "Przegląda aukcje przez REST oraz składa oferty i odbiera powiadomienia przez WebSocket")
+Person(seller, "Sprzedający", "Tworzy aukcje i obserwuje ich wynik")
+Person(operations, "Zespół operacyjny", "Utrzymuje system i monitoruje procesy")
+
+System(hexabid, "Hexabid", "System aukcyjny w architekturze heksagonalnej")
+System_Ext(kyc, "External KYC", "Zewnętrzny dostawca weryfikacji KYC")
+System_Ext(kafka, "Kafka", "Broker zdarzeń domenowych")
+System_Ext(google, "Google Identity", "Dostawca OpenID Connect")
+System_Ext(github, "GitHub Identity", "Dostawca OAuth2")
+
+Rel(seller, hexabid, "Tworzy aukcje", "HTTPS/JSON")
+Rel(buyer, hexabid, "Pobiera aukcje i uczestniczy w aukcji", "HTTPS/JSON, WebSocket/STOMP")
+Rel(operations, hexabid, "Monitoruje i utrzymuje", "Actuator / logi")
+Rel(hexabid, kyc, "Weryfikuje uczestników", "HTTP, contract-first client")
+Rel(hexabid, kafka, "Publikuje zdarzenia", "Kafka protocol")
+Rel(hexabid, google, "Uwierzytelnia użytkowników", "OpenID Connect")
+Rel(hexabid, github, "Uwierzytelnia użytkowników", "OAuth2")
+Rel(hexabid, local_auth, "Uwierzytelnia użytkowników deweloperskich", "Form login")
+
+SHOW_LEGEND()
+....
+
+Na poziomie *System Context* system może korzystać z zewnętrznych dostawców tożsamości (Google, GitHub) lub wewnętrznego mechanizmu dla celów deweloperskich (Local Auth). Wybór konkretnej metody zależy od wariantu budowy aplikacji.
+
+
+Na poziomie *System Context* nie pokazuję `Job` jako osobnego inicjatora, ponieważ w tej aplikacji scheduler jest elementem wewnętrznym systemu, a nie zewnętrznym aktorem lub osobnym systemem. Dlatego pojawia się dopiero na poziomie *Container*.
+
+== Widok 2: Container
+
+[plantuml, c4-container, png]
+....
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Container Diagram - Hexabid
+skinparam defaultFontName Noto Sans
+
+LAYOUT_WITH_LEGEND()
+
+Person(buyer, "Kupujący")
+Person(seller, "Sprzedający")
+
+System_Ext(kyc, "External KYC", "Zewnętrzna usługa KYC")
+System_Ext(kafka, "Kafka", "Broker zdarzeń")
+System_Ext(google, "Google Identity", "OpenID Connect")
+System_Ext(github, "GitHub Identity", "OAuth2")
+SystemDb(db, "Auction Database", "Relacyjna baza danych", "Przechowuje stan aukcji i historię licytacji")
+
+System_Boundary(hexabid, "Hexabid") {
+    Container(authCore, "auctions-auth-core", "Pure Java", "Model użytkownika i port dostępu do aktualnej tożsamości")
+    Container(authOAuth, "auctions-adapter-in-auth-oauth", "Spring Security OAuth2 Client", "Logowanie przez Google i GitHub (wtyczka produkcyjna)")
+    Container(authLocal, "auctions-adapter-in-auth-local", "Spring Security", "Logowanie lokalne / deweloperskie (wtyczka deweloperska)")
+    Container(rest, "auctions-adapter-in-rest", "Spring MVC", "Obsługuje zwykłe zapytania i komendy REST, bez licytacji")
+    Container(ws, "auctions-adapter-in-ws", "Spring WebSocket", "Obsługuje licytacje i powiadomienia aukcyjne w czasie rzeczywistym")
+    Container(job, "auctions-adapter-in-job", "Spring Scheduling", "Zamyka wygasłe aukcje")
+    Container(core, "auctions-core", "Pure Java", "Modele domenowe, porty i use case'y")
+    ContainerDb(dbAdapter, "auctions-adapter-out-db", "Spring Data JPA", "Implementuje port repozytorium aukcji")
+    Container(kafkaAdapter, "auctions-adapter-out-kafka", "Spring Kafka", "Publikuje zdarzenia domenowe")
+    Container(kycAdapter, "auctions-adapter-out-kyc", "Generated OpenAPI Client", "Implementuje port KYC")
+    Container(contract, "auctions-api-contract", "OpenAPI Generator", "Kontrakt wejściowy i generowane DTO/delegaty")
+    Container(bootstrap, "auctions-bootstrap", "Spring Boot", "Composition root i konfiguracja runtime")
+}
+
+Rel(seller, rest, "Tworzy aukcje", "HTTPS/JSON")
+Rel(buyer, rest, "Pobiera aukcje", "HTTPS/JSON")
+Rel(buyer, ws, "Składa oferty i odbiera powiadomienia", "WebSocket/STOMP")
+Rel(rest, authCore, "Pobiera aktualnego użytkownika")
+Rel(ws, authCore, "Pobiera aktualnego użytkownika")
+Rel(authOAuth, authCore, "Implementuje port CurrentUserProvider")
+Rel(authLocal, authCore, "Implementuje port CurrentUserProvider")
+Rel(authOAuth, google, "Deleguje logowanie", "OIDC")
+Rel(authOAuth, github, "Deleguje logowanie", "OAuth2")
+
+Rel(rest, contract, "Implementuje kontrakt")
+Rel(rest, core, "Wywołuje porty wejściowe")
+Rel(ws, core, "Wywołuje port wejściowy PlaceBid")
+Rel(job, core, "Wywołuje port wejściowy CloseExpiredAuctions")
+
+Rel(core, dbAdapter, "Używa portu AuctionRepository")
+Rel(core, kafkaAdapter, "Używa portu AuctionEventPublisher")
+Rel(core, kycAdapter, "Używa portu KycClient")
+
+Rel(dbAdapter, db, "Zapis/odczyt aukcji", "JPA")
+Rel(kafkaAdapter, kafka, "Publikacja zdarzeń", "Kafka")
+Rel(kycAdapter, kyc, "Weryfikacja KYC", "HTTP")
+Rel(bootstrap, rest, "Składa aplikację")
+Rel(bootstrap, authOAuth, "Składa aplikację (profil auth-oauth)")
+Rel(bootstrap, authLocal, "Składa aplikację (profil auth-local)")
+Rel(bootstrap, authCore, "Wstrzykuje porty auth")
+Rel(bootstrap, ws, "Składa aplikację")
+Rel(bootstrap, job, "Składa aplikację")
+Rel(bootstrap, core, "Tworzy use case'y")
+Rel(bootstrap, dbAdapter, "Konfiguruje runtime")
+
+SHOW_LEGEND()
+....
+
+== Widok 3: Component
+
+[plantuml, c4-component-core, png]
+....
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Component Diagram - auctions-core i kluczowe adaptery
+skinparam defaultFontName Noto Sans
+
+LAYOUT_WITH_LEGEND()
+
+Container_Boundary(coreBoundary, "auctions-core") {
+    Component(partyArchetype, "Party / PartyId", "Shared Archetype", "Uczestnik biznesowy używany przez aukcje niezależnie od dostawcy tożsamości")
+    Component(auctionAggregate, "Auction", "Model", "Agregat aukcji z regułami biznesowymi")
+    Component(createAuctionUc, "CreateAuctionService", "Use Case", "Tworzy aukcję lub zwraca biznesowy powód odrzucenia")
+    Component(placeBidUc, "PlaceBidService", "Use Case", "Składa ofertę albo zwraca jawny wynik odrzucenia i obsługuje konflikt współbieżności")
+    Component(closeExpiredUc, "CloseExpiredAuctionsService", "Use Case", "Zamyka wygasłe aukcje i zlicza konflikty zapisu")
+    Component(getAuctionUc, "FindAuctionDetailsService", "Use Case", "Udostępnia widok aukcji jako jawny wynik wyszukiwania")
+    Component(inPorts, "Porty wejściowe", "Interfaces", "CreateAuction, PlaceBid, CloseExpiredAuctions, FindAuctionDetails")
+    Component(outPorts, "Porty wyjściowe", "Interfaces", "AuctionRepository, AuctionEventPublisher, KycClient")
+}
+
+Container_Boundary(authBoundary, "auctions-auth-core") {
+    Component(currentUserPort, "CurrentUserProvider", "Port", "Udostępnia aktualnie uwierzytelnionego użytkownika")
+}
+
+Container_Boundary(oauthBoundary, "auctions-adapter-in-auth-oauth") {
+    Component(oauthConfig, "OAuth2SecurityConfiguration", "Adapter In", "Konfiguruje Spring Security dla Google i GitHub")
+    Component(oauthCurrentUserProvider, "OAuth2CurrentUserProvider", "Adapter In", "Mapuje principal OAuth2/OIDC na użytkownika aplikacyjnego")
+}
+
+Container_Boundary(localAuthBoundary, "auctions-adapter-in-auth-local") {
+    Component(localAuthConfig, "LocalSecurityConfiguration", "Adapter In", "Konfiguruje Spring Security dla logowania lokalnego (form login)")
+    Component(localCurrentUserProvider, "LocalCurrentUserProvider", "Adapter In", "Mapuje UserDetails na użytkownika aplikacyjnego")
+}
+
+Container_Boundary(restBoundary, "auctions-adapter-in-rest") {
+    Component(restDelegate, "RestAuctionApiDelegate", "Adapter In", "Mapuje DTO z kontraktu na komendy domenowe i pobiera tożsamość z portu auth")
+    Component(restMapper, "RestAuctionContractMapper", "Mapper", "Mapuje AuctionView/BidView na DTO kontraktowe")
+}
+
+Container_Boundary(dbBoundary, "auctions-adapter-out-db") {
+    Component(jpaRepoAdapter, "JpaAuctionRepositoryAdapter", "Adapter Out", "Implementacja portu AuctionRepository")
+    Component(jpaMapper, "AuctionJpaMapper", "Mapper", "Mapowanie domena <-> encje JPA")
+    Component(springDataRepo, "SpringDataAuctionJpaRepository", "Repository", "Repozytorium Spring Data")
+}
+
+Container_Boundary(kafkaBoundary, "auctions-adapter-out-kafka") {
+    Component(kafkaPublisher, "KafkaAuctionEventPublisher", "Adapter Out", "Publikuje biznesowe zdarzenia aukcyjne do Kafki")
+}
+
+Container_Boundary(kycBoundary, "auctions-adapter-out-kyc") {
+    Component(kycClientAdapter, "GeneratedKycClientAdapter", "Adapter Out", "Opakowuje wygenerowanego klienta OpenAPI")
+    Component(generatedKycApi, "KycVerificationApi", "Generated OpenAPI Client", "Klient do dostawcy KYC")
+}
+
+Container_Boundary(wsNotificationsBoundary, "auctions-adapter-in-ws") {
+    Component(wsPublisher, "AuctionWebSocketEventPublisher", "WebSocket Notifications", "Publikuje zmianę lidera i zakończenie aukcji do subskrybentów")
+    Component(wsController, "AuctionBiddingWebSocketController", "Adapter In", "Składa ofertę w imieniu aktualnego użytkownika i publikuje wynik akceptacji/odrzucenia")
+}
+
+Rel(restDelegate, inPorts, "Wywołuje")
+Rel(restDelegate, restMapper, "Używa")
+Rel(restDelegate, currentUserPort, "Używa")
+Rel(wsController, inPorts, "Wywołuje")
+Rel(wsController, currentUserPort, "Używa")
+Rel(inPorts, createAuctionUc, "Implementowane przez")
+Rel(inPorts, placeBidUc, "Implementowane przez")
+Rel(inPorts, closeExpiredUc, "Implementowane przez")
+Rel(inPorts, getAuctionUc, "Implementowane przez")
+
+Rel(createAuctionUc, outPorts, "Używa")
+Rel(placeBidUc, outPorts, "Używa")
+Rel(closeExpiredUc, outPorts, "Używa")
+Rel(getAuctionUc, outPorts, "Używa")
+
+Rel(placeBidUc, auctionAggregate, "Modyfikuje")
+Rel(createAuctionUc, auctionAggregate, "Tworzy")
+Rel(closeExpiredUc, auctionAggregate, "Zamyka")
+Rel(createAuctionUc, partyArchetype, "Używa sprzedającego jako")
+Rel(placeBidUc, partyArchetype, "Używa licytującego jako")
+
+Rel(outPorts, jpaRepoAdapter, "Implementowane przez")
+Rel(outPorts, kafkaPublisher, "Implementowane przez")
+Rel(outPorts, kycClientAdapter, "Implementowane przez")
+Rel(outPorts, wsPublisher, "Publikowane do klientów przez")
+Rel(currentUserPort, oauthCurrentUserProvider, "Implementowane przez (wtyczka oauth)")
+Rel(currentUserPort, localCurrentUserProvider, "Implementowane przez (wtyczka local)")
+Rel(oauthCurrentUserProvider, partyArchetype, "Mapuje principal na")
+Rel(localCurrentUserProvider, partyArchetype, "Mapuje principal na")
+Rel(oauthConfig, oauthCurrentUserProvider, "Konfiguruje środowisko")
+Rel(localAuthConfig, localCurrentUserProvider, "Konfiguruje środowisko")
+
+Rel(jpaRepoAdapter, jpaMapper, "Używa")
+Rel(jpaRepoAdapter, springDataRepo, "Używa")
+Rel(kycClientAdapter, generatedKycApi, "Używa")
+
+SHOW_LEGEND()
+....
+
+== Główne scenariusze
+
+=== Tworzenie aukcji
+
+1. Sprzedający wywołuje REST `POST /api/auctions`.
+2. `auctions-adapter-in-rest` pobiera aktualną tożsamość z `CurrentUserProvider` i mapuje request na `CreateAuctionCommand`.
+3. `CreateAuctionService` sprawdza KYC przez port `KycClient`.
+4. `CreateAuctionService` zwraca jawny wynik utworzenia albo biznesowy powód odrzucenia.
+5. `AuctionRepository` zapisuje nową aukcję.
+6. REST zwraca widok aukcji zgodny z kontraktem OpenAPI.
+
+=== Licytacja w czasie rzeczywistym
+
+1. Kupujący wysyła ofertę przez WebSocket.
+2. Adapter WebSocket pobiera aktualną tożsamość użytkownika z portu auth.
+3. `PlaceBidService` wywołuje agregat i zwraca `BidAccepted` albo `BidRejected`.
+4. `Auction` waliduje reguły licytacji i aktualizuje historię ofert.
+5. `AuctionRepository` zapisuje nowy stan agregatu z optimistic locking.
+6. `AuctionEventPublisher` publikuje zdarzenie zmiany lidera do Kafki i do kanału WebSocket.
+7. W przypadku konfliktu współbieżności use case zwraca wynik biznesowy `CONCURRENT_MODIFICATION`, a system nie traci stabilności.
+
+=== Zamknięcie wygasłych aukcji
+
+1. Scheduler uruchamia `CloseExpiredAuctionsUseCase`.
+2. Core pobiera wygasłe aukcje z `AuctionRepository`.
+3. `Auction` zmienia status na `CLOSED` i rozstrzyga, czy aukcja została wygrana czy zamknięta bez zwycięzcy.
+4. W razie konfliktu optimistic lock aukcja jest pomijana, a use case zlicza konflikt zamiast zatrzymać cały job.
+5. Adaptery publikują biznesowe zdarzenie końca aukcji do Kafki i WebSocket.
+
+== Decyzje architektoniczne
+
+- `auctions-core` nie zna Springa, JPA, Kafki ani HTTP.
+- `auctions-auth-core` izoluje model użytkownika i port dostępu do aktualnej tożsamości od Spring Security.
+- `auctions-bootstrap` pełni rolę composition root i tworzy use case'y jako beany.
+- komunikacja REST i KYC jest contract-first, dzięki generatorom OpenAPI.
+- uwierzytelnianie odbywa się przez OAuth2/OpenID Connect z dostawcami Google i GitHub.
+- licytacja i powiadomienia aukcyjne są prowadzone przez WebSocket, a REST służy do zwykłych operacji i odczytów.
+- zdarzenia domenowe opisują konkretny fakt biznesowy, a nie ogólne "coś się zakończyło".
+- use case'y zwracają jawne wyniki biznesowe zamiast przeciekać techniczne wyjątki do adapterów.
+- zapis aukcji wykorzystuje optimistic locking; konflikty są obsługiwane stabilnie i jawnie.
+- pakiety domenowe są zorientowane na język biznesowy, a nie na technologię.
+- uwierzytelnianie jest realizowane w modelu "wtyczkowym" (plugin architecture):
+** Wybór dostawcy (OAuth2 vs Local) odbywa się w czasie asemblacji za pomocą profilu Maven.
+** Kod niepożądanych adapterów (np. deweloperskiego) nie trafia do paczki produkcyjnej.
+** Rdzeń aplikacji (`auctions-auth-core`) pozostaje nieświadomy użytej implementacji dzięki portom.
+
+== Mechanizm wtyczek uwierzytelniania
+
+System wspiera dynamiczny wybór mechanizmu uwierzytelniania na etapie budowania aplikacji. Pozwala to na całkowite odseparowanie kodu deweloperskiego od produkcyjnego.
+
+=== Składanie w czasie budowy (Maven Profiles)
+
+W module `auctions-bootstrap/pom.xml` zdefiniowano profile Maven, które warunkowo dołączają odpowiednie adaptery jako zależności:
+
+* `auth-oauth` (aktywny domyślnie): Dołącza `auctions-adapter-in-auth-oauth`.
+* `auth-local`: Dołącza `auctions-adapter-in-auth-local`.
+
+Dzięki temu, budując aplikację poleceniem `mvn clean package -P auth-local`, otrzymujemy artefakt JAR, który fizycznie wewnątrz `BOOT-INF/lib` nie posiada bibliotek związanych z OAuth2, a zawiera kod logowania lokalnego.
+
+=== Automatyczna rejestracja (Spring Component Scanning)
+
+Aplikacja wykorzystuje mechanizm `scanBasePackages = "com.acme.auctions"`. Ponieważ oba adaptery (`oauth` i `local`) znajdują się w podpakietach tej ścieżki, Spring Boot automatycznie wykrywa i rejestruje:
+
+1. **Konfigurację Security**: Klasy oznaczone `@Configuration` (np. `LocalSecurityConfiguration` lub `OAuth2SecurityConfiguration`). 
+2. **Implementację Portów**: Klasy implementujące `CurrentUserProvider`.
+
+Jeżeli na ścieżce klas (classpath) znajdzie się tylko jeden z tych modułów, Spring utworzy beany tylko dla niego. W przypadku znalezienia obu (co jest możliwe w środowisku IDE bez poprawnie ustawionych profili), mechanizm Springowy może wymagać użycia `@ConditionalOnMissingBean` lub `@Primary`, jednak w docelowym artefakcie (buildzie) znajduje się zawsze tylko jedna wtyczka.
+
+=== Ekran logowania
+
+Spring Security automatycznie generuje stronę `/login` na podstawie aktywnych filtrów:
+* Gdy aktywny jest `formLogin()`, generowany jest formularz logowania.
+* Gdy aktywny jest `oauth2Login()`, generowana jest lista dostawców (GitHub, Google).
+
+== Renderowanie dokumentu
+
+HTML:
+
+[source,bash]
+----
+asciidoctor \
+  -r asciidoctor-diagram \
+  -r asciidoctor-diagram/plantuml/classpath \
+  doc/architecture-c4.adoc
+----
+
+PDF:
+
+[source,bash]
+----
+asciidoctor-pdf \
+  -r asciidoctor-diagram \
+  -r asciidoctor-diagram/plantuml/classpath \
+  -a pdf-theme=doc/pdf-theme.yml \
+  -o doc/architecture-c4.pdf \
+  doc/architecture-c4.adoc
+----
+
+Uwaga:
+
+- PDF generowany z IDE może pokazywać placeholder zamiast diagramów, jeśli plugin AsciiDoc nie ma aktywnego backendu diagramów.
+- Renderowanie przez CLI z powyższymi `require` osadza diagramy poprawnie.
+- Motyw `doc/pdf-theme.yml` wymusza font `Noto Sans`, żeby PDF poprawnie wyświetlał polskie znaki.
+- Jeżeli środowisko blokuje zdalne `!includeurl`, można zmirrorować bibliotekę `C4-PlantUML` lokalnie i podmienić dyrektywy `!includeurl` na `!include`.

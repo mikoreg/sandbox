@@ -1,0 +1,91 @@
+#!/bin/sh
+
+# Lightweight POSIX launcher for the checked-in Gradle Wrapper JAR.
+APP_HOME=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P) || exit 1
+CLASSPATH="$APP_HOME/gradle/wrapper/gradle-wrapper.jar"
+
+# Helper function to get the major version of Java
+get_java_major_version() {
+    _version=$("$1" -version 2>&1 | head -n 1 | cut -d'"' -f2)
+    _major=$(echo "$_version" | cut -d'.' -f1)
+    if [ "$_major" = "1" ]; then
+        _major=$(echo "$_version" | cut -d'.' -f2)
+    fi
+    echo "$_major"
+}
+
+# Helper to find a compatible JDK (between 17 and 24) on the system
+find_compatible_java_dir() {
+    for _dir in \
+        /usr/lib/jvm/java-21-amazon-corretto \
+        /usr/lib/jvm/java-17-amazon-corretto \
+        /usr/lib/jvm/java-21-openjdk \
+        /usr/lib/jvm/java-17-openjdk \
+        /usr/lib/jvm/java-21 \
+        /usr/lib/jvm/java-17 \
+        /usr/lib/jvm/* \
+        /usr/lib64/jvm/* \
+        /usr/java/*
+    do
+        [ -e "$_dir" ] || continue
+        if [ -x "$_dir/bin/java" ]; then
+            _ver=$(get_java_major_version "$_dir/bin/java")
+            if [ "$_ver" -ge 17 ] && [ "$_ver" -le 24 ]; then
+                echo "$_dir"
+                return 0
+            fi
+        fi
+    done
+    return 1
+}
+
+if [ -n "$JAVA_HOME" ]; then
+    JAVACMD="$JAVA_HOME/bin/java"
+    if [ -x "$JAVACMD" ]; then
+        JAVA_VER=$(get_java_major_version "$JAVACMD")
+        if [ "$JAVA_VER" -lt 17 ] || [ "$JAVA_VER" -gt 24 ]; then
+            echo "WARNING: Provided JAVA_HOME ($JAVA_HOME) runs Java $JAVA_VER, which is incompatible (requires 17-24)." >&2
+            COMPAT_DIR=$(find_compatible_java_dir)
+            if [ -n "$COMPAT_DIR" ]; then
+                echo "Using compatible JDK found at: $COMPAT_DIR" >&2
+                export JAVA_HOME="$COMPAT_DIR"
+                JAVACMD="$JAVA_HOME/bin/java"
+            fi
+        fi
+    fi
+else
+    # Check if default java is compatible
+    if command -v java >/dev/null 2>&1; then
+        DEFAULT_JAVA=$(command -v java)
+        JAVA_VER=$(get_java_major_version "$DEFAULT_JAVA")
+        if [ "$JAVA_VER" -ge 17 ] && [ "$JAVA_VER" -le 24 ]; then
+            JAVACMD="$DEFAULT_JAVA"
+            # Set JAVA_HOME automatically so child processes use this Java
+            REAL_JAVA=$(readlink -f "$DEFAULT_JAVA")
+            export JAVA_HOME=$(dirname "$(dirname "$REAL_JAVA")")
+        else
+            echo "WARNING: Default system Java runs version $JAVA_VER, which is incompatible (requires 17-24)." >&2
+            COMPAT_DIR=$(find_compatible_java_dir)
+            if [ -n "$COMPAT_DIR" ]; then
+                echo "Using compatible JDK found at: $COMPAT_DIR" >&2
+                export JAVA_HOME="$COMPAT_DIR"
+                JAVACMD="$JAVA_HOME/bin/java"
+            else
+                JAVACMD="$DEFAULT_JAVA"
+            fi
+        fi
+    fi
+fi
+
+if ! command -v "$JAVACMD" >/dev/null 2>&1 && [ ! -x "$JAVACMD" ]; then
+    echo "ERROR: Java was not found. Set JAVA_HOME to a JDK 17-24 installation." >&2
+    exit 1
+fi
+
+exec "$JAVACMD" \
+    -Dfile.encoding=UTF-8 \
+    -Xmx64m \
+    -Xms64m \
+    -Dorg.gradle.appname=gradlew \
+    -classpath "$CLASSPATH" \
+    org.gradle.wrapper.GradleWrapperMain "$@"

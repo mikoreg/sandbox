@@ -1,0 +1,158 @@
+openapi: 3.0.3
+info:
+  title: Auction API
+  version: 1.0.0
+  description: API for managing auctions and bids
+servers:
+  - url: http://localhost:8080
+    description: Development server
+
+paths:
+  /auctions:
+    post:
+      summary: Create a new auction
+      operationId: createAuction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAuctionRequest'
+      responses:
+        '201':
+          description: Auction created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuctionResponse'
+        '400':
+          description: Invalid input
+security:
+  - bearerAuth: []
+
+    get:
+      summary: Get all auctions
+      operationId: getAllAuctions
+      responses:
+        '200':
+          description: List of auctions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuctionResponse'
+security:
+  - bearerAuth: []
+
+  /auctions/{auctionId}:
+    get:
+      summary: Get auction by ID
+      operationId: getAuctionById
+      parameters:
+        - name: auctionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Auction found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuctionResponse'
+        '404':
+          description: Auction not found
+security:
+  - bearerAuth: []
+
+  /auctions/{auctionId}/bids:
+    post:
+      summary: Place a bid on an auction
+      operationId: placeBid
+      parameters:
+        - name: auctionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaceBidRequest'
+      responses:
+        '200':
+          description: Bid placed successfully
+        '400':
+          description: Invalid bid
+        '404':
+          description: Auction not found
+security:
+  - bearerAuth: []
+
+components:
+  schemas:
+    CreateAuctionRequest:
+      type: object
+      required:
+        - title
+        - description
+        - startingPrice
+        - endsAt
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        startingPrice:
+          type: number
+          format: double
+        endsAt:
+          type: string
+          format: date-time
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+    PlaceBidRequest:
+      type: object
+      required:
+        - amount
+      properties:
+        amount:
+          type: number
+          format: double
+
+    AuctionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        startingPrice:
+          type: number
+          format: double
+        currentPrice:
+          type: number
+          format: double
+          nullable: true
+        status:
+          type: string
+          enum: [PUBLISHED, BID_ON, CLOSED]
+        endsAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time

@@ -1,0 +1,41 @@
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
+         xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+    &lt;groupId&gt;com.acme.auctions&lt;/groupId&gt;
+    &lt;artifactId&gt;auctions-parent&lt;/artifactId&gt;
+    &lt;version&gt;1.0.0&lt;/version&gt;
+    &lt;packaging&gt;pom&lt;/packaging&gt;
+
+    &lt;modules&gt;
+        &lt;module&gt;auctions-core&lt;/module&gt;
+        &lt;module&gt;auctions-api-contract&lt;/module&gt;
+        &lt;module&gt;auctions-adapter-in-rest&lt;/module&gt;
+        &lt;module&gt;auctions-adapter-in-ws&lt;/module&gt;
+        &lt;module&gt;auctions-adapter-in-job&lt;/module&gt;
+        &lt;module&gt;auctions-adapter-out-db&lt;/module&gt;
+        &lt;module&gt;auctions-adapter-out-kafka&lt;/module&gt;
+        &lt;module&gt;auctions-adapter-out-kyc&lt;/module&gt;
+        &lt;module&gt;auctions-bootstrap&lt;/module&gt;
+    &lt;/modules&gt;
+
+    &lt;properties&gt;
+        &lt;maven.compiler.source&gt;17&lt;/maven.compiler.source&gt;
+        &lt;maven.compiler.target&gt;17&lt;/maven.compiler.target&gt;
+        &lt;spring.boot.version&gt;3.2.0&lt;/spring.boot.version&gt;
+    &lt;/properties&gt;
+
+    &lt;dependencyManagement&gt;
+        &lt;dependencies&gt;
+            &lt;dependency&gt;
+                &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+                &lt;artifactId&gt;spring-boot-dependencies&lt;/artifactId&gt;
+                &lt;version&gt;${spring.boot.version}&lt;/version&gt;
+                &lt;type&gt;pom&lt;/type&gt;
+                &lt;scope&gt;import&lt;/scope&gt;
+            &lt;/dependency&gt;
+        &lt;/dependencies&gt;
+    &lt;/dependencyManagement&gt;
+&lt;/project&gt;

@@ -1,0 +1,21 @@
+extends: default
+
+font:
+  catalog:
+    merge: true
+    Noto Sans:
+      normal: /usr/share/fonts/google-noto/NotoSans-Regular.ttf
+      bold: /usr/share/fonts/google-noto/NotoSans-Bold.ttf
+      italic: /usr/share/fonts/google-noto/NotoSans-Italic.ttf
+      bold_italic: /usr/share/fonts/google-noto/NotoSans-BoldItalic.ttf
+    Noto Sans Mono:
+      normal: /usr/share/fonts/google-noto/NotoSansMono-Regular.ttf
+
+base:
+  font-family: Noto Sans
+
+heading:
+  font-family: Noto Sans
+
+code:
+  font-family: Noto Sans Mono

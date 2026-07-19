@@ -1,0 +1,42 @@
+<div class="shell">
+  <header class="topbar">
+    <a class="brand" routerLink="/">
+      <span class="brand__mark">HB</span>
+      <span>
+        <strong>Hexabid</strong>
+        <small>reference auction SPA</small>
+      </span>
+    </a>
+
+    <nav class="nav">
+      <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Rynek</a>
+      <a routerLink="/sell" routerLinkActive="is-active">Wystaw aukcję</a>
+      <a routerLink="/dashboard" routerLinkActive="is-active">Moje konto</a>
+    </nav>
+
+    <div class="actions">
+      @if (session.loading()) {
+        <span class="session-pill muted">Ładowanie sesji...</span>
+      } @else if (session.profile(); as profile) {
+        <a class="session-pill" routerLink="/dashboard">
+          <strong>{{ profile.displayName }}</strong>
+          <small>{{ profile.verifiedLabel }}</small>
+        </a>
+        @if (profile.provider === 'dev') {
+          <a class="ghost-button" href="/dev-auth?redirect=http://localhost:4200/">Zmien usera</a>
+        }
+        <button class="ghost-button" type="button" (click)="session.logout()">Wyloguj</button>
+      } @else {
+        <div class="login-group">
+          @for (provider of session.loginProviders; track provider.id) {
+            <a class="ghost-button" [href]="provider.href">{{ provider.label }}</a>
+          }
+        </div>
+      }
+    </div>
+  </header>
+
+  <main class="content">
+    <router-outlet />
+  </main>
+</div>

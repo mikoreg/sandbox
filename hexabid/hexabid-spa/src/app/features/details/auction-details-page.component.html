@@ -1,0 +1,119 @@
+@if (facade.loading()) {
+  <section class="surface loading-state">Ładowanie szczegółów aukcji...</section>
+} @else if (facade.error()) {
+  <app-empty-state
+    title="Nie udało się otworzyć aukcji"
+    [description]="facade.error()!"
+    actionLabel="Wróć do rynku"
+    actionHref="/"
+  />
+} @else if (facade.auction(); as auction) {
+  <section class="details-grid">
+    <article class="surface spotlight">
+      <div class="eyebrow">
+        <span class="status-badge" [class.closed]="auction.statusTone === 'closed'">{{ auction.statusLabel }}</span>
+        <span>{{ auction.endsAtLabel }}</span>
+      </div>
+
+      <h1>{{ auction.title }}</h1>
+      <p class="lede">
+        Ekran szczegółów jest już gotowy pod pracę z bieżącym API i real-time bidding. Kolejne iteracje mogą
+        rozszerzyć go o media, kategorię, wadium i richer metadata bez naruszania warstw.
+      </p>
+
+      <dl class="metrics">
+        <div>
+          <dt>Aktualna cena</dt>
+          <dd>{{ auction.priceLabel }}</dd>
+        </div>
+        <div>
+          <dt>Lider</dt>
+          <dd>{{ auction.leadingBidderLabel }}</dd>
+        </div>
+        <div>
+          <dt>Ofert łącznie</dt>
+          <dd>{{ auction.totalBids }}</dd>
+        </div>
+        <div>
+          <dt>Koniec aukcji</dt>
+          <dd>{{ auction.timeLeftLabel }}</dd>
+        </div>
+      </dl>
+    </article>
+
+    <aside class="surface bid-panel">
+      <h2>Złóż ofertę</h2>
+      <p>
+        Kanał STOMP jest zestawiany automatycznie po wejściu na ekran. Potwierdzenia i odrzucenia pojawiają się
+        poniżej w strumieniu aktywności.
+      </p>
+
+      <form [formGroup]="bidForm" (ngSubmit)="submitBid()" class="stack">
+        <label>
+          <span>Kwota</span>
+          <input type="text" formControlName="amount" placeholder="150.00" />
+        </label>
+
+        <label>
+          <span>Waluta</span>
+          <select formControlName="currency">
+            <option value="PLN">PLN</option>
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+          </select>
+        </label>
+
+        <button type="submit" [disabled]="facade.bidSubmitting() || !auction.isOpen">
+          {{ facade.bidSubmitting() ? 'Wysyłanie...' : 'Licytuj teraz' }}
+        </button>
+      </form>
+
+      @if (!auction.isOpen) {
+        <p class="hint">Ta aukcja jest zamknięta, więc formularz licytacji został zablokowany.</p>
+      }
+    </aside>
+  </section>
+
+  <section class="details-grid details-grid--secondary">
+    <article class="surface">
+      <div class="section-heading">
+        <h2>Historia ofert</h2>
+        <span>{{ auction.totalBids }} wpisów</span>
+      </div>
+
+      @if (auction.bidHistory.length) {
+        <div class="timeline">
+          @for (bid of auction.bidHistory; track bid.bidderId + bid.placedAt.toISOString()) {
+            <article class="timeline-item">
+              <strong>{{ bid.priceLabel }}</strong>
+              <span>{{ bid.bidderLabel }}</span>
+              <small>{{ bid.placedAtLabel }}</small>
+            </article>
+          }
+        </div>
+      } @else {
+        <p class="muted">Brak ofert zapisanych dla tej aukcji.</p>
+      }
+    </article>
+
+    <article class="surface">
+      <div class="section-heading">
+        <h2>Strumień aktywności</h2>
+        <span>Live</span>
+      </div>
+
+      @if (facade.feed().length) {
+        <div class="feed">
+          @for (item of facade.feed(); track item.title + item.detail) {
+            <article class="feed-item" [class.error]="item.tone === 'error'" [class.success]="item.tone === 'success'">
+              <strong>{{ item.title }}</strong>
+              <p>{{ item.detail }}</p>
+            </article>
+          }
+        </div>
+      } @else {
+        <p class="muted">Czekamy na pierwsze zdarzenia z kanału aukcji.</p>
+      }
+    </article>
+  </section>
+}

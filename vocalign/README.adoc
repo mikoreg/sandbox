@@ -1,0 +1,55 @@
+= Vocalign
+
+Prosty pipeline TTS + wyrównanie czasowe do napisów (TTML/SRT/JSON) i render timeline audio.
+
+== Wymagania
+
+* JDK 25
+* Maven 3.9+
+* `ffmpeg` i `ffprobe` w `PATH`
+
+== Szybki start
+
+Z katalogu `vocalign/`:
+
+[source,bash]
+----
+./run.sh
+----
+
+Domyślnie skrypt używa:
+
+* wejście: `.local/MFG-S03E04.pl.ttml.xml`
+* config: `.local/config.properties`
+
+== Uruchomienie z innym wejściem
+
+[source,bash]
+----
+./run.sh .local/MFG-S03E04.ttml.xml
+----
+
+== Przykład diagnostyczny (bez GTTS)
+
+[source,bash]
+----
+./run.sh .local/MFG-S03E04.pl.ttml.xml --tts-provider mock --preview-ms 120000
+----
+
+== Ręczne uruchomienie bez skryptu
+
+[source,bash]
+----
+mvn clean package
+java -jar target/vocalign-0.1.0-SNAPSHOT.jar \
+  --config .local/config.properties \
+  --input .local/MFG-S03E04.pl.ttml.xml
+----
+
+== Wyjścia
+
+Przy domyślnej konfiguracji artefakty trafiają do `.local/`:
+
+* timeline: `.local/timeline_*.wav`
+* surowe TTS: `.local/tts/`
+* przetworzone segmenty: `.local/processed/`

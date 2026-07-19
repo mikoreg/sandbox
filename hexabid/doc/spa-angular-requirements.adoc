@@ -1,0 +1,646 @@
+= Hexabid SPA/Angular - Wymagania i Plan Startowy
+:toc:
+:toclevels: 3
+:sectnums:
+:source-highlighter: highlight.js
+
+== Cel dokumentu
+
+Ten dokument stanowi materiał startowy do rozpoczęcia prac nad aplikacją SPA w Angularze dla systemu `Hexabid`.
+Zakres obejmuje:
+
+- wymagania funkcjonalne
+- wymagania niefunkcjonalne
+- podstawowe use case'y
+- zasady architektoniczne frontendu
+- identyfikację luk względem obecnego backendu
+- rekomendowany plan prac wdrożeniowych
+
+Dokument zakłada, że backend może być rozwijany równolegle z frontendem, o ile zachowana zostanie spójność z architekturą heksagonalną, contract-first i separacją odpowiedzialności.
+
+== Kontekst i stan obecny
+
+Aktualny system backendowy udostępnia:
+
+- logowanie przez OAuth2/OIDC oraz alternatywną wtyczkę Local Auth dla deweloperów
+- utworzenie aukcji przez REST
+- pobranie szczegółów aukcji przez REST
+- licytację w czasie rzeczywistym przez WebSocket/STOMP
+- zamykanie aukcji przez job
+- publikację zdarzeń domenowych
+
+Aktualnie brak pełnego zaplecza pod docelowe SPA, w szczególności:
+
+- wyszukiwania i listingu aukcji
+- filtrowania, sortowania i paginacji
+- obszaru "moje aukcje" i "moje licytacje"
+- profilu użytkownika i ekspozycji statusu tożsamości/KYC
+- modelu nawigacji i widoków wspierających pełną obsługę procesu aukcyjnego
+- jawnie zdefiniowanego BFF lub API-read-modeli zoptymalizowanych pod frontend
+
+Wniosek:
+prace nad SPA powinny objąć zarówno frontend Angular, jak i rozszerzenie kontraktu backendowego.
+
+== Wizja produktu
+
+Docelowa aplikacja SPA ma być referencyjnym przykładem wysokiej jakości rozwiązania front-back dla systemu aukcyjnego, pokazującym:
+
+- separację warstw i modeli
+- spójność z architekturą domenową i heksagonalną
+- contract-first na styku frontend-backend
+- utrzymywalność, testowalność i czytelny podział odpowiedzialności
+- nowoczesny, dopracowany UX dla aplikacji transakcyjnej i real-time
+
+Makieta dostarczona przez użytkownika jest inspiracją dla strony wyszukiwania i eksploracji aukcji.
+Docelowy interfejs może rozwijać ten kierunek wizualny, ale nie powinien kopiować makiety 1:1.
+
+== Zakres produktu SPA
+
+=== Obszary funkcjonalne
+
+SPA powinna pokryć co najmniej następujące obszary:
+
+- publiczne przeglądanie i wyszukiwanie aukcji
+- szczegóły aukcji
+- licytację w czasie rzeczywistym
+- tworzenie aukcji
+- logowanie i obsługę sesji użytkownika
+- obszar użytkownika zalogowanego
+- prezentację statusów biznesowych i błędów
+- obsługę pustych stanów, loading states i scenariuszy błędnych
+
+=== Użytkownicy i role
+
+Na poziomie produktu wyróżniamy:
+
+- gościa, który przegląda i wyszukuje aukcje
+- kupującego, który loguje się i licytuje
+- sprzedającego, który loguje się i tworzy aukcje
+- operatora/administratora demonstracyjnego, który analizuje działanie systemu i architektury
+
+W obecnym modelu domenowym użytkownik jest reprezentowany jako `Party`.
+Frontend nie powinien modelować logiki autoryzacyjnej przez role techniczne z providerów logowania, lecz przez capabilities wynikające z API i stanu sesji.
+
+== Wymagania funkcjonalne
+
+=== FR-01 Strona główna i eksploracja aukcji
+
+System musi udostępniać stronę główną z możliwością:
+
+- przeglądania wyróżnionych aukcji
+- przejścia do wyszukiwarki
+- prezentacji kategorii i sekcji tematycznych
+- przejścia do logowania oraz strefy użytkownika
+
+=== FR-02 Wyszukiwanie aukcji
+
+System musi umożliwiać wyszukiwanie aukcji z użyciem filtrów:
+
+- fraza tekstowa
+- kategoria
+- podkategoria
+- zakres ceny wywoławczej
+- zakres wartości szacunkowej
+- lokalizacja
+- status aukcji
+- obecność wadium
+- sortowanie
+
+Wyszukiwarka musi wspierać:
+
+- paginację lub infinite scroll
+- linkowalny stan filtrów w URL
+- łatwe czyszczenie filtrów
+- pusty stan dla braku wyników
+
+=== FR-03 Szczegóły aukcji
+
+System musi prezentować szczegóły aukcji obejmujące:
+
+- identyfikator aukcji
+- tytuł
+- opis
+- kategorię i atrybuty domenowe
+- dane sprzedającego w zakresie dozwolonym biznesowo
+- cenę wywoławczą
+- aktualną cenę prowadzącą
+- status aukcji
+- czas do zakończenia
+- historię ofert lub jej widok zagregowany
+- informacje o warunkach udziału, w tym wadium i KYC
+- galerię zdjęć lub miejsce na nią w modelu
+
+=== FR-04 Licytacja w czasie rzeczywistym
+
+Uwierzytelniony użytkownik musi mieć możliwość:
+
+- połączenia z kanałem aukcji w czasie rzeczywistym
+- składania ofert
+- otrzymywania potwierdzeń zaakceptowanej oferty
+- otrzymywania jawnych odrzuceń biznesowych
+- otrzymywania zdarzeń zmiany lidera
+- otrzymywania zdarzenia zakończenia aukcji
+
+Interfejs musi czytelnie rozróżniać:
+
+- aktualny stan serwera
+- operację oczekującą
+- lokalny błąd walidacji
+- błąd biznesowy z backendu
+
+=== FR-05 Tworzenie aukcji
+
+Uwierzytelniony użytkownik musi mieć możliwość utworzenia aukcji przez formularz wielosekcyjny.
+
+Minimalny zakres danych:
+
+- tytuł
+- opis
+- kategoria i podkategoria
+- cena wywoławcza
+- termin zakończenia
+- lokalizacja
+- parametry logistyczne i formalne
+- informacja o wadium
+- załączniki lub przygotowanie modelu pod ich przyszłe dodanie
+
+Formularz powinien wspierać:
+
+- walidację synchroniczną i asynchroniczną
+- zapis wersji roboczej, jeśli backend zostanie rozszerzony
+- podsumowanie przed publikacją
+
+=== FR-06 Uwierzytelnianie i sesja
+
+System musi umożliwiać:
+
+- rozpoczęcie logowania przez dostawcę OAuth2/OIDC
+- rozpoznanie aktualnego użytkownika po odświeżeniu strony
+- bezpieczne wylogowanie
+- łagodną obsługę wygaśnięcia sesji
+
+Frontend nie może polegać na ręcznym przekazywaniu identyfikatora użytkownika w payloadach biznesowych.
+
+=== FR-07 Profil i kontekst użytkownika
+
+System powinien udostępniać widok kontekstu użytkownika zawierający:
+
+- podstawowe dane profilu
+- status zalogowania
+- status weryfikacji
+- listę moich aukcji
+- listę obserwowanych lub licytowanych aukcji
+- ostatnią aktywność związaną z aukcjami
+
+=== FR-08 Powiadomienia i feedback
+
+System musi prezentować użytkownikowi:
+
+- globalne komunikaty sukcesu i błędu
+- lokalne komunikaty formularzy
+- status połączenia real-time
+- ostrzeżenia o utracie połączenia
+- komunikaty o zmianie stanu aukcji podczas oglądania
+
+=== FR-09 Responsywność i dostępność
+
+System musi wspierać:
+
+- pełną obsługę na desktopie
+- pełną obsługę na mobile
+- poprawne działanie z klawiaturą
+- semantyczne formularze i komunikaty dla technologii wspierających
+
+=== FR-10 Dokumentacyjność rozwiązania
+
+Rozwiązanie powinno być na tyle czytelne, aby mogło służyć jako aplikacja referencyjna dla najlepszych praktyk.
+
+Oznacza to w szczególności:
+
+- jednoznaczny podział modeli i warstw
+- czytelne nazwy use case'ów frontendowych
+- brak mieszania modeli API, modeli widoku i modeli domeny UI
+- obecność dokumentacji architektonicznej i decyzji projektowych
+
+== Wymagania niefunkcjonalne
+
+=== NFR-01 Architektura frontendu
+
+Aplikacja Angular musi być podzielona na warstwy o wyraźnej odpowiedzialności:
+
+- `shell` lub `app composition` dla bootstrapu i routingu
+- `core` dla elementów przekrojowych
+- `features` dla przypadków użycia
+- `shared` dla komponentów reużywalnych
+- `data-access` dla integracji z API, WebSocket i persistence UI
+- `ui` dla prezentacyjnych komponentów bez logiki integracyjnej
+
+Modele muszą być rozdzielone co najmniej na:
+
+- modele kontraktu API
+- modele mapowane do logiki aplikacyjnej
+- modele widoku
+- komendy formularzy
+
+=== NFR-02 Utrzymywalność
+
+Kod musi być organizowany per feature i per use case, a nie wyłącznie per typ artefaktu.
+
+Wymagane jest:
+
+- hermetyzowanie integracji z backendem
+- mappery między warstwami
+- ograniczenie rozlewania RxJS/signals po całej aplikacji
+- trzymanie logiki orkiestracyjnej poza komponentami prezentacyjnymi
+
+=== NFR-03 Contract-first
+
+Komunikacja frontend-backend powinna być oparta na kontrakcie, preferencyjnie OpenAPI dla HTTP i jawnej specyfikacji kanałów WebSocket.
+
+Pożądane jest:
+
+- generowanie klienta API lub modeli na podstawie kontraktu
+- oddzielenie kodu wygenerowanego od własnych adapterów frontendowych
+- utrzymywanie mapowań w warstwie adapterów
+
+=== NFR-04 Jakość i testowalność
+
+Wymagane są:
+
+- testy jednostkowe dla mapperów, store'ów i logiki use case
+- testy komponentów dla kluczowych ekranów
+- testy integracyjne frontend-backend dla ścieżek krytycznych
+- testy E2E dla scenariuszy biznesowych
+
+=== NFR-05 Wydajność
+
+Docelowa aplikacja powinna:
+
+- ładować pierwszy ekran w czasie akceptowalnym dla SPA biznesowego
+- ograniczać przeładowania danych
+- stosować lazy loading dla obszarów funkcjonalnych
+- unikać nadmiernego odświeżania widoków podczas zdarzeń WebSocket
+
+=== NFR-06 Obserwowalność
+
+Frontend powinien wspierać:
+
+- strukturalne logowanie błędów aplikacyjnych
+- correlation id lub trace id, jeśli backend je udostępni
+- centralną obsługę błędów HTTP i WebSocket
+
+=== NFR-07 Bezpieczeństwo
+
+Wymagane jest:
+
+- brak przechowywania wrażliwych danych w local storage bez uzasadnienia
+- spójna obsługa sesji OAuth2
+- zabezpieczenie nawigacji do stref wymagających uwierzytelnienia
+- ochrona przed nieautoryzowanym użyciem akcji UI
+
+=== NFR-08 UX i design system
+
+Interfejs powinien być spójny, ale nie generyczny.
+Należy opracować własny język wizualny dla `Hexabid`, inspirowany dostarczoną makietą, lecz rozwinięty o:
+
+- wyraźną hierarchię typografii
+- konsekwentną siatkę
+- system stanów komponentów
+- dopracowane empty states
+- świadome użycie ruchu i akcentów wizualnych
+
+== Podstawowe use case'y
+
+=== UC-01 Przeglądanie listy aukcji
+
+1. Użytkownik otwiera stronę główną lub wyszukiwarkę.
+2. System pobiera listę aukcji zgodną z domyślnymi filtrami.
+3. Użytkownik zawęża wyniki poprzez filtry.
+4. System odświeża listę i stan URL.
+5. Użytkownik przechodzi do szczegółów wybranej aukcji.
+
+=== UC-02 Przeglądanie szczegółów aukcji
+
+1. Użytkownik otwiera szczegóły aukcji.
+2. System pobiera dane szczegółowe przez REST.
+3. System inicjuje subskrypcję zdarzeń real-time dla tej aukcji.
+4. Użytkownik widzi bieżący stan aukcji i aktualizacje w czasie rzeczywistym.
+
+=== UC-03 Złożenie oferty
+
+1. Użytkownik zalogowany otwiera szczegóły aktywnej aukcji.
+2. Wprowadza kwotę oferty.
+3. Frontend wykonuje walidację lokalną.
+4. System wysyła komunikat przez WebSocket.
+5. Backend zwraca akceptację lub odrzucenie.
+6. UI aktualizuje stan aukcji i prezentuje wynik.
+
+=== UC-04 Utworzenie aukcji
+
+1. Użytkownik loguje się.
+2. Przechodzi do formularza utworzenia aukcji.
+3. Wypełnia wymagane pola.
+4. Frontend waliduje formularz i przygotowuje komendę.
+5. Backend przyjmuje żądanie lub odrzuca je z jawnym powodem.
+6. Po sukcesie użytkownik zostaje przekierowany do szczegółów aukcji lub dashboardu.
+
+=== UC-05 Powrót użytkownika do aktywnej aukcji
+
+1. Użytkownik wraca na stronę wcześniej oglądanej aukcji.
+2. Frontend odtwarza stan z URL i pobiera bieżące dane.
+3. System wznawia subskrypcję kanałów real-time.
+4. UI pokazuje aktualny lider, czas i status aukcji.
+
+=== UC-06 Obsługa błędu biznesowego
+
+1. Użytkownik próbuje wykonać akcję niedozwoloną biznesowo.
+2. Backend odrzuca operację z jawnym powodem.
+3. Frontend mapuje powód na zrozumiały komunikat.
+4. UI zachowuje spójny stan i wskazuje możliwe dalsze kroki.
+
+== Luki względem obecnego backendu
+
+Aby zbudować pełne SPA, backend powinien zostać rozszerzony co najmniej o:
+
+- endpoint listowania i wyszukiwania aukcji
+- model kategorii i podkategorii
+- dane lokalizacyjne i atrybuty filtrowania
+- osobny read model dla listy aukcji
+- endpoint `me` dla kontekstu użytkownika
+- endpointy "moje aukcje" i "moje licytacje"
+- opisany kontrakt zdarzeń WebSocket do użycia przez frontend
+- spójną reprezentację błędów biznesowych dla HTTP
+- opcjonalnie wsparcie draftów aukcji i uploadu plików
+
+Rekomendacja architektoniczna:
+nie przeciążać istniejącego `AuctionResponse` wszystkimi potrzebami UI.
+Lepiej wprowadzić wyspecjalizowane read modele pod:
+
+- `AuctionListItem`
+- `AuctionDetails`
+- `CurrentUserProfile`
+- `UserAuctionSummary`
+
+== Założenia architektury SPA
+
+=== Styl architektoniczny
+
+Rekomendowany jest frontend typu feature-sliced z lokalną orkiestracją use case'ów.
+
+Komponenty ekranowe powinny:
+
+- delegować pobieranie danych do warstwy facade/store/use case
+- korzystać z modeli widoku, nie z surowych DTO
+- pozostawać możliwie cienkie
+
+=== Proponowany podział modułów
+
+[source,text]
+----
+src/app/
+  app/
+  core/
+  shared/
+  features/
+    auction-search/
+    auction-details/
+    auction-create/
+    auth/
+    user-dashboard/
+  data-access/
+    http/
+    realtime/
+    mappers/
+    contracts/
+----
+
+=== Zasady modelowania
+
+Należy rozdzielić:
+
+- `Api*` dla kontraktów transportowych
+- `*Dto` tylko jeśli są generowane lub pochodzą z zewnętrznego kontraktu
+- `*Command` dla danych wysyłanych do use case'ów UI
+- `*Vm` dla modeli widoku
+- `*State` dla lokalnego stanu ekranów
+
+Przykład:
+
+- `ApiAuctionDetails`
+- `AuctionDetailsVm`
+- `PlaceBidCommand`
+- `AuctionDetailsState`
+
+=== Zarządzanie stanem
+
+Stan powinien być lokalizowany jak najbliżej feature'a.
+Nie należy budować globalnego store obejmującego wszystko, jeśli nie wynika to z realnych potrzeb.
+
+Preferowane podejście:
+
+- lokalne store'y/facade per feature
+- wydzielony `SessionFacade`
+- wydzielony adapter `RealtimeAuctionGateway`
+
+=== Routing i kompozycja
+
+Routing powinien wspierać:
+
+- publiczne ścieżki eksploracji
+- strefę użytkownika
+- guardy oparte na stanie sesji
+- resolver lub prefetch tylko tam, gdzie realnie poprawia UX
+
+=== Design system
+
+Należy przygotować bazę komponentów UI:
+
+- przyciski
+- pola formularzy
+- selecty i chipy filtrów
+- karty aukcji
+- sekcje empty/loading/error
+- layout nagłówka, hero, siatki wyników i paneli szczegółów
+
+== Plan prac
+
+=== Etap 0 - Doprecyzowanie produktu i kontraktów
+
+Cel:
+ustalenie pełnego zakresu funkcjonalnego i API pod SPA.
+
+Zakres:
+
+- doprecyzowanie user journey
+- model nawigacji i mapy ekranów
+- kontrakt wyszukiwania aukcji
+- kontrakt profilu użytkownika
+- kontrakt read modeli pod frontend
+- kontrakt kanałów WebSocket
+
+Rezultat:
+
+- zatwierdzona specyfikacja API/WS
+- aktualizacja OpenAPI
+- lista decyzji architektonicznych
+
+=== Etap 1 - Fundament frontendowy
+
+Cel:
+uruchomienie Angular SPA z architekturą docelową.
+
+Zakres:
+
+- inicjalizacja aplikacji Angular
+- routing, shell i layout aplikacji
+- konfiguracja stylów globalnych i tokenów design systemu
+- konfiguracja testów, lintingu i formatowania
+- warstwa `core`, `shared`, `data-access`
+- integracja z logowaniem i kontekstem sesji
+
+Rezultat:
+
+- uruchamialny szkielet SPA
+- podstawowy layout i nawigacja
+- gotowe konwencje katalogów, modeli i nazewnictwa
+
+=== Etap 2 - Publiczna eksploracja i wyszukiwarka
+
+Cel:
+wdrożenie ekranu inspirowanego makietą i pełnego search experience.
+
+Zakres:
+
+- hero i wyszukiwarka główna
+- ekran wyników
+- filtrowanie, sortowanie, paginacja
+- stan w URL
+- karta aukcji i empty states
+
+Zależności backendowe:
+
+- endpoint wyszukiwania/listowania
+- słowniki kategorii
+
+=== Etap 3 - Szczegóły aukcji i real-time bidding
+
+Cel:
+wdrożenie krytycznego scenariusza aukcyjnego.
+
+Zakres:
+
+- ekran szczegółów aukcji
+- oś czasu lub panel aktywności
+- licznik czasu
+- połączenie WebSocket
+- składanie oferty
+- obsługa zdarzeń i reconnect
+
+Zależności backendowe:
+
+- stabilny kontrakt REST szczegółów
+- jawna specyfikacja komunikatów WS
+
+=== Etap 4 - Tworzenie aukcji
+
+Cel:
+udostępnienie pełnego flow publikacji aukcji.
+
+Zakres:
+
+- formularz tworzenia aukcji
+- walidacja
+- podsumowanie
+- stany błędów i powodzenia
+
+Zależności backendowe:
+
+- rozszerzony kontrakt tworzenia aukcji
+- opcjonalnie drafty i upload
+
+=== Etap 5 - Strefa użytkownika
+
+Cel:
+domknięcie doświadczenia użytkownika zalogowanego.
+
+Zakres:
+
+- profil
+- moje aukcje
+- moje licytacje
+- status weryfikacji
+- historia aktywności
+
+=== Etap 6 - Domknięcie jakości referencyjnej
+
+Cel:
+przygotowanie rozwiązania jako wzorcowej aplikacji referencyjnej.
+
+Zakres:
+
+- testy E2E
+- dokumentacja architektoniczna frontendu
+- ADR-y dla kluczowych decyzji
+- przegląd dostępności
+- przegląd wydajności
+- ujednolicenie observability
+
+== Plan zmian backendu
+
+Rekomendowana kolejność zmian backendowych:
+
+1. Rozszerzenie OpenAPI o wyszukiwanie, read modele i profil użytkownika.
+2. Dodanie reprezentacji błędów biznesowych dla endpointów HTTP.
+3. Uporządkowanie i opisanie kontraktu WebSocket dla frontendu.
+4. Dodanie endpointów dashboardowych użytkownika.
+5. Ewentualne wsparcie draftów, uploadu i richer metadata aukcji.
+
+Ważna zasada:
+backend powinien nadal expose'ować use case'y i read modele przez adaptery, bez przenoszenia logiki prezentacyjnej do rdzenia domenowego.
+
+== Kryteria gotowości do rozpoczęcia implementacji
+
+Prace nad SPA można rozpocząć bezpiecznie po spełnieniu poniższych warunków:
+
+- zatwierdzony zakres MVP i zakres docelowy
+- zaakceptowany model ekranów
+- zaakceptowane kontrakty HTTP i WebSocket dla pierwszych etapów
+- ustalone zasady katalogów, modeli i nazewnictwa w Angularze
+- wskazany sposób integracji z uwierzytelnianiem (OAuth2/OIDC lub Local Auth) w środowisku developerskim
+
+== MVP rekomendowane
+
+Rekomendowane MVP dla pierwszego przyrostu SPA:
+
+- logowanie
+- strona wyszukiwania i lista wyników
+- szczegóły aukcji
+- licytacja w czasie rzeczywistym
+- utworzenie aukcji
+
+Poza MVP:
+
+- dashboard użytkownika
+- drafty
+- upload plików
+- zaawansowane analityki i obserwacja aktywności
+
+== Otwarte decyzje
+
+Do szybkiego potwierdzenia przed startem implementacji pozostają:
+
+- czy Angular ma być osadzony jako osobny projekt w repo monolitycznym, czy jako osobny katalog aplikacji frontendowej
+- czy frontend ma korzystać z backendu bezpośrednio, czy przez warstwę BFF
+- jaki jest docelowy model sesji dla lokalnego developmentu
+- czy kategorie, lokalizacja i media aukcji należą do MVP
+- czy historia ofert ma być pełna, czy ograniczona do ostatnich zdarzeń
+
+== Rekomendacja końcowa
+
+Najbezpieczniejsze podejście startowe to:
+
+- najpierw dopiąć kontrakty i modele read-side pod frontend
+- następnie uruchomić fundament Angular z twardymi zasadami separacji modeli
+- potem iteracyjnie dowozić feature'y od eksploracji do real-time bidding
+
+Dzięki temu `Hexabid` pozostanie spójną aplikacją referencyjną zarówno po stronie backendu, jak i frontendu.

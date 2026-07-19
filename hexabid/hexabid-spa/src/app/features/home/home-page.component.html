@@ -1,0 +1,100 @@
+<section class="hero">
+  <div class="hero__copy">
+    <span class="kicker">Hexagonal architecture on screen</span>
+    <h1>Rynek aukcyjny zaprojektowany jak produkt, a nie tylko demo API.</h1>
+    <p>
+      Pierwszy przyrost SPA pokazuje już publiczny marketplace, szczegóły aukcji, dashboard użytkownika i kanał
+      real-time. Struktura aplikacji jest przygotowana pod dalsze rozbudowywanie bez mieszania modeli i warstw.
+    </p>
+
+    <div class="hero__stats">
+      <div class="surface">
+        <strong>{{ facade.page().items.length }}</strong>
+        <span>aukcji w bieżącym widoku</span>
+      </div>
+      <div class="surface">
+        <strong>{{ session.isAuthenticated() ? 'online' : 'guest' }}</strong>
+        <span>stan sesji użytkownika</span>
+      </div>
+      <div class="surface">
+        <strong>STOMP</strong>
+        <span>gotowe pod licytację live</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero__panel surface">
+    <div class="panel-header">
+      <span>Eksploracja aukcji</span>
+      <a routerLink="/sell">Przejdź do wystawiania</a>
+    </div>
+
+    <form [formGroup]="filtersForm" (ngSubmit)="applyFilters()" class="search-grid">
+      <label class="search-grid__wide">
+        <span>Szukaj frazy</span>
+        <input type="text" formControlName="query" placeholder="np. komiks, figurka, dzieło sztuki" />
+      </label>
+
+      <label>
+        <span>Status</span>
+        <select formControlName="status">
+          <option [ngValue]="''">Wszystkie</option>
+          <option [ngValue]="AuctionStatus.OPEN">Aktywne</option>
+          <option [ngValue]="AuctionStatus.CLOSED">Zamknięte</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Sortowanie</span>
+        <select formControlName="sort">
+          <option [ngValue]="AuctionSort.ENDING_SOON">Kończące się najszybciej</option>
+          <option [ngValue]="AuctionSort.ENDING_LATEST">Kończące się najpóźniej</option>
+        </select>
+      </label>
+
+      <div class="search-grid__actions">
+        <button type="submit">Szukaj</button>
+        <button type="button" class="button-secondary" (click)="clearFilters()">Wyczyść</button>
+      </div>
+    </form>
+
+    @if (facade.error()) {
+      <div class="inline-alert">{{ facade.error() }}</div>
+    }
+  </div>
+</section>
+
+<section class="results surface">
+  <div class="results__header">
+    <div>
+      <span class="kicker">Wyszukiwanie</span>
+      <h2>Widok rynku</h2>
+    </div>
+    <p>
+      Kryteria są utrzymywane w URL, a feature jest odseparowany od kontraktów API przez własny facade i mappery.
+    </p>
+  </div>
+
+  @if (facade.loading()) {
+    <div class="results__loading">Pobieranie aukcji...</div>
+  } @else if (facade.page().items.length) {
+    <div class="cards">
+      @for (auction of facade.page().items; track auction.auctionId) {
+        <app-auction-card [auction]="auction" />
+      }
+    </div>
+
+    @if (facade.page().nextCursor) {
+      <div class="results__footer">
+        <button type="button" class="button-secondary" (click)="facade.loadMore()">Załaduj kolejne wyniki</button>
+      </div>
+    }
+  } @else {
+    <app-empty-state
+      title="Brak danych"
+      description="W aktualnej konfiguracji backendu lista może wymagać logowania OAuth2 lub po prostu nie zawierać jeszcze aukcji."
+      actionLabel="Przejdź do dashboardu"
+      actionHref="/dashboard"
+    />
+  }
+</section>

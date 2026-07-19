@@ -1,0 +1,62 @@
+package com.github.mikoreg.timelineaudio.subtitles;
+
+import com.github.mikoreg.timelineaudio.domain.SubtitleSegment;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.lang.System.Logger.Level;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+public class TtmlSubtitleParser implements SubtitleParser {
+    public static final String TTML_NAMESPACE = "http://www.w3.org/ns/ttml";
+
+    private static final System.Logger LOG = System.getLogger(TtmlSubtitleParser.class.getName());
+
+    @Override
+    public List<SubtitleSegment> parse(Path inputPath) {
+        LOG.log(Level.INFO, "Parsing TTML file: " + inputPath);
+        List<SubtitleSegment> segments = new ArrayList<>();
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            Document document = factory.newDocumentBuilder().parse(inputPath.toFile());
+            NodeList nodes = document.getElementsByTagNameNS(TTML_NAMESPACE, "p");
+            if (nodes.getLength() == 0) {
+                LOG.log(Level.WARNING, "No TTML namespace nodes found, falling back to <p> lookup without namespace.");
+                nodes = document.getElementsByTagName("p");
+            }
+
+            for (int i = 0; i < nodes.getLength(); i++) {
+                Element element = (Element) nodes.item(i);
+                String text = element.getTextContent();
+                if (text == null || text.isBlank()) {
+                    continue;
+                }
+                text = text.trim();
+                String beginAttr = element.getAttribute("begin");
+                String endAttr = element.getAttribute("end");
+                if (beginAttr == null || beginAttr.isBlank()) {
+                    LOG.log(Level.DEBUG, "Skipping segment without begin time at index " + i);
+                    continue;
+                }
+                long beginMs = TtmlTimecodeParser.parseToMs(beginAttr.trim());
+                Long endMs = null;
+                if (endAttr != null && !endAttr.isBlank()) {
+                    endMs = TtmlTimecodeParser.parseToMs(endAttr.trim());
+                }
+                String id = "seg-" + (segments.size() + 1);
+                segments.add(new SubtitleSegment(id, text, beginMs, endMs));
+            }
+
+            LOG.log(Level.INFO, "Parsed segments: " + segments.size());
+            return segments;
+        } catch (Exception e) {
+            LOG.log(Level.ERROR, "Failed to parse TTML file", e);
+            throw new IllegalStateException("TTML parsing failed", e);
+        }
+    }
+}

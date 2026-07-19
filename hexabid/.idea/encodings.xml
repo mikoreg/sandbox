@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/auctions-adapter-in-auth-oauth/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/auctions-adapter-in-job/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/auctions-adapter-in-rest/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/auctions-adapter-in-ws/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/auctions-adapter-out-db/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/auctions-adapter-out-kafka/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/auctions-adapter-out-kyc/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/auctions-api-contract/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/auctions-architecture-tests/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/auctions-auth-core/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/auctions-bootstrap/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/auctions-core/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+  </component>
+</project>

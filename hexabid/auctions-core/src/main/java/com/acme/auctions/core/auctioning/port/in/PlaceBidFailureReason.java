@@ -1,0 +1,12 @@
+package com.acme.auctions.core.auctioning.port.in;
+
+public enum PlaceBidFailureReason {
+    AUCTION_NOT_FOUND,
+    BIDDER_NOT_VERIFIED,
+    SELLER_CANNOT_BID_ON_OWN_AUCTION,
+    BID_AMOUNT_TOO_LOW,
+    AUCTION_ALREADY_CLOSED,
+    AUCTION_ALREADY_EXPIRED,
+    CURRENCY_MISMATCH,
+    CONCURRENT_MODIFICATION
+}
