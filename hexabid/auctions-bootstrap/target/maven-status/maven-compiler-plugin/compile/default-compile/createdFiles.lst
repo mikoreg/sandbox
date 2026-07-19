@@ -1,5 +1,0 @@
-com/acme/auctions/bootstrap/AuctioningConfiguration.class
-com/acme/auctions/bootstrap/DevelopmentDataConfiguration.class
-com/acme/auctions/bootstrap/HexabidApplication.class
-com/acme/auctions/bootstrap/DevelopmentSecurityConfiguration.class
-com/acme/auctions/bootstrap/DevelopmentDataConfiguration$BidSeed.class

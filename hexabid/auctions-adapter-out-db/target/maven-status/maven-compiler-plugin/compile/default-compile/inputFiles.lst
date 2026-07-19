@@ -1,7 +1,0 @@
-/work/projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-db/src/main/java/com/acme/auctions/adapter/out/db/AuctionJpaEntity.java
-/work/projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-db/src/main/java/com/acme/auctions/adapter/out/db/AuctionJpaMapper.java
-/work/projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-db/src/main/java/com/acme/auctions/adapter/out/db/BidJpaEntity.java
-/work/projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-db/src/main/java/com/acme/auctions/adapter/out/db/JdbcAuctionReadModelAdapter.java
-/work/projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-db/src/main/java/com/acme/auctions/adapter/out/db/JpaAuctionRepositoryAdapter.java
-/work/projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-db/src/main/java/com/acme/auctions/adapter/out/db/SpringDataAuctionJpaRepository.java
-/work/projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-out-db/src/main/java/com/acme/auctions/adapter/out/db/package-info.java

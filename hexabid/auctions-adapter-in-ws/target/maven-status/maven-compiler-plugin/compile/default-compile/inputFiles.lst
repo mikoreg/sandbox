@@ -1,7 +1,0 @@
-/work/projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-in-ws/src/main/java/com/acme/auctions/adapter/in/ws/AuctionBiddingWebSocketController.java
-/work/projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-in-ws/src/main/java/com/acme/auctions/adapter/in/ws/AuctionEventWebSocketMessage.java
-/work/projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-in-ws/src/main/java/com/acme/auctions/adapter/in/ws/AuctionWebSocketConfig.java
-/work/projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-in-ws/src/main/java/com/acme/auctions/adapter/in/ws/AuctionWebSocketEventPublisher.java
-/work/projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-in-ws/src/main/java/com/acme/auctions/adapter/in/ws/BidAcceptedWebSocketMessage.java
-/work/projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-in-ws/src/main/java/com/acme/auctions/adapter/in/ws/BidRejectedWebSocketMessage.java
-/work/projects/github.com/mikoreg/sandbox/hexabid/auctions-adapter-in-ws/src/main/java/com/acme/auctions/adapter/in/ws/PlaceBidWebSocketMessage.java
