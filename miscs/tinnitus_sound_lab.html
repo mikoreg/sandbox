@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tinnitus Sound Lab</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1d222b; --line:#2b3340;
+    --text:#eef2f7; --muted:#a8b2c1; --accent:#7cc4ff; --accent2:#a4e0b1;
+    --danger:#ff8b8b; --warn:#ffd27a; --shadow:0 10px 30px rgba(0,0,0,.28);
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:linear-gradient(180deg,#0d1014,#11151b 45%,#0d1014);
+    color:var(--text); line-height:1.45;
+  }
+  .app{max-width:1180px;margin:0 auto;padding:24px}
+  header{display:flex;gap:18px;align-items:flex-start;justify-content:space-between;margin-bottom:18px}
+  h1{font-size:clamp(26px,4vw,40px);margin:0 0 6px}
+  .subtitle{color:var(--muted);max-width:780px}
+  .badge{padding:8px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:13px}
+  .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr} header{flex-direction:column}}
+  .card{
+    background:rgba(23,26,33,.95); border:1px solid var(--line); border-radius:18px;
+    box-shadow:var(--shadow); padding:18px;
+  }
+  .card h2{margin:0 0 12px;font-size:18px}
+  .step{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+  .stepnum{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#202631;border:1px solid var(--line);font-weight:700}
+  .muted{color:var(--muted)}
+  .small{font-size:13px}
+  .row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin:12px 0}
+  .row.compact{grid-template-columns:150px 1fr auto}
+  label{font-weight:600}
+  input[type="range"]{width:100%}
+  select,input[type="number"],input[type="text"]{
+    width:100%;background:#10141a;color:var(--text);border:1px solid var(--line);
+    border-radius:10px;padding:10px 12px;
+  }
+  button{
+    border:1px solid var(--line); background:#202631; color:var(--text); border-radius:11px;
+    padding:10px 14px; cursor:pointer; font-weight:700;
+  }
+  button:hover{filter:brightness(1.08)}
+  button.primary{background:#12324b;border-color:#255f88;color:#dff2ff}
+  button.safe{background:#173522;border-color:#2a6b43;color:#e6ffed}
+  button.danger{background:#3b1c1c;border-color:#6a3030;color:#ffe7e7}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  .btnrow{display:flex;flex-wrap:wrap;gap:8px}
+  .value{min-width:86px;text-align:right;font-variant-numeric:tabular-nums;color:#d9e6f3}
+  .notice{
+    border-left:4px solid var(--warn);background:#2a2418;padding:12px 14px;border-radius:10px;margin:12px 0;color:#ffe6a9
+  }
+  .notice.danger{border-left-color:var(--danger);background:#2a1919;color:#ffd9d9}
+  .notice.good{border-left-color:var(--accent2);background:#17271d;color:#dff8e6}
+  .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 9px;font-size:12px;color:var(--muted)}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:#667}
+  .status-dot.on{background:#75d58f;box-shadow:0 0 0 4px rgba(117,213,143,.12)}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .tabs button.active{background:#17314b;border-color:#2d6b9e}
+  .panel{display:none}.panel.active{display:block}
+  canvas{width:100%;height:220px;background:#0b0e12;border:1px solid var(--line);border-radius:12px}
+  .meter{height:10px;background:#0e1217;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+  .meter > div{height:100%;width:0%;background:linear-gradient(90deg,#5ccf85,#ffd36b,#ff7777)}
+  .kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+  .kpi div{background:#12171e;border:1px solid var(--line);border-radius:12px;padding:10px}
+  .kpi b{display:block;font-size:18px}
+  .preset-list{display:grid;gap:8px;margin-top:10px}
+  .preset{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:10px;padding:10px;background:#12171e}
+  footer{color:var(--muted);font-size:12px;margin-top:18px;padding:10px 2px 28px}
+  .switch{display:flex;align-items:center;gap:8px}
+  .switch input{width:18px;height:18px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>Tinnitus Sound Lab</h1>
+      <div class="subtitle">
+        Lokalny generator dźwięków do eksperymentalnego łagodzenia szumów usznych. Pomaga dopasować wysokość pisku,
+        porównać typy szumu i znaleźć ustawienie, które zmniejsza jego uciążliwość.
+      </div>
+    </div>
+    <div class="badge">100% lokalnie • Web Audio API • brak wysyłania danych</div>
+  </header>
+
+  <div class="notice danger">
+    <b>Ważne:</b> to narzędzie nie diagnozuje i nie leczy przyczyny szumów usznych. Nie używaj wysokiej głośności.
+    Nagły jednostronny szum z pogorszeniem słuchu, silnymi zawrotami głowy lub szum pulsujący w rytm serca wymaga pilnej konsultacji medycznej.
+  </div>
+
+  <div class="grid">
+    <main class="card">
+      <div class="tabs">
+        <button class="active" data-tab="guide">Asystent doboru</button>
+        <button data-tab="manual">Tryb ręczny</button>
+        <button data-tab="notchlab">Notch Lab</button>
+        <button data-tab="presets">Presety</button>
+      </div>
+
+      <section id="guide" class="panel active">
+        <div class="step"><div class="stepnum">1</div><div><b>Bezpieczny start</b><div class="small muted">Ustaw systemową głośność nisko. Najlepiej zacznij od głośnika, nie od słuchawek.</div></div></div>
+        <div class="btnrow">
+          <button id="unlock" class="primary">Uruchom audio</button>
+          <button id="testAudio">🔊 Test audio</button>
+          <span class="pill"><span id="dot" class="status-dot"></span><span id="audioState">audio wyłączone</span></span>
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--line);margin:18px 0">
+
+        <div class="step"><div class="stepnum">2</div><div><b>Dopasuj wysokość pisku</b><div class="small muted">Krótko odsłuchuj ton i ustaw go możliwie blisko swojego pisku.</div></div></div>
+        <div class="row compact">
+          <label for="pitch">Częstotliwość</label>
+          <input id="pitch" type="range" min="125" max="12000" step="1" value="7337">
+          <div class="value"><span id="pitchVal">7337</span> Hz</div>
+        </div>
+        <div class="row compact">
+          <label for="toneLevel">Głośność tonu</label>
+          <input id="toneLevel" type="range" min="0" max="18" step="1" value="8">
+          <div class="value"><span id="toneLevelVal">8</span>%</div>
+        </div>
+        <div class="btnrow">
+          <button id="toneHold">Przytrzymaj, aby odsłuchać</button>
+          <button id="pitchDown">− pół tonu</button>
+          <button id="pitchUp">+ pół tonu</button>
+          <button id="savePitch" class="safe">Zapamiętaj: to mój pisk</button>
+        </div>
+        <div class="small muted" style="margin-top:8px">Nie próbuj „przekrzyczeć” szumu usznego. Ton testowy powinien być tylko wystarczająco słyszalny do porównania.</div>
+        <div class="notice" style="margin-top:12px">
+          <b>Nie słyszysz nic?</b> Kliknij „Test audio”. Jeśli nadal jest cisza, sprawdź głośność systemową,
+          czy karta przeglądarki nie jest wyciszona oraz czy dźwięk trafia do właściwego urządzenia wyjściowego.
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--line);margin:18px 0">
+
+        <div class="step"><div class="stepnum">3</div><div><b>Porównaj dźwięki maskujące</b><div class="small muted">Wybierz dźwięk, przy którym pisk najmniej przyciąga uwagę — niekoniecznie taki, który go całkowicie zagłusza.</div></div></div>
+
+        <div class="row compact">
+          <label for="noiseType">Rodzaj</label>
+          <select id="noiseType">
+            <option value="pink">Szum różowy — miękki, zrównoważony</option>
+            <option value="white">Szum biały — jaśniejszy, więcej wysokich tonów</option>
+            <option value="brown">Szum brązowy — głęboki, mniej wysokich tonów</option>
+            <option value="narrow">Wąskopasmowy wokół pisku</option>
+            <option value="notched">Szum z wycięciem wokół pisku (eksperymentalny)</option>
+          </select>
+          <div></div>
+        </div>
+
+        <div class="row compact">
+          <label for="noiseLevel">Poziom</label>
+          <input id="noiseLevel" type="range" min="0" max="35" step="1" value="12">
+          <div class="value"><span id="noiseLevelVal">12</span>%</div>
+        </div>
+
+        <div class="row compact">
+          <label for="bandwidth">Szerokość pasma</label>
+          <input id="bandwidth" type="range" min="0.25" max="2.5" step="0.05" value="1.0">
+          <div class="value"><span id="bandwidthVal">1.00</span> okt.</div>
+        </div>
+
+        <div class="btnrow">
+          <button id="startNoise" class="safe">▶ Start szumu</button>
+          <button id="stopAll" class="danger">■ Stop</button>
+        </div>
+
+        <div class="row">
+          <label for="rating">Jak bardzo pisk przeszkadza teraz?</label>
+          <div class="value"><span id="ratingVal">5</span>/10</div>
+        </div>
+        <input id="rating" type="range" min="0" max="10" value="5" step="1">
+
+        <div class="btnrow" style="margin-top:12px">
+          <button class="compare" data-noise="white">Test biały</button>
+          <button class="compare" data-noise="pink">Test różowy</button>
+          <button class="compare" data-noise="brown">Test brązowy</button>
+          <button class="compare" data-noise="narrow">Test wokół pisku</button>
+        </div>
+
+        <div class="notice good" style="margin-top:14px">
+          <b>Praktyczna zasada:</b> zacznij od poziomu, przy którym pisk nadal jest lekko słyszalny, ale mniej dominujący.
+          Jeśli dźwięk powoduje zmęczenie, ból, uczucie pełności w uchu albo wyraźne nasilenie szumu — przerwij.
+        </div>
+      </section>
+
+      <section id="manual" class="panel">
+        <h2>Tryb ręczny</h2>
+        <div class="row compact">
+          <label for="manualFreq">Środek pasma</label>
+          <input id="manualFreq" type="range" min="125" max="12000" step="1" value="7337">
+          <div class="value"><span id="manualFreqVal">7337</span> Hz</div>
+        </div>
+        <div class="row compact">
+          <label for="manualQ">Q filtra</label>
+          <input id="manualQ" type="range" min="0.2" max="20" step="0.1" value="1.2">
+          <div class="value"><span id="manualQVal">1.2</span></div>
+        </div>
+        <div class="row compact">
+          <label for="manualLevel">Poziom</label>
+          <input id="manualLevel" type="range" min="0" max="35" step="1" value="12">
+          <div class="value"><span id="manualLevelVal">12</span>%</div>
+        </div>
+        <div class="switch">
+          <input id="softPulse" type="checkbox">
+          <label for="softPulse">Delikatna modulacja głośności (wolne „oddychanie” dźwięku)</label>
+        </div>
+        <div class="btnrow" style="margin-top:12px">
+          <button id="manualStart" class="safe">Uruchom</button>
+          <button id="manualStop" class="danger">Stop</button>
+        </div>
+      </section>
+
+
+      <section id="notchlab" class="panel">
+        <h2>Notch Lab — szum z wycięciem wokół pisku</h2>
+        <div class="notice good">
+          Dla Twojego pisku ustawionego na <b><span id="notchPitchLabel">7337</span> Hz</b> aplikacja wycina pasmo
+          symetrycznie w skali logarytmicznej. Dolna i górna granica są liczone z szerokości w oktawach, a następnie
+          przeliczane na właściwe <b>Q</b> filtra notch.
+        </div>
+
+        <div class="row compact">
+          <label for="notchFreq">Częstotliwość pisku</label>
+          <input id="notchFreq" type="range" min="125" max="12000" step="1" value="7337">
+          <div class="value"><span id="notchFreqVal">7337</span> Hz</div>
+        </div>
+
+        <div class="row compact">
+          <label for="notchWidth">Szerokość wycięcia</label>
+          <input id="notchWidth" type="range" min="0.10" max="1.50" step="0.05" value="0.50">
+          <div class="value"><span id="notchWidthVal">0.50</span> okt.</div>
+        </div>
+
+        <div class="kpi">
+          <div><span class="small muted">Dolna granica</span><b><span id="notchLow">—</span></b></div>
+          <div><span class="small muted">Środek</span><b><span id="notchMid">—</span></b></div>
+          <div><span class="small muted">Górna granica</span><b><span id="notchHigh">—</span></b></div>
+        </div>
+        <div class="small muted" style="margin-top:8px">Q filtra: <b id="notchQ">—</b>. Granice odpowiadają szerokości pasma w oktawach wokół częstotliwości środkowej.</div>
+
+        <hr style="border:none;border-top:1px solid var(--line);margin:18px 0">
+
+        <h2>Porównanie A/B</h2>
+        <div class="small muted">A i B używają tego samego rodzaju szumu i tego samego poziomu. Różnica polega wyłącznie na obecności wycięcia.</div>
+
+        <div class="row compact">
+          <label for="abNoise">Szum bazowy</label>
+          <select id="abNoise">
+            <option value="pink" selected>Różowy</option>
+            <option value="white">Biały</option>
+            <option value="brown">Brązowy</option>
+          </select>
+          <div></div>
+        </div>
+
+        <div class="row compact">
+          <label for="abLevel">Poziom</label>
+          <input id="abLevel" type="range" min="0" max="35" step="1" value="12">
+          <div class="value"><span id="abLevelVal">12</span>%</div>
+        </div>
+
+        <div class="btnrow">
+          <button id="playA">A — zwykły szum</button>
+          <button id="playB" class="safe">B — szum z wycięciem</button>
+          <button id="abStop" class="danger">■ Stop</button>
+        </div>
+
+        <div class="notice" style="margin-top:12px">
+          Dobrze ustawiony wariant B nie musi „wyciszyć” pisku natychmiast. Szukamy przede wszystkim wariantu,
+          przy którym pisk jest mniej dominujący lub mniej drażniący przy podobnym poziomie głośności całego szumu.
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--line);margin:18px 0">
+
+        <h2>Test szerokości wycięcia</h2>
+        <div class="small muted">Przetestuj kolejno 0,25 / 0,50 / 0,75 / 1,00 oktawy. Po odsłuchu nadaj ocenę 0–10, gdzie 0 = pisk nie przeszkadza, 10 = bardzo przeszkadza.</div>
+
+        <div class="btnrow" style="margin-top:12px">
+          <button id="startWidthTest" class="primary">Rozpocznij test</button>
+          <button id="nextWidth" disabled>Następny wariant</button>
+          <button id="stopWidthTest" class="danger">Zakończ</button>
+        </div>
+
+        <div id="widthTestBox" class="notice good" style="display:none;margin-top:12px">
+          Testuję: <b><span id="testWidthLabel">—</span> okt.</b>
+          (<span id="testRangeLabel">—</span>)
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <label for="widthRating">Ocena uciążliwości</label>
+          <div class="value"><span id="widthRatingVal">5</span>/10</div>
+        </div>
+        <input id="widthRating" type="range" min="0" max="10" value="5" step="1">
+
+        <div id="widthResults" class="preset-list" style="margin-top:14px"></div>
+      </section>
+
+      <section id="presets" class="panel">
+        <h2>Presety</h2>
+        <div class="row">
+          <input id="presetName" type="text" placeholder="np. Wieczór – różowy 6 kHz">
+          <button id="savePreset" class="safe">Zapisz bieżące ustawienia</button>
+        </div>
+        <div id="presetList" class="preset-list"></div>
+        <div class="small muted" style="margin-top:10px">Presety są zapisywane wyłącznie w pamięci tej przeglądarki (localStorage).</div>
+      </section>
+    </main>
+
+    <aside class="card">
+      <h2>Wizualizacja</h2>
+      <canvas id="scope" width="900" height="300"></canvas>
+      <div class="kpi">
+        <div><span class="small muted">Dopasowany pisk</span><b><span id="kpiFreq">—</span></b></div>
+        <div><span class="small muted">Rodzaj</span><b><span id="kpiNoise">—</span></b></div>
+        <div><span class="small muted">Sesja</span><b><span id="timer">00:00</span></b></div>
+      </div>
+
+      <h2 style="margin-top:18px">Wskaźnik poziomu sygnału</h2>
+      <div class="meter"><div id="meterFill"></div></div>
+      <div class="small muted" style="margin-top:8px">
+        To wskaźnik cyfrowego poziomu w aplikacji, <b>nie pomiar dB SPL w uchu</b>.
+      </div>
+
+      <h2 style="margin-top:18px">Szybkie wskazówki</h2>
+      <ul class="small muted" style="padding-left:18px">
+        <li>Preferuj najniższy skuteczny poziom dźwięku.</li>
+        <li>Do dłuższych sesji lepszy bywa głośnik niż słuchawki.</li>
+        <li>Porównuj ustawienia po kilka minut; zapisuj te, przy których mniej skupiasz się na pisku.</li>
+        <li>„Notched noise” jest tu oznaczony jako eksperymentalny — nie traktuj go jako terapii o gwarantowanej skuteczności.</li>
+      </ul>
+    </aside>
+  </div>
+
+  <footer>
+    Tinnitus Sound Lab • narzędzie edukacyjne. Brak kalibracji absolutnej głośności. Jeśli szum uszny jest nowy, jednostronny,
+    pulsacyjny albo towarzyszy mu niedosłuch, skonsultuj laryngologa/audiologa.
+  </footer>
+</div>
+
+<script>
+(() => {
+  let ctx, master, analyser, source, filter, modOsc, modGain, toneOsc, toneGain;
+  let noiseBuffer = null;
+  let startedAt = null;
+  let matchedPitch = null;
+  let raf = null;
+
+  const $ = id => document.getElementById(id);
+  const clamp = (v,min,max)=>Math.min(max,Math.max(min,v));
+  const pctGain = p => clamp(p,0,100) / 100 * 0.50;
+
+  function fmtTime(sec){
+    const m = Math.floor(sec/60), s = Math.floor(sec%60);
+    return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }
+
+  function ensureAudio(){
+    if(ctx) return;
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain();
+    master.gain.value = 0.9;
+    analyser = ctx.createAnalyser();
+    analyser.fftSize = 2048;
+    analyser.smoothingTimeConstant = 0.82;
+    master.connect(analyser);
+    analyser.connect(ctx.destination);
+
+    $('dot').classList.add('on');
+    $('audioState').textContent = 'audio gotowe';
+    draw();
+  }
+
+  function makeNoiseBuffer(type){
+    ensureAudio();
+    const seconds = 3;
+    const len = ctx.sampleRate * seconds;
+    const b = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = b.getChannelData(0);
+
+    if(type === 'white' || type === 'narrow' || type === 'notched'){
+      for(let i=0;i<len;i++) data[i]=Math.random()*2-1;
+    } else if(type === 'pink'){
+      let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+      for(let i=0;i<len;i++){
+        const white=Math.random()*2-1;
+        b0=0.99886*b0+white*0.0555179;
+        b1=0.99332*b1+white*0.0750759;
+        b2=0.96900*b2+white*0.1538520;
+        b3=0.86650*b3+white*0.3104856;
+        b4=0.55000*b4+white*0.5329522;
+        b5=-0.7616*b5-white*0.0168980;
+        data[i]=(b0+b1+b2+b3+b4+b5+b6+white*0.5362)*0.11;
+        b6=white*0.115926;
+      }
+    } else if(type === 'brown'){
+      let last=0;
+      for(let i=0;i<len;i++){
+        const white=Math.random()*2-1;
+        last=(last+0.02*white)/1.02;
+        data[i]=last*3.5;
+      }
+    }
+    return b;
+  }
+
+  function stopNoise(){
+    if(source){try{source.stop()}catch(e){}; source.disconnect(); source=null;}
+    if(filter){filter.disconnect(); filter=null;}
+    if(modOsc){try{modOsc.stop()}catch(e){}; modOsc.disconnect(); modOsc=null;}
+    if(modGain){modGain.disconnect(); modGain=null;}
+    startedAt=null;
+    $('timer').textContent='00:00';
+  }
+
+  function stopTone(){
+    if(toneOsc){try{toneOsc.stop()}catch(e){}; toneOsc.disconnect(); toneOsc=null;}
+    if(toneGain){toneGain.disconnect(); toneGain=null;}
+  }
+
+  async function startTone(){
+    ensureAudio();
+    if(ctx.state !== 'running') await ctx.resume();
+    stopTone();
+    toneOsc=ctx.createOscillator();
+    toneGain=ctx.createGain();
+    toneOsc.type='sine';
+    toneOsc.frequency.value=+$('pitch').value;
+    toneGain.gain.value=pctGain(+$('toneLevel').value)*0.45;
+    toneOsc.connect(toneGain).connect(master);
+    toneOsc.start();
+  }
+
+  function currentCenterFreq(){
+    return matchedPitch || +$('pitch').value || 7337;
+  }
+
+  function octaveBandwidthToQ(octaves){
+    const r = Math.pow(2, octaves);
+    return Math.sqrt(r) / (r - 1);
+  }
+
+  function octaveBounds(center, octaves){
+    const factor = Math.pow(2, octaves / 2);
+    return {
+      low: center / factor,
+      high: center * factor
+    };
+  }
+
+  async function startNoise(type = $('noiseType').value, level = +$('noiseLevel').value, manual=false, opts={}){
+    ensureAudio();
+    if(ctx.state !== 'running') await ctx.resume();
+    stopNoise();
+
+    const baseType = opts.baseNoise || ((type==='narrow' || type==='notched') ? 'pink' : type);
+    source=ctx.createBufferSource();
+    source.buffer=makeNoiseBuffer(baseType);
+    source.loop=true;
+
+    let node=source;
+    const center = opts.center || (manual ? +$('manualFreq').value : currentCenterFreq());
+
+    if(type==='narrow'){
+      filter=ctx.createBiquadFilter();
+      filter.type='bandpass';
+      filter.frequency.value=center;
+      filter.Q.value = manual ? +$('manualQ').value : Math.max(0.35, 1.2 / +$('bandwidth').value);
+      node.connect(filter); node=filter;
+    } else if(type==='notched'){
+      const octaves = opts.octaves || +$('bandwidth').value;
+      const q = octaveBandwidthToQ(octaves);
+      filter=ctx.createBiquadFilter();
+      filter.type='notch';
+      filter.frequency.value=center;
+      filter.Q.value=q;
+      node.connect(filter); node=filter;
+    }
+
+    const g=ctx.createGain();
+    g.gain.value=pctGain(level);
+    node.connect(g);
+
+    const pulse = manual ? $('softPulse').checked : false;
+    if(pulse){
+      modGain=ctx.createGain();
+      modGain.gain.value=0.75;
+      g.connect(modGain).connect(master);
+      modOsc=ctx.createOscillator();
+      const depth=ctx.createGain();
+      modOsc.frequency.value=0.12;
+      depth.gain.value=0.22;
+      modOsc.connect(depth).connect(modGain.gain);
+      modOsc.start();
+    } else {
+      g.connect(master);
+    }
+
+    source.start();
+    startedAt=performance.now();
+    $('kpiNoise').textContent=type;
+  }
+
+  function stopAll(){
+    stopNoise(); stopTone();
+    $('kpiNoise').textContent='—';
+  }
+
+  $('unlock').onclick=async()=>{
+    ensureAudio();
+    await ctx.resume();
+    $('audioState').textContent = 'audio aktywne';
+  };
+
+  $('testAudio').onclick=async()=>{
+    ensureAudio();
+    if(ctx.state !== 'running') await ctx.resume();
+
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.value = 440;
+
+    const now = ctx.currentTime;
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.035, now + 0.03);
+    g.gain.setValueAtTime(0.035, now + 0.25);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+
+    osc.connect(g).connect(master);
+    osc.start(now);
+    osc.stop(now + 0.48);
+
+    $('audioState').textContent = 'audio aktywne';
+  };
+
+  const pitch=$('pitch');
+  function updatePitchUI(){
+    $('pitchVal').textContent=Math.round(+pitch.value);
+    $('manualFreq').value=pitch.value;
+    $('manualFreqVal').textContent=Math.round(+pitch.value);
+    if(toneOsc) toneOsc.frequency.setTargetAtTime(+pitch.value,ctx.currentTime,.02);
+  }
+  pitch.oninput=updatePitchUI;
+  $('toneLevel').oninput=e=>$('toneLevelVal').textContent=e.target.value;
+
+  $('pitchDown').onclick=()=>{
+    pitch.value=Math.max(125,+pitch.value/Math.pow(2,1/12));
+    updatePitchUI();
+  };
+  $('pitchUp').onclick=()=>{
+    pitch.value=Math.min(12000,+pitch.value*Math.pow(2,1/12));
+    updatePitchUI();
+  };
+
+  $('toneHold').addEventListener('pointerdown', e=>{e.preventDefault();startTone();});
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>$('toneHold').addEventListener(ev,stopTone));
+
+  $('savePitch').onclick=()=>{
+    matchedPitch=Math.round(+pitch.value);
+    $('kpiFreq').textContent=matchedPitch+' Hz';
+    $('manualFreq').value=matchedPitch;
+    $('manualFreqVal').textContent=matchedPitch;
+    if($('notchFreq')){
+      $('notchFreq').value=matchedPitch;
+      updateNotchUI();
+    }
+  };
+
+  $('noiseLevel').oninput=e=>$('noiseLevelVal').textContent=e.target.value;
+  $('bandwidth').oninput=e=>$('bandwidthVal').textContent=(+e.target.value).toFixed(2);
+  $('rating').oninput=e=>$('ratingVal').textContent=e.target.value;
+
+  $('startNoise').onclick=()=>startNoise();
+  $('stopAll').onclick=stopAll;
+
+  document.querySelectorAll('.compare').forEach(btn=>{
+    btn.onclick=()=>{
+      $('noiseType').value=btn.dataset.noise;
+      startNoise(btn.dataset.noise);
+    }
+  });
+
+  $('manualFreq').oninput=e=>$('manualFreqVal').textContent=Math.round(+e.target.value);
+  $('manualQ').oninput=e=>$('manualQVal').textContent=(+e.target.value).toFixed(1);
+  $('manualLevel').oninput=e=>$('manualLevelVal').textContent=e.target.value;
+  $('manualStart').onclick=()=>startNoise('narrow',+$('manualLevel').value,true);
+  $('manualStop').onclick=stopNoise;
+
+  document.querySelectorAll('[data-tab]').forEach(btn=>{
+    btn.onclick=()=>{
+      document.querySelectorAll('[data-tab]').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active'); $(btn.dataset.tab).classList.add('active');
+      renderPresets();
+    }
+  });
+
+  function presetData(){
+    return {
+      pitch: matchedPitch || Math.round(+pitch.value),
+      noiseType:$('noiseType').value,
+      noiseLevel:+$('noiseLevel').value,
+      bandwidth:+$('bandwidth').value,
+      rating:+$('rating').value,
+      ts:Date.now()
+    };
+  }
+  function getPresets(){try{return JSON.parse(localStorage.getItem('tsl-presets')||'[]')}catch(e){return[]}}
+  function setPresets(p){localStorage.setItem('tsl-presets',JSON.stringify(p))}
+  $('savePreset').onclick=()=>{
+    const name=$('presetName').value.trim() || 'Preset '+new Date().toLocaleString();
+    const arr=getPresets(); arr.push({name,...presetData()}); setPresets(arr); $('presetName').value=''; renderPresets();
+  };
+
+  function loadPreset(p){
+    matchedPitch=p.pitch;
+    pitch.value=p.pitch; updatePitchUI(); $('kpiFreq').textContent=p.pitch+' Hz';
+    $('noiseType').value=p.noiseType;
+    $('noiseLevel').value=p.noiseLevel; $('noiseLevelVal').textContent=p.noiseLevel;
+    $('bandwidth').value=p.bandwidth; $('bandwidthVal').textContent=(+p.bandwidth).toFixed(2);
+    $('rating').value=p.rating; $('ratingVal').textContent=p.rating;
+  }
+
+  function renderPresets(){
+    const root=$('presetList'); if(!root) return;
+    const arr=getPresets(); root.innerHTML='';
+    if(!arr.length){root.innerHTML='<div class="muted small">Brak zapisanych presetów.</div>';return;}
+    arr.forEach((p,i)=>{
+      const el=document.createElement('div'); el.className='preset';
+      el.innerHTML=`<div><b>${escapeHtml(p.name)}</b><div class="small muted">${p.noiseType} • ${p.pitch} Hz • ${p.noiseLevel}% • ocena ${p.rating}/10</div></div>
+      <div class="btnrow"><button data-load="${i}">Wczytaj</button><button class="danger" data-del="${i}">Usuń</button></div>`;
+      root.appendChild(el);
+    });
+    root.querySelectorAll('[data-load]').forEach(b=>b.onclick=()=>loadPreset(arr[+b.dataset.load]));
+    root.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{arr.splice(+b.dataset.del,1);setPresets(arr);renderPresets();});
+  }
+  function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+
+  function draw(){
+    if(!analyser){raf=requestAnimationFrame(draw);return;}
+    const canvas=$('scope'), c=canvas.getContext('2d');
+    const w=canvas.width, h=canvas.height;
+    const arr=new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(arr);
+
+    c.clearRect(0,0,w,h);
+    c.fillStyle='#0b0e12'; c.fillRect(0,0,w,h);
+
+    c.strokeStyle='#202733'; c.lineWidth=1;
+    for(let i=1;i<6;i++){const y=h*i/6;c.beginPath();c.moveTo(0,y);c.lineTo(w,y);c.stroke();}
+
+    c.beginPath();
+    for(let x=0;x<w;x++){
+      const idx=Math.floor((x/w)*arr.length*.55);
+      const v=arr[idx]/255;
+      const y=h-v*h*.9;
+      if(x===0)c.moveTo(x,y); else c.lineTo(x,y);
+    }
+    c.strokeStyle='#7cc4ff'; c.lineWidth=2; c.stroke();
+
+    let sum=0; for(const v of arr) sum+=v*v;
+    const rms=Math.sqrt(sum/arr.length)/255;
+    $('meterFill').style.width=(clamp(rms*180,0,100)).toFixed(1)+'%';
+
+    if(startedAt) $('timer').textContent=fmtTime((performance.now()-startedAt)/1000);
+    raf=requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('beforeunload',stopAll);
+
+  // --- Notch Lab ---
+  const widthTestValues = [0.25, 0.50, 0.75, 1.00];
+  let widthTestIndex = -1;
+  let widthTestResults = [];
+
+  function updateNotchUI(){
+    if(!$('notchFreq')) return;
+    const f = +$('notchFreq').value;
+    const oct = +$('notchWidth').value;
+    const bounds = octaveBounds(f, oct);
+    const q = octaveBandwidthToQ(oct);
+
+    $('notchFreqVal').textContent = Math.round(f);
+    $('notchPitchLabel').textContent = Math.round(f);
+    $('notchWidthVal').textContent = oct.toFixed(2);
+    $('notchLow').textContent = Math.round(bounds.low) + ' Hz';
+    $('notchMid').textContent = Math.round(f) + ' Hz';
+    $('notchHigh').textContent = Math.round(bounds.high) + ' Hz';
+    $('notchQ').textContent = q.toFixed(3);
+  }
+
+  $('notchFreq').oninput = updateNotchUI;
+  $('notchWidth').oninput = updateNotchUI;
+  $('abLevel').oninput = e => $('abLevelVal').textContent = e.target.value;
+  $('widthRating').oninput = e => $('widthRatingVal').textContent = e.target.value;
+
+  $('playA').onclick = () => {
+    startNoise($('abNoise').value, +$('abLevel').value, false, {baseNoise:$('abNoise').value});
+    $('kpiNoise').textContent = 'A: ' + $('abNoise').value;
+  };
+
+  $('playB').onclick = () => {
+    const f = +$('notchFreq').value;
+    const oct = +$('notchWidth').value;
+    startNoise('notched', +$('abLevel').value, false, {
+      center:f,
+      octaves:oct,
+      baseNoise:$('abNoise').value
+    });
+    $('kpiNoise').textContent = 'B: notch ' + oct.toFixed(2) + ' okt.';
+  };
+
+  $('abStop').onclick = stopNoise;
+
+  function renderWidthResults(){
+    const root = $('widthResults');
+    if(!root) return;
+    root.innerHTML = '';
+    if(!widthTestResults.length){
+      root.innerHTML = '<div class="small muted">Brak ocen.</div>';
+      return;
+    }
+    const best = [...widthTestResults].sort((a,b)=>a.rating-b.rating)[0];
+    widthTestResults.forEach(r=>{
+      const div = document.createElement('div');
+      div.className='preset';
+      const star = r === best ? ' ★ najlepszy wynik' : '';
+      div.innerHTML = `<div><b>${r.width.toFixed(2)} okt.${star}</b><div class="small muted">${Math.round(r.low)}–${Math.round(r.high)} Hz • Q ${r.q.toFixed(3)}</div></div><div><b>${r.rating}/10</b></div>`;
+      root.appendChild(div);
+    });
+  }
+
+  function playCurrentWidthTest(){
+    const width = widthTestValues[widthTestIndex];
+    const f = +$('notchFreq').value;
+    const bounds = octaveBounds(f, width);
+    const q = octaveBandwidthToQ(width);
+
+    $('widthTestBox').style.display='block';
+    $('testWidthLabel').textContent=width.toFixed(2);
+    $('testRangeLabel').textContent=Math.round(bounds.low)+'–'+Math.round(bounds.high)+' Hz';
+    $('widthRating').value=5;
+    $('widthRatingVal').textContent='5';
+
+    startNoise('notched', +$('abLevel').value, false, {
+      center:f,
+      octaves:width,
+      baseNoise:$('abNoise').value
+    });
+
+    $('nextWidth').disabled=false;
+    $('nextWidth').textContent = widthTestIndex === widthTestValues.length-1 ? 'Zapisz ostatnią ocenę' : 'Zapisz ocenę i następny';
+  }
+
+  $('startWidthTest').onclick = ()=>{
+    widthTestResults=[];
+    widthTestIndex=0;
+    renderWidthResults();
+    playCurrentWidthTest();
+  };
+
+  $('nextWidth').onclick = ()=>{
+    if(widthTestIndex < 0) return;
+    const width = widthTestValues[widthTestIndex];
+    const f = +$('notchFreq').value;
+    const bounds = octaveBounds(f, width);
+    widthTestResults.push({
+      width,
+      rating:+$('widthRating').value,
+      low:bounds.low,
+      high:bounds.high,
+      q:octaveBandwidthToQ(width)
+    });
+    renderWidthResults();
+
+    if(widthTestIndex >= widthTestValues.length-1){
+      stopNoise();
+      $('nextWidth').disabled=true;
+      $('widthTestBox').style.display='none';
+      widthTestIndex=-1;
+      return;
+    }
+    widthTestIndex++;
+    playCurrentWidthTest();
+  };
+
+  $('stopWidthTest').onclick = ()=>{
+    stopNoise();
+    widthTestIndex=-1;
+    $('nextWidth').disabled=true;
+    $('widthTestBox').style.display='none';
+  };
+
+  updateNotchUI();
+  renderWidthResults();
+
+  renderPresets();
+})();
+</script>
+</body>
+</html>
