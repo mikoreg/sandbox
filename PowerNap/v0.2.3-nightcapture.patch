@@ -1,0 +1,2112 @@
+diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/CHANGELOG-v0.2.3-nightcapture.md /mnt/data/powernap_work/PowerNap/CHANGELOG-v0.2.3-nightcapture.md
+--- /mnt/data/powernap_original/PowerNap/CHANGELOG-v0.2.3-nightcapture.md	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/powernap_work/PowerNap/CHANGELOG-v0.2.3-nightcapture.md	2026-09-24 20:55:46.743254143 +0000
+@@ -0,0 +1,18 @@
++# v0.2.3-nightcapture
++
++Purpose: collect a long, real sleep reference session without letting the current false-positive-prone detector terminate acquisition.
++
++Changes:
++
++- Added UI switch `RAW sleep capture`.
++- RAW sleep capture forces sensor CSV recording ON.
++- RAW sleep capture bypasses exact-alarm requirement and schedules no 10-minute alarm.
++- `SLEEP_CONFIRMED` becomes a logged marker only in capture mode; sensors and CSV continue until manual STOP.
++- Added 10 MiB CSV rotation with a stable session id and global sequence counter.
++- Added 5-minute `CAPTURE_HEARTBEAT` events with battery %, display interactive state, and callback ages for ACC/HR/IBI.
++- Monitoring service returns `START_REDELIVER_INTENT` for better recovery from process reclamation.
++- Updated `pull-sessions.sh`: latest session means all rotated segments; default ADB timeout increased to 120 s; added long options and `--session`.
++- Updated `analyze-session.py` to accept multiple rotated CSVs or a directory.
++- Bumped app version to `0.2.3-nightcapture` / versionCode 3.
++
++The sleep classifier itself is intentionally unchanged. The goal of this build is data collection, not detector tuning.
+diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/NIGHT_CAPTURE.md /mnt/data/powernap_work/PowerNap/NIGHT_CAPTURE.md
+--- /mnt/data/powernap_original/PowerNap/NIGHT_CAPTURE.md	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/powernap_work/PowerNap/NIGHT_CAPTURE.md	2026-09-24 20:55:46.741770617 +0000
+@@ -0,0 +1,69 @@
++# PowerNap v0.2.3-nightcapture — overnight RAW capture
++
++This build is intended to collect a real **awake -> sleep -> sleeping** session before we redesign the sleep-onset detector.
++
++## What is different
++
++`RAW sleep capture` is a dedicated laboratory mode:
++
++- CSV RAW logging is forced ON.
++- The existing detector still runs and writes `SNAP` rows and a `DETECTOR_SLEEP_MARKER` event.
++- A detector `SLEEP_CONFIRMED` result **does not stop sensors**.
++- No 10-minute power-nap alarm is scheduled in this mode.
++- Capture continues until the user presses **STOP / CANCEL**.
++- RAW CSV is rotated at 10 MiB into one logical session:
++  - `YYYYMMDD-HHMMSS-000.csv`
++  - `YYYYMMDD-HHMMSS-001.csv`
++  - ...
++- Every 5 minutes an event `CAPTURE_HEARTBEAT` records battery percentage, screen interactive state, and age of the last ACC/HR/IBI callback.
++- The monitoring service uses `START_REDELIVER_INTENT`, so Android can restart it with the same start intent if the service process is reclaimed.
++
++## Tonight's recommended setup
++
++1. Install/build the **samsungDebug** flavor.
++2. On the watch open **Power Nap Lab**.
++3. Select **Samsung Health Sensor SDK** as `READ ENGINE` so the whole recording uses one known sensor path. Avoid `Auto` for this reference recording unless Samsung SDK cannot start.
++4. Enable **RAW sleep capture**. `Record sensor data` is automatically enabled and locked ON.
++5. Make sure sensor/background permissions are granted.
++6. Exact-alarm permission is not required for RAW sleep capture because this mode intentionally schedules no nap alarm.
++7. Wear the watch normally and reasonably snugly. Start with enough battery for the intended capture and avoid enabling battery-saver mode during the experiment if possible.
++8. Press **START** shortly before trying to sleep. From then on, leave the app alone.
++9. If the UI later says `SLEEP_CONFIRMED`, that is only the old detector's marker. **Recording continues.**
++10. After waking, open the app and press **STOP / CANCEL** before pulling files.
++
++## Pull the complete newest session
++
++If one watch is connected:
++
++```bash
++./scripts/pull-sessions.sh \
++  --package com.example.powernapwatch \
++  --latest \
++  --output powernap-night \
++  --timeout 180
++```
++
++If ADB sees more than one device, add the watch serial:
++
++```bash
++./scripts/pull-sessions.sh \
++  --package com.example.powernapwatch \
++  --latest \
++  --output powernap-night \
++  --serial 'YOUR_WATCH_SERIAL' \
++  --timeout 180
++```
++
++`--latest` now detects rotated files and downloads **all segments belonging to the newest session**.
++
++## Quick integrity check
++
++```bash
++python3 scripts/analyze-session.py powernap-night
++```
++
++For the final analysis, provide every `YYYYMMDD-HHMMSS-NNN.csv` file from that session. Do not merge or edit them manually; the global `seq` column preserves ordering across segments.
++
++## Expected size
++
++Previous captures were approximately 7 MiB/hour at the current Samsung RAW rates. A full night may therefore produce tens of MiB. Rotation at 10 MiB keeps each individual file manageable while retaining all samples.
+diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/README.md /mnt/data/powernap_work/PowerNap/README.md
+--- /mnt/data/powernap_original/PowerNap/README.md	2026-09-24 18:52:06.000000000 +0000
++++ /mnt/data/powernap_work/PowerNap/README.md	2026-09-24 20:55:46.743254143 +0000
+@@ -236,3 +236,7 @@
+ * `pull-sessions.sh` now uses a finite ADB timeout and explicit watch selection.
+ * Added `adb-watch-diagnostics.sh`.
+ * Samsung `SDK_POLICY_ERROR` message now includes the exact Health Sensor Service developer-mode path.
++
++## v0.2.3-nightcapture
++
++For collecting a real overnight RAW reference recording, use the dedicated **RAW sleep capture** mode. It does not stop at the current detector's `SLEEP_CONFIRMED` result and does not schedule the 10-minute alarm; recording continues until manual STOP. See `NIGHT_CAPTURE.md` for the exact procedure and updated pull command.
+diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/app/build.gradle /mnt/data/powernap_work/PowerNap/app/build.gradle
+--- /mnt/data/powernap_original/PowerNap/app/build.gradle	2026-09-24 17:28:12.000000000 +0000
++++ /mnt/data/powernap_work/PowerNap/app/build.gradle	2026-09-24 20:53:07.002808693 +0000
+@@ -10,8 +10,8 @@
+         applicationId 'com.example.powernapwatch'
+         minSdk 30
+         targetSdk 36
+-        versionCode 2
+-        versionName '0.2.0'
++        versionCode 3
++        versionName '0.2.3-nightcapture'
+     }
+ 
+     flavorDimensions += 'sensors'
+diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/service/NapMonitoringService.java /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/service/NapMonitoringService.java
+--- /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/service/NapMonitoringService.java	2026-09-24 18:50:58.000000000 +0000
++++ /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/service/NapMonitoringService.java	2026-09-24 20:54:01.241476078 +0000
+@@ -6,10 +6,13 @@
+ import android.app.Service;
+ import android.content.Intent;
+ import android.content.pm.ServiceInfo;
++import android.os.BatteryManager;
+ import android.os.Build;
+ import android.os.Handler;
+ import android.os.IBinder;
+ import android.os.Looper;
++import android.os.PowerManager;
++import android.os.SystemClock;
+ import android.util.Log;
+ 
+ import com.example.powernapwatch.R;
+@@ -31,11 +34,13 @@
+     public static final String ACTION_STOP = "com.example.powernapwatch.STOP";
+     public static final String EXTRA_ENGINE = "sensor_engine";
+     public static final String EXTRA_LOGGING = "record_sensor_data";
++    public static final String EXTRA_RAW_SLEEP_CAPTURE = "raw_sleep_capture";
+ 
+     private static final String TAG = "PowerNap";
+     private static final String CHANNEL = "power_nap_monitor";
+     private static final int NOTIFICATION_ID = 1101;
+     private static final long NAP_DURATION_MS = 10 * 60_000L;
++    private static final long CAPTURE_HEARTBEAT_MS = 5 * 60_000L;
+ 
+     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+     private SleepSignalSource source;
+@@ -43,6 +48,19 @@
+     private CsvSessionLogger logger;
+     private SessionStore store;
+     private boolean active;
++    private boolean rawSleepCapture;
++    private long captureStartElapsed;
++    private long lastAccElapsed;
++    private long lastHrElapsed;
++    private long lastIbiElapsed;
++
++    private final Runnable captureHeartbeat = new Runnable() {
++        @Override public void run() {
++            if (!active || !rawSleepCapture) return;
++            writeCaptureHeartbeat();
++            mainHandler.postDelayed(this, CAPTURE_HEARTBEAT_MS);
++        }
++    };
+ 
+     @Override
+     public void onCreate() {
+@@ -59,41 +77,54 @@
+             return START_NOT_STICKY;
+         }
+         if (!active) startMonitoring(intent);
+-        return START_NOT_STICKY;
++        return START_REDELIVER_INTENT;
+     }
+ 
+     private void startMonitoring(Intent intent) {
+-        Notification notification = monitorNotification("Collecting baseline...");
++        UserPreferences preferences = new UserPreferences(this);
++        rawSleepCapture = intent != null && intent.hasExtra(EXTRA_RAW_SLEEP_CAPTURE)
++                ? intent.getBooleanExtra(EXTRA_RAW_SLEEP_CAPTURE, false)
++                : preferences.rawSleepCaptureEnabled();
++
++        Notification notification = monitorNotification(rawSleepCapture
++                ? "RAW sleep capture starting..."
++                : "Collecting baseline...");
+         if (Build.VERSION.SDK_INT >= 29) {
+             startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH);
+         } else {
+             startForeground(NOTIFICATION_ID, notification);
+         }
+ 
+-        if (!NapAlarmScheduler.canScheduleExact(this)) {
++        // A long RAW sleep capture deliberately has no power-nap alarm.
++        if (!rawSleepCapture && !NapAlarmScheduler.canScheduleExact(this)) {
+             store.state(NapState.ERROR, "Exact alarm permission is required");
+             stopForeground(STOP_FOREGROUND_REMOVE);
+             stopSelf();
+             return;
+         }
+ 
+-        UserPreferences preferences = new UserPreferences(this);
+         SensorEngine selectedEngine = SensorEngine.fromName(
+                 intent == null ? null : intent.getStringExtra(EXTRA_ENGINE));
+         if (intent == null || !intent.hasExtra(EXTRA_ENGINE)) selectedEngine = preferences.engine();
+         boolean loggingEnabled = intent != null && intent.hasExtra(EXTRA_LOGGING)
+                 ? intent.getBooleanExtra(EXTRA_LOGGING, true)
+                 : preferences.loggingEnabled();
++        if (rawSleepCapture) loggingEnabled = true;
+ 
+         preferences.engine(selectedEngine);
+         preferences.loggingEnabled(loggingEnabled);
++        preferences.rawSleepCaptureEnabled(rawSleepCapture);
+         active = true;
++        captureStartElapsed = SystemClock.elapsedRealtime();
++        lastAccElapsed = captureStartElapsed;
++        lastHrElapsed = captureStartElapsed;
++        lastIbiElapsed = captureStartElapsed;
+ 
+         String loggingProblem = null;
+         if (loggingEnabled) {
+             try {
+                 logger = new CsvSessionLogger(this);
+-                Log.i(TAG, "Diagnostic CSV: " + logger.path());
++                Log.i(TAG, "Diagnostic CSV session=" + logger.sessionId() + " file=" + logger.path());
+             } catch (IOException e) {
+                 loggingProblem = "CSV logger unavailable: " + e.getMessage();
+                 Log.e(TAG, loggingProblem, e);
+@@ -108,11 +139,18 @@
+         }
+ 
+         boolean loggingActive = logger != null;
+-        store.reset(selectedEngine.label(), source.name(), loggingActive, logger == null ? "" : logger.path());
++        store.reset(selectedEngine.label(), source.name(), loggingActive, rawSleepCapture,
++                logger == null ? "" : logger.path());
+         if (loggingProblem != null) store.providerMessage(source.name(), loggingProblem);
+-        if (logger != null) logger.writeSessionHeader(selectedEngine.label(), source.name());
++        if (logger != null) {
++            logger.writeSessionHeader(selectedEngine.label(), source.name(), rawSleepCapture);
++            if (rawSleepCapture) {
++                logger.event(System.currentTimeMillis(),
++                        "RAW_SLEEP_CAPTURE_START no_alarm=true; stop_condition=USER_STOP");
++            }
++        }
+         Log.i(TAG, "Selected engine=" + selectedEngine + ", source=" + source.name()
+-                + ", logging=" + loggingEnabled);
++                + ", logging=" + loggingEnabled + ", rawSleepCapture=" + rawSleepCapture);
+ 
+         SleepOnsetDetector.Config cfg = new SleepOnsetDetector.Config();
+         detector = new SleepOnsetDetector(cfg, new SleepOnsetDetector.Listener() {
+@@ -120,7 +158,9 @@
+             public void onSnapshot(DetectorSnapshot snapshot) {
+                 store.snapshot(snapshot);
+                 if (logger != null) logger.snapshot(snapshot);
+-                updateNotification(snapshot.state() + "  " + Math.round(snapshot.confidence() * 100) + "%");
++                updateNotification(rawSleepCapture
++                        ? "RAW capture • " + snapshot.state() + " • " + Math.round(snapshot.confidence() * 100) + "%"
++                        : snapshot.state() + "  " + Math.round(snapshot.confidence() * 100) + "%");
+             }
+ 
+             @Override
+@@ -134,6 +174,7 @@
+             @Override
+             public void onAcceleration(long timestampMs, double x, double y, double z) {
+                 if (!active) return;
++                lastAccElapsed = SystemClock.elapsedRealtime();
+                 if (logger != null) logger.accel(timestampMs, x, y, z);
+                 detector.onAcceleration(timestampMs, x, y, z);
+             }
+@@ -141,6 +182,7 @@
+             @Override
+             public void onHeartRate(long timestampMs, double bpm, int status) {
+                 if (!active) return;
++                lastHrElapsed = SystemClock.elapsedRealtime();
+                 if (logger != null) logger.heart(timestampMs, bpm, status);
+                 detector.onHeartRate(timestampMs, bpm);
+             }
+@@ -148,6 +190,7 @@
+             @Override
+             public void onIbi(long timestampMs, double ibiMs, int status) {
+                 if (!active) return;
++                lastIbiElapsed = SystemClock.elapsedRealtime();
+                 if (logger != null) logger.ibi(timestampMs, ibiMs, status);
+                 if (status == 0) detector.onIbi(timestampMs, ibiMs);
+             }
+@@ -181,11 +224,29 @@
+                 mainHandler.post(() -> failAndStop(errorMessage, error));
+             }
+         });
++
++        if (rawSleepCapture) {
++            writeCaptureHeartbeat();
++            mainHandler.removeCallbacks(captureHeartbeat);
++            mainHandler.postDelayed(captureHeartbeat, CAPTURE_HEARTBEAT_MS);
++        }
+     }
+ 
+     private synchronized void handleSleepConfirmed(long estimatedOnsetMs, double confidence) {
+         if (!active) return;
+         long now = System.currentTimeMillis();
++
++        if (rawSleepCapture) {
++            if (logger != null) logger.event(now,
++                    "DETECTOR_SLEEP_MARKER estimatedOnset=" + estimatedOnsetMs
++                            + "; confidence=" + confidence
++                            + "; action=CONTINUE_RAW_CAPTURE");
++            store.state(NapState.SLEEP_CONFIRMED,
++                    "Detector marked sleep; RAW capture continues until STOP.");
++            updateNotification("RAW capture • sleep marker detected • recording continues");
++            return;
++        }
++
+         long alarmAt = Math.max(now + 2_000, estimatedOnsetMs + NAP_DURATION_MS);
+         if (logger != null) logger.event(now, "SLEEP_CONFIRMED sleepOnset=" + estimatedOnsetMs
+                 + "; alarmAt=" + alarmAt + "; confidence=" + confidence);
+@@ -195,11 +256,36 @@
+ 
+         if (source != null) source.stop();
+         active = false;
++        stopCaptureHeartbeat();
+         closeLogger();
+         stopForeground(STOP_FOREGROUND_REMOVE);
+         stopSelf();
+     }
+ 
++    private void writeCaptureHeartbeat() {
++        CsvSessionLogger l = logger;
++        if (l == null) return;
++        long now = SystemClock.elapsedRealtime();
++        BatteryManager battery = (BatteryManager) getSystemService(BATTERY_SERVICE);
++        int batteryPct = battery == null ? -1 : battery.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
++        PowerManager power = (PowerManager) getSystemService(POWER_SERVICE);
++        boolean interactive = power != null && power.isInteractive();
++        l.event(System.currentTimeMillis(),
++                "CAPTURE_HEARTBEAT elapsed_ms=" + (now - captureStartElapsed)
++                        + "; battery_pct=" + batteryPct
++                        + "; interactive=" + interactive
++                        + "; acc_age_ms=" + Math.max(0, now - lastAccElapsed)
++                        + "; hr_age_ms=" + Math.max(0, now - lastHrElapsed)
++                        + "; ibi_age_ms=" + Math.max(0, now - lastIbiElapsed)
++                        + "; segment=" + l.segmentIndex()
++                        + (l.lastError().isEmpty() ? "" : "; logger_error=" + l.lastError()));
++        store.currentFile(l.path());
++    }
++
++    private void stopCaptureHeartbeat() {
++        mainHandler.removeCallbacks(captureHeartbeat);
++    }
++
+     private synchronized void failAndStop(String reason, Throwable error) {
+         if (!active) return;
+         Log.e(TAG, "Stopping after error: " + reason, error);
+@@ -209,6 +295,7 @@
+             try { source.stop(); } catch (Throwable ignored) { }
+         }
+         active = false;
++        stopCaptureHeartbeat();
+         closeLogger();
+         stopForeground(STOP_FOREGROUND_REMOVE);
+         stopSelf();
+@@ -216,10 +303,14 @@
+ 
+     private synchronized void cancelAndStop(String reason) {
+         NapAlarmScheduler.cancel(this);
++        stopCaptureHeartbeat();
+         if (source != null) {
+             try { source.stop(); } catch (Throwable ignored) { }
+         }
+-        if (logger != null) logger.event(System.currentTimeMillis(), reason);
++        if (logger != null) {
++            logger.event(System.currentTimeMillis(),
++                    rawSleepCapture ? "RAW_SLEEP_CAPTURE_STOP " + reason : reason);
++        }
+         active = false;
+         closeLogger();
+         store.state(NapState.CANCELLED, reason);
+@@ -237,7 +328,7 @@
+     private Notification monitorNotification(String text) {
+         return new Notification.Builder(this, CHANNEL)
+                 .setSmallIcon(R.drawable.ic_nap)
+-                .setContentTitle("Power Nap")
++                .setContentTitle(rawSleepCapture ? "Power Nap • RAW sleep capture" : "Power Nap")
+                 .setContentText(text)
+                 .setOngoing(true)
+                 .setCategory(Notification.CATEGORY_SERVICE)
+@@ -257,6 +348,7 @@
+ 
+     @Override
+     public void onDestroy() {
++        stopCaptureHeartbeat();
+         if (source != null && active) {
+             try { source.stop(); } catch (Throwable ignored) { }
+         }
+diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/ui/MainActivity.java /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/ui/MainActivity.java
+--- /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/ui/MainActivity.java	2026-09-24 17:26:18.000000000 +0000
++++ /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/ui/MainActivity.java	2026-09-24 20:53:04.202674537 +0000
+@@ -48,6 +48,7 @@
+     private TextView message;
+     private Spinner engineSpinner;
+     private Switch loggingSwitch;
++    private Switch rawSleepCaptureSwitch;
+     private List<SensorEngine> engines;
+     private boolean bindingControls;
+ 
+@@ -72,6 +73,7 @@
+         message = findViewById(R.id.message);
+         engineSpinner = findViewById(R.id.engineSpinner);
+         loggingSwitch = findViewById(R.id.loggingSwitch);
++        rawSleepCaptureSwitch = findViewById(R.id.rawSleepCaptureSwitch);
+ 
+         Button start = findViewById(R.id.startButton);
+         Button stop = findViewById(R.id.stopButton);
+@@ -106,7 +108,9 @@
+                 message.setText("Grant sensor permissions, then press START again.");
+                 return;
+             }
+-            if (!NapAlarmScheduler.canScheduleExact(this)) {
++
++            boolean rawSleepCapture = rawSleepCaptureSwitch.isChecked();
++            if (!rawSleepCapture && !NapAlarmScheduler.canScheduleExact(this)) {
+                 Toast.makeText(this, "Missing exact alarm permission", Toast.LENGTH_SHORT).show();
+                 requestExactAlarmAccess();
+                 message.setText("Grant exact-alarm access, then press START again.");
+@@ -114,16 +118,20 @@
+             }
+ 
+             SensorEngine selected = selectedEngine();
+-            boolean record = loggingSwitch.isChecked();
++            boolean record = rawSleepCapture || loggingSwitch.isChecked();
+             preferences.engine(selected);
+             preferences.loggingEnabled(record);
++            preferences.rawSleepCaptureEnabled(rawSleepCapture);
+ 
+             Intent i = new Intent(this, NapMonitoringService.class);
+             i.setAction(NapMonitoringService.ACTION_START);
+             i.putExtra(NapMonitoringService.EXTRA_ENGINE, selected.name());
+             i.putExtra(NapMonitoringService.EXTRA_LOGGING, record);
++            i.putExtra(NapMonitoringService.EXTRA_RAW_SLEEP_CAPTURE, rawSleepCapture);
+             startForegroundService(i);
+-            message.setText("Starting " + selected.label() + (record ? " with CSV logging..." : "..."));
++            message.setText(rawSleepCapture
++                    ? "Starting RAW sleep capture. No nap alarm; recording continues until STOP."
++                    : "Starting " + selected.label() + (record ? " with CSV logging..." : "..."));
+         });
+ 
+         stop.setOnClickListener(v -> {
+@@ -150,6 +158,11 @@
+         if (index < 0) index = 0;
+         engineSpinner.setSelection(index);
+         loggingSwitch.setChecked(preferences.loggingEnabled());
++        rawSleepCaptureSwitch.setChecked(preferences.rawSleepCaptureEnabled());
++        if (rawSleepCaptureSwitch.isChecked()) {
++            loggingSwitch.setChecked(true);
++            loggingSwitch.setEnabled(false);
++        }
+         bindingControls = false;
+ 
+         engineSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+@@ -161,6 +174,18 @@
+         loggingSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+             if (!bindingControls) preferences.loggingEnabled(isChecked);
+         });
++        rawSleepCaptureSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
++            if (bindingControls) return;
++            preferences.rawSleepCaptureEnabled(isChecked);
++            if (isChecked) {
++                loggingSwitch.setChecked(true);
++                loggingSwitch.setEnabled(false);
++                preferences.loggingEnabled(true);
++                message.setText("RAW sleep capture: no 10-minute alarm; recording ends only with STOP.");
++            } else {
++                loggingSwitch.setEnabled(true);
++            }
++        });
+     }
+ 
+     private SensorEngine selectedEngine() {
+@@ -222,7 +247,7 @@
+ 
+         if (s.loggingEnabled()) {
+             String file = s.file().isEmpty() ? "starting..." : new File(s.file()).getName();
+-            logStatus.setText("recording: ON  •  " + file);
++            logStatus.setText((s.rawSleepCapture() ? "RAW SLEEP CAPTURE" : "recording: ON") + "  •  " + file);
+         } else {
+             logStatus.setText("recording: OFF");
+         }
+@@ -238,7 +263,9 @@
+                 "HR %s | RMSSD %s ms\nMotion %s | confidence %.0f%%",
+                 hr, rmssd, motion, s.confidence() * 100.0);
+ 
+-        if (s.alarmAtMs() > 0 && s.alarmAtMs() > System.currentTimeMillis()) {
++        if (s.rawSleepCapture()) {
++            text += "\nRAW capture runs until STOP";
++        } else if (s.alarmAtMs() > 0 && s.alarmAtMs() > System.currentTimeMillis()) {
+             long sec = (s.alarmAtMs() - System.currentTimeMillis()) / 1000;
+             text += String.format(Locale.ROOT, "\nAlarm in %d:%02d", sec / 60, sec % 60);
+         }
+@@ -246,13 +273,15 @@
+ 
+         boolean monitoring = isMonitoringState(s.state());
+         engineSpinner.setEnabled(!monitoring);
+-        loggingSwitch.setEnabled(!monitoring);
++        rawSleepCaptureSwitch.setEnabled(!monitoring);
++        loggingSwitch.setEnabled(!monitoring && !rawSleepCaptureSwitch.isChecked());
+     }
+ 
+     private static boolean isMonitoringState(NapState state) {
+         return state == NapState.BASELINE
+                 || state == NapState.WAITING_FOR_SLEEP
+                 || state == NapState.SLEEP_CANDIDATE
+-                || state == NapState.SLEEP_CONFIRMED;
++                || state == NapState.SLEEP_CONFIRMED
++                || state == NapState.NAPPING;
+     }
+ }
+diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/util/CsvSessionLogger.java /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/util/CsvSessionLogger.java
+--- /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/util/CsvSessionLogger.java	2026-09-24 18:49:48.000000000 +0000
++++ /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/util/CsvSessionLogger.java	2026-09-24 20:54:22.053781853 +0000
+@@ -2,6 +2,7 @@
+ 
+ import android.content.Context;
+ import android.os.Build;
++import android.util.Log;
+ 
+ import com.example.powernapwatch.core.DetectorSnapshot;
+ 
+@@ -9,39 +10,57 @@
+ import java.io.File;
+ import java.io.FileWriter;
+ import java.io.IOException;
++import java.nio.charset.StandardCharsets;
+ import java.text.SimpleDateFormat;
+ import java.util.Date;
+ import java.util.Locale;
+ 
+ /**
+- * Raw diagnostic logger. Besides the sensor timestamp it records when the app
+- * actually received each sample. delivery_delay_ms makes batching, stalls and
+- * timestamp anomalies visible during post-session analysis.
++ * RAW diagnostic logger suitable for long sleep captures.
++ *
++ * Files are rotated so an overnight capture does not depend on one very large
++ * file surviving until STOP. All segments share one session id and a global
++ * sequence number, so they can be merged losslessly afterwards.
+  */
+ public final class CsvSessionLogger implements AutoCloseable {
++    private static final String TAG = "PowerNap";
+     private static final int AUTO_FLUSH_LINES = 100;
+-
+-    private final BufferedWriter writer;
+-    private final File file;
++    private static final long MAX_SEGMENT_BYTES = 10L * 1024L * 1024L;
++    private static final String HEADER =
++            "seq,type,sensor_timestamp_ms,received_timestamp_ms,delivery_delay_ms,x,y,z,hr,ibi,status,state,confidence,motion_rms,rmssd,reason\n";
++
++    private final File dir;
++    private final String sessionId;
++    private BufferedWriter writer;
++    private File file;
+     private long sequence;
++    private long bytesWritten;
+     private int pendingLines;
++    private int segmentIndex;
++    private boolean closed;
++    private String lastError = "";
+ 
+     public CsvSessionLogger(Context context) throws IOException {
+-        File dir = new File(context.getFilesDir(), "sessions");
++        dir = new File(context.getFilesDir(), "sessions");
+         if (!dir.exists() && !dir.mkdirs()) throw new IOException("Cannot create sessions directory");
+-        String name = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT).format(new Date()) + ".csv";
+-        file = new File(dir, name);
+-        writer = new BufferedWriter(new FileWriter(file, false), 64 * 1024);
+-        writer.write("seq,type,sensor_timestamp_ms,received_timestamp_ms,delivery_delay_ms,x,y,z,hr,ibi,status,state,confidence,motion_rms,rmssd,reason\n");
+-        writer.flush();
++        sessionId = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT).format(new Date());
++        openSegment(0, false);
+     }
+ 
+-    public String path() { return file.getAbsolutePath(); }
+-    public String fileName() { return file.getName(); }
+-
+-    public synchronized void writeSessionHeader(String selectedEngine, String effectiveProvider) {
+-        event(System.currentTimeMillis(), "SESSION_START selectedEngine=" + selectedEngine
++    public synchronized String path() { return file == null ? "" : file.getAbsolutePath(); }
++    public synchronized String fileName() { return file == null ? "" : file.getName(); }
++    public String sessionId() { return sessionId; }
++    public synchronized int segmentIndex() { return segmentIndex; }
++    public synchronized String lastError() { return lastError; }
++
++    public synchronized void writeSessionHeader(String selectedEngine, String effectiveProvider,
++                                                boolean rawSleepCapture) {
++        event(System.currentTimeMillis(), "SESSION_START session_id=" + sessionId
++                + "; selectedEngine=" + selectedEngine
+                 + "; provider=" + effectiveProvider
++                + "; mode=" + (rawSleepCapture ? "RAW_SLEEP_CAPTURE" : "POWER_NAP")
++                + "; rotate_bytes=" + MAX_SEGMENT_BYTES
++                + "; usable_space_mb=" + (dir.getUsableSpace() / (1024L * 1024L))
+                 + "; device=" + Build.MANUFACTURER + " " + Build.MODEL
+                 + "; android=" + Build.VERSION.RELEASE
+                 + "; sdk=" + Build.VERSION.SDK_INT);
+@@ -73,34 +92,103 @@
+         line("EVENT", sensorT, received, null, null, null, null, null, null, null, null, null, null, text);
+     }
+ 
+-    /** Diagnostic metadata. Unlike EVENT it does not force an immediate fsync/flush. */
++    /** Diagnostic metadata. Unlike EVENT it does not force an immediate flush. */
+     public synchronized void diagnostic(String text) {
+         long now = System.currentTimeMillis();
+         line("DIAG", now, now, null, null, null, null, null, null, null, null, null, null, text);
+     }
+ 
++    public synchronized void flush() {
++        if (writer == null) return;
++        try {
++            writer.flush();
++            pendingLines = 0;
++        } catch (IOException e) {
++            recordFailure("flush", e);
++        }
++    }
++
+     private void line(String type, long sensorT, long receivedT,
+                       Double x, Double y, Double z, Double hr, Double ibi,
+                       Integer status, String state, Double confidence, Double motion, Double rmssd,
+                       String reason) {
++        if (closed || writer == null) return;
++        String preview = row(sequence + 1, type, sensorT, receivedT, x, y, z, hr, ibi, status, state,
++                confidence, motion, rmssd, reason);
++        int rowBytes = preview.getBytes(StandardCharsets.UTF_8).length;
+         try {
+-            writer.write(Long.toString(++sequence)); writer.write(',');
+-            writer.write(type); writer.write(',');
+-            writer.write(Long.toString(sensorT)); writer.write(',');
+-            writer.write(Long.toString(receivedT)); writer.write(',');
+-            writer.write(Long.toString(receivedT - sensorT)); writer.write(',');
+-            writer.write(num(x)); writer.write(','); writer.write(num(y)); writer.write(','); writer.write(num(z)); writer.write(',');
+-            writer.write(num(hr)); writer.write(','); writer.write(num(ibi)); writer.write(',');
+-            writer.write(status == null ? "" : status.toString()); writer.write(',');
+-            writer.write(csv(state)); writer.write(','); writer.write(num(confidence)); writer.write(',');
+-            writer.write(num(motion)); writer.write(','); writer.write(num(rmssd)); writer.write(',');
+-            writer.write(csv(reason)); writer.write('\n');
++            if (bytesWritten > HEADER.length() && bytesWritten + rowBytes > MAX_SEGMENT_BYTES) {
++                rotate();
++            }
++            String row = row(++sequence, type, sensorT, receivedT, x, y, z, hr, ibi, status, state,
++                    confidence, motion, rmssd, reason);
++            rowBytes = row.getBytes(StandardCharsets.UTF_8).length;
++            writer.write(row);
++            bytesWritten += rowBytes;
+             pendingLines++;
+             if (pendingLines >= AUTO_FLUSH_LINES || "EVENT".equals(type)) {
+                 writer.flush();
+                 pendingLines = 0;
+             }
+-        } catch (IOException ignored) { }
++        } catch (IOException e) {
++            recordFailure("write", e);
++        }
++    }
++
++    private String row(long seq, String type, long sensorT, long receivedT,
++                       Double x, Double y, Double z, Double hr, Double ibi,
++                       Integer status, String state, Double confidence, Double motion, Double rmssd,
++                       String reason) {
++        StringBuilder b = new StringBuilder(192);
++        b.append(seq).append(',').append(type).append(',')
++                .append(sensorT).append(',').append(receivedT).append(',')
++                .append(receivedT - sensorT).append(',')
++                .append(num(x)).append(',').append(num(y)).append(',').append(num(z)).append(',')
++                .append(num(hr)).append(',').append(num(ibi)).append(',')
++                .append(status == null ? "" : status).append(',')
++                .append(csv(state)).append(',').append(num(confidence)).append(',')
++                .append(num(motion)).append(',').append(num(rmssd)).append(',')
++                .append(csv(reason)).append('\n');
++        return b.toString();
++    }
++
++    private void rotate() throws IOException {
++        String nextName = fileNameFor(segmentIndex + 1);
++        long now = System.currentTimeMillis();
++        String marker = row(++sequence, "EVENT", now, now,
++                null, null, null, null, null, null, null, null, null, null,
++                "SEGMENT_END next=" + nextName);
++        writer.write(marker);
++        writer.flush();
++        writer.close();
++        openSegment(segmentIndex + 1, true);
++    }
++
++    private void openSegment(int index, boolean rotated) throws IOException {
++        segmentIndex = index;
++        file = new File(dir, fileNameFor(index));
++        writer = new BufferedWriter(new FileWriter(file, false), 64 * 1024);
++        writer.write(HEADER);
++        bytesWritten = HEADER.getBytes(StandardCharsets.UTF_8).length;
++        pendingLines = 0;
++        if (rotated) {
++            long now = System.currentTimeMillis();
++            String marker = row(++sequence, "EVENT", now, now,
++                    null, null, null, null, null, null, null, null, null, null,
++                    "SEGMENT_START session_id=" + sessionId + "; segment=" + index);
++            writer.write(marker);
++            bytesWritten += marker.getBytes(StandardCharsets.UTF_8).length;
++            writer.flush();
++        }
++    }
++
++    private String fileNameFor(int index) {
++        return String.format(Locale.ROOT, "%s-%03d.csv", sessionId, index);
++    }
++
++    private void recordFailure(String operation, IOException e) {
++        lastError = operation + ": " + e.getMessage();
++        Log.e(TAG, "CSV logger " + lastError, e);
+     }
+ 
+     private static String num(Double d) {
+@@ -115,7 +203,12 @@
+ 
+     @Override
+     public synchronized void close() {
+-        try { writer.flush(); } catch (IOException ignored) { }
+-        try { writer.close(); } catch (IOException ignored) { }
++        if (closed) return;
++        closed = true;
++        if (writer != null) {
++            try { writer.flush(); } catch (IOException e) { recordFailure("final flush", e); }
++            try { writer.close(); } catch (IOException e) { recordFailure("close", e); }
++            writer = null;
++        }
+     }
+ }
+diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/util/SessionStore.java /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/util/SessionStore.java
+--- /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/util/SessionStore.java	2026-09-24 17:26:18.000000000 +0000
++++ /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/util/SessionStore.java	2026-09-24 20:52:32.499486080 +0000
+@@ -14,12 +14,14 @@
+         p = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+     }
+ 
+-    public void reset(String selectedEngine, String provider, boolean loggingEnabled, String file) {
++    public void reset(String selectedEngine, String provider, boolean loggingEnabled,
++                      boolean rawSleepCapture, String file) {
+         p.edit().clear()
+                 .putString("state", NapState.BASELINE.name())
+                 .putString("selectedEngine", selectedEngine)
+                 .putString("provider", provider)
+                 .putBoolean("loggingEnabled", loggingEnabled)
++                .putBoolean("rawSleepCapture", rawSleepCapture)
+                 .putString("file", file == null ? "" : file)
+                 .apply();
+     }
+@@ -44,6 +46,10 @@
+         p.edit().putString("provider", provider).putString("message", message).apply();
+     }
+ 
++    public void currentFile(String file) {
++        p.edit().putString("file", file == null ? "" : file).apply();
++    }
++
+     public void napScheduled(long onsetAtMs, long alarmAtMs, double confidence) {
+         p.edit().putString("state", NapState.NAPPING.name())
+                 .putLong("onsetAt", onsetAtMs)
+@@ -62,6 +68,7 @@
+                 p.getString("selectedEngine", "--"),
+                 p.getString("provider", "--"),
+                 p.getBoolean("loggingEnabled", false),
++                p.getBoolean("rawSleepCapture", false),
+                 p.getFloat("hr", Float.NaN),
+                 p.getFloat("baselineHr", Float.NaN),
+                 p.getFloat("motion", Float.NaN),
+@@ -74,7 +81,8 @@
+         );
+     }
+ 
+-    public record Snapshot(NapState state, String selectedEngine, String provider, boolean loggingEnabled,
++    public record Snapshot(NapState state, String selectedEngine, String provider,
++                           boolean loggingEnabled, boolean rawSleepCapture,
+                            float heartRate, float baselineHeartRate, float movement, float rmssd,
+                            float confidence, String message, long onsetAtMs, long alarmAtMs, String file) {}
+ }
+diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/util/UserPreferences.java /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/util/UserPreferences.java
+--- /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/util/UserPreferences.java	2026-09-24 17:26:18.000000000 +0000
++++ /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/util/UserPreferences.java	2026-09-24 20:52:32.498036819 +0000
+@@ -9,6 +9,7 @@
+     private static final String PREFS = "power_nap_preferences";
+     private static final String KEY_ENGINE = "sensor_engine";
+     private static final String KEY_LOGGING = "record_sensor_data";
++    private static final String KEY_RAW_SLEEP_CAPTURE = "raw_sleep_capture";
+ 
+     private final SharedPreferences preferences;
+ 
+@@ -31,4 +32,12 @@
+     public void loggingEnabled(boolean enabled) {
+         preferences.edit().putBoolean(KEY_LOGGING, enabled).apply();
+     }
++
++    public boolean rawSleepCaptureEnabled() {
++        return preferences.getBoolean(KEY_RAW_SLEEP_CAPTURE, false);
++    }
++
++    public void rawSleepCaptureEnabled(boolean enabled) {
++        preferences.edit().putBoolean(KEY_RAW_SLEEP_CAPTURE, enabled).apply();
++    }
+ }
+diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/app/src/main/res/layout/activity_main.xml /mnt/data/powernap_work/PowerNap/app/src/main/res/layout/activity_main.xml
+--- /mnt/data/powernap_original/PowerNap/app/src/main/res/layout/activity_main.xml	2026-09-24 17:26:18.000000000 +0000
++++ /mnt/data/powernap_work/PowerNap/app/src/main/res/layout/activity_main.xml	2026-09-24 20:53:05.393198086 +0000
+@@ -66,6 +66,15 @@
+             android:textColor="#FFFFFF"
+             android:textSize="11sp" />
+ 
++        <Switch
++            android:id="@+id/rawSleepCaptureSwitch"
++            android:layout_width="210dp"
++            android:layout_height="wrap_content"
++            android:layout_marginTop="2dp"
++            android:text="RAW sleep capture"
++            android:textColor="#FFFFFF"
++            android:textSize="11sp" />
++
+         <TextView
+             android:id="@+id/provider"
+             android:layout_width="match_parent"
+diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/scripts/analyze-session.py /mnt/data/powernap_work/PowerNap/scripts/analyze-session.py
+--- /mnt/data/powernap_original/PowerNap/scripts/analyze-session.py	2026-09-24 18:51:52.000000000 +0000
++++ /mnt/data/powernap_work/PowerNap/scripts/analyze-session.py	2026-09-24 20:55:11.313285245 +0000
+@@ -3,13 +3,40 @@
+ from collections import Counter
+ from pathlib import Path
+ 
+-if len(sys.argv) != 2:
+-    print("Usage: analyze-session.py SESSION.csv", file=sys.stderr)
++if len(sys.argv) < 2:
++    print("Usage: analyze-session.py SESSION.csv [SEGMENT.csv ...] | DIRECTORY", file=sys.stderr)
+     sys.exit(2)
+ 
+-path = Path(sys.argv[1])
+-rows = list(csv.DictReader(path.open(newline='', encoding='utf-8')))
+-print(f"File: {path}")
++inputs = [Path(x) for x in sys.argv[1:]]
++if len(inputs) == 1 and inputs[0].is_dir():
++    paths = sorted(inputs[0].glob('*.csv'))
++else:
++    paths = []
++    for p in inputs:
++        if any(ch in str(p) for ch in '*?['):
++            paths.extend(sorted(Path('.').glob(str(p))))
++        else:
++            paths.append(p)
++
++if not paths:
++    print("No CSV files found", file=sys.stderr)
++    sys.exit(1)
++
++rows=[]
++for path in paths:
++    with path.open(newline='', encoding='utf-8') as f:
++        for r in csv.DictReader(f):
++            r['_file'] = path.name
++            rows.append(r)
++
++# Rotated v0.2.3+ logs have a session-global sequence number.
++def seq_key(r):
++    try: return int(r.get('seq') or 0)
++    except ValueError: return 0
++rows.sort(key=seq_key)
++
++print("Files:")
++for p in paths: print(f"  {p}")
+ print(f"Rows: {len(rows)}")
+ counts = Counter(r['type'] for r in rows)
+ print("Types:", dict(counts))
+@@ -60,7 +87,6 @@
+     print("Detector states:", dict(states))
+     if conf: print(f"Confidence max={max(conf)*100:.0f}% median={statistics.median(conf)*100:.0f}%")
+ 
+-# v0.2.2 source-level diagnostics
+ for label in ('HR','ACC'):
+     req=[]; complete=[]; skipped=[]
+     for r in rows:
+@@ -80,7 +106,13 @@
+         if complete:
+             print(f"  completion latency median={statistics.median(complete):.0f}ms max={max(complete)}ms")
+ 
++heartbeats=[]
+ print("Events:")
+ for r in rows:
+     if r['type']=='EVENT':
+-        print(f"  {r['sensor_timestamp_ms']}: {r['reason']}")
++        reason=r.get('reason','') or ''
++        print(f"  {r['sensor_timestamp_ms']}: {reason}")
++        if reason.startswith('CAPTURE_HEARTBEAT'):
++            heartbeats.append(reason)
++if heartbeats:
++    print(f"Capture heartbeats: {len(heartbeats)}")
+diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/scripts/pull-latest-session.sh /mnt/data/powernap_work/PowerNap/scripts/pull-latest-session.sh
+--- /mnt/data/powernap_original/PowerNap/scripts/pull-latest-session.sh	2026-09-23 14:55:08.000000000 +0000
++++ /mnt/data/powernap_work/PowerNap/scripts/pull-latest-session.sh	2026-09-24 20:55:11.310252819 +0000
+@@ -1,11 +1,4 @@
+ #!/usr/bin/env bash
+ set -euo pipefail
+-PKG="${1:-com.example.powernapwatch}"
+-REMOTE=$(adb shell "run-as $PKG sh -c 'ls -t files/sessions/*.csv 2>/dev/null | head -1'" | tr -d '\r')
+-if [[ -z "$REMOTE" ]]; then
+-  echo "No CSV session found for package $PKG" >&2
+-  exit 1
+-fi
+-OUT="$(basename "$REMOTE")"
+-adb exec-out run-as "$PKG" cat "$REMOTE" > "$OUT"
+-echo "Saved $OUT"
++SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++exec "$SCRIPT_DIR/pull-sessions.sh" --package "${1:-com.example.powernapwatch}" --latest --output "${2:-powernap-sessions}"
+diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/scripts/pull-sessions.sh /mnt/data/powernap_work/PowerNap/scripts/pull-sessions.sh
+--- /mnt/data/powernap_original/PowerNap/scripts/pull-sessions.sh	2026-09-24 18:06:38.000000000 +0000
++++ /mnt/data/powernap_work/PowerNap/scripts/pull-sessions.sh	2026-09-24 20:55:11.305631910 +0000
+@@ -5,30 +5,40 @@
+ MODE="--latest"
+ OUT_DIR="powernap-sessions"
+ SERIAL="${ANDROID_SERIAL:-}"
+-ADB_TIMEOUT="15"
++ADB_TIMEOUT="120"
++SESSION_ID=""
+ 
+ usage() {
+   cat <<USAGE
+ Usage:
+   $0 [PACKAGE] [--latest|--all] [OUT_DIR] [--serial SERIAL] [--timeout SECONDS]
++  $0 --package PACKAGE --latest --output OUT_DIR [--serial SERIAL]
++  $0 --package PACKAGE --session YYYYMMDD-HHMMSS --output OUT_DIR [--serial SERIAL]
++
++--latest pulls the complete newest session. For v0.2.3+ this means all rotated
++segments (SESSION-000.csv, SESSION-001.csv, ...), not only the newest file.
+ 
+ Examples:
+-  $0
+-  $0 com.example.powernapwatch --latest
+-  $0 com.example.powernapwatch --all powernap-sessions
+-  $0 com.example.powernapwatch --latest powernap-sessions --serial 192.168.1.20:5555
++  $0 --package com.example.powernapwatch --latest --output powernap-sessions
++  $0 --package com.example.powernapwatch --all --output powernap-sessions
++  $0 --package com.example.powernapwatch --session 20260924-230501 --output powernap-sessions
+ 
+ If ANDROID_SERIAL is set, it is used unless --serial is supplied.
+ USAGE
+ }
+ 
+-# Backwards-compatible positional arguments first.
++# Backwards-compatible positional arguments.
+ if [[ $# -gt 0 && "$1" != --* ]]; then PKG="$1"; shift; fi
+ if [[ $# -gt 0 && ( "$1" == "--latest" || "$1" == "--all" ) ]]; then MODE="$1"; shift; fi
+ if [[ $# -gt 0 && "$1" != --* ]]; then OUT_DIR="$1"; shift; fi
+ 
+ while [[ $# -gt 0 ]]; do
+   case "$1" in
++    --package) PKG="${2:?Missing value for --package}"; shift 2 ;;
++    --latest) MODE="--latest"; SESSION_ID=""; shift ;;
++    --all) MODE="--all"; SESSION_ID=""; shift ;;
++    --session) MODE="--session"; SESSION_ID="${2:?Missing value for --session}"; shift 2 ;;
++    --output) OUT_DIR="${2:?Missing value for --output}"; shift 2 ;;
+     --serial) SERIAL="${2:?Missing value for --serial}"; shift 2 ;;
+     --timeout) ADB_TIMEOUT="${2:?Missing value for --timeout}"; shift 2 ;;
+     -h|--help) usage; exit 0 ;;
+@@ -43,11 +53,10 @@
+   exit 1
+ fi
+ if ! command -v timeout >/dev/null 2>&1; then
+-  echo "ERROR: GNU timeout not found. Install coreutils or run the adb commands manually." >&2
++  echo "ERROR: GNU timeout not found. Install coreutils or run adb manually." >&2
+   exit 1
+ fi
+ 
+-# Pick a device explicitly. This avoids adb waiting/ambiguity when both phone and watch are connected.
+ if [[ -z "$SERIAL" ]]; then
+   mapfile -t DEVICES < <(adb devices | awk 'NR>1 && $2=="device" {print $1}')
+   if [[ ${#DEVICES[@]} -eq 0 ]]; then
+@@ -67,30 +76,53 @@
+   timeout --foreground "${ADB_TIMEOUT}s" "${ADB[@]}" "$@"
+ }
+ 
++shell_run_as() {
++  local cmd="$1"
++  run_adb shell "run-as $PKG sh -c '$cmd'"
++}
++
+ echo "ADB device: $SERIAL"
+ if ! run_adb get-state >/dev/null; then
+   echo "ERROR: watch is not responding to adb within ${ADB_TIMEOUT}s." >&2
+   adb devices -l >&2 || true
+-  echo "Tip: reconnect Wireless debugging / adb connect, then retry." >&2
+   exit 1
+ fi
+ 
+-# Verify run-as early so a non-debuggable/wrong package fails immediately instead of looking like a hang.
+-if ! run_adb shell run-as "$PKG" sh -c 'pwd >/dev/null' >/dev/null 2>&1; then
++if ! shell_run_as 'pwd >/dev/null' >/dev/null 2>&1; then
+   echo "ERROR: 'run-as $PKG' failed. Is the debug build installed and is the package name correct?" >&2
+   exit 1
+ fi
+ 
+-list_remote() {
+-  run_adb shell run-as "$PKG" sh -c 'ls -1t files/sessions/*.csv 2>/dev/null' | tr -d '\r'
++list_all() {
++  shell_run_as 'ls -1t files/sessions/*.csv 2>/dev/null' | tr -d '\r'
++}
++
++list_session() {
++  local id="$1"
++  shell_run_as "ls -1 files/sessions/${id}-*.csv 2>/dev/null | sort" | tr -d '\r'
+ }
+ 
+ REMOTE_LIST=""
+-if ! REMOTE_LIST="$(list_remote)"; then
+-  rc=$?
+-  echo "ERROR: listing session logs failed (adb timeout or connection error, rc=$rc)." >&2
+-  exit 1
+-fi
++case "$MODE" in
++  --all)
++    REMOTE_LIST="$(list_all || true)"
++    ;;
++  --session)
++    REMOTE_LIST="$(list_session "$SESSION_ID" || true)"
++    ;;
++  --latest)
++    LATEST="$(list_all | head -n 1 || true)"
++    if [[ -n "$LATEST" ]]; then
++      base="$(basename "$LATEST")"
++      if [[ "$base" =~ ^([0-9]{8}-[0-9]{6})-[0-9]{3}\.csv$ ]]; then
++        SESSION_ID="${BASH_REMATCH[1]}"
++        REMOTE_LIST="$(list_session "$SESSION_ID" || true)"
++      else
++        REMOTE_LIST="$LATEST"
++      fi
++    fi
++    ;;
++esac
+ 
+ mapfile -t FILES <<< "$REMOTE_LIST"
+ if [[ ${#FILES[@]} -eq 0 || -z "${FILES[0]:-}" ]]; then
+@@ -98,9 +130,7 @@
+   exit 1
+ fi
+ 
+-if [[ "$MODE" != "--all" ]]; then
+-  FILES=("${FILES[0]}")
+-fi
++echo "Files to pull: ${#FILES[@]}${SESSION_ID:+ (session $SESSION_ID)}"
+ 
+ for remote in "${FILES[@]}"; do
+   [[ -z "$remote" ]] && continue
+diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/v0.2.3-nightcapture.patch /mnt/data/powernap_work/PowerNap/v0.2.3-nightcapture.patch
+--- /mnt/data/powernap_original/PowerNap/v0.2.3-nightcapture.patch	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/powernap_work/PowerNap/v0.2.3-nightcapture.patch	2026-09-24 20:58:09.643326086 +0000
+@@ -0,0 +1,1054 @@
++diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/CHANGELOG-v0.2.3-nightcapture.md /mnt/data/powernap_work/PowerNap/CHANGELOG-v0.2.3-nightcapture.md
++--- /mnt/data/powernap_original/PowerNap/CHANGELOG-v0.2.3-nightcapture.md	1970-01-01 00:00:00.000000000 +0000
+++++ /mnt/data/powernap_work/PowerNap/CHANGELOG-v0.2.3-nightcapture.md	2026-09-24 20:55:46.743254143 +0000
++@@ -0,0 +1,18 @@
+++# v0.2.3-nightcapture
+++
+++Purpose: collect a long, real sleep reference session without letting the current false-positive-prone detector terminate acquisition.
+++
+++Changes:
+++
+++- Added UI switch `RAW sleep capture`.
+++- RAW sleep capture forces sensor CSV recording ON.
+++- RAW sleep capture bypasses exact-alarm requirement and schedules no 10-minute alarm.
+++- `SLEEP_CONFIRMED` becomes a logged marker only in capture mode; sensors and CSV continue until manual STOP.
+++- Added 10 MiB CSV rotation with a stable session id and global sequence counter.
+++- Added 5-minute `CAPTURE_HEARTBEAT` events with battery %, display interactive state, and callback ages for ACC/HR/IBI.
+++- Monitoring service returns `START_REDELIVER_INTENT` for better recovery from process reclamation.
+++- Updated `pull-sessions.sh`: latest session means all rotated segments; default ADB timeout increased to 120 s; added long options and `--session`.
+++- Updated `analyze-session.py` to accept multiple rotated CSVs or a directory.
+++- Bumped app version to `0.2.3-nightcapture` / versionCode 3.
+++
+++The sleep classifier itself is intentionally unchanged. The goal of this build is data collection, not detector tuning.
++diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/NIGHT_CAPTURE.md /mnt/data/powernap_work/PowerNap/NIGHT_CAPTURE.md
++--- /mnt/data/powernap_original/PowerNap/NIGHT_CAPTURE.md	1970-01-01 00:00:00.000000000 +0000
+++++ /mnt/data/powernap_work/PowerNap/NIGHT_CAPTURE.md	2026-09-24 20:55:46.741770617 +0000
++@@ -0,0 +1,69 @@
+++# PowerNap v0.2.3-nightcapture — overnight RAW capture
+++
+++This build is intended to collect a real **awake -> sleep -> sleeping** session before we redesign the sleep-onset detector.
+++
+++## What is different
+++
+++`RAW sleep capture` is a dedicated laboratory mode:
+++
+++- CSV RAW logging is forced ON.
+++- The existing detector still runs and writes `SNAP` rows and a `DETECTOR_SLEEP_MARKER` event.
+++- A detector `SLEEP_CONFIRMED` result **does not stop sensors**.
+++- No 10-minute power-nap alarm is scheduled in this mode.
+++- Capture continues until the user presses **STOP / CANCEL**.
+++- RAW CSV is rotated at 10 MiB into one logical session:
+++  - `YYYYMMDD-HHMMSS-000.csv`
+++  - `YYYYMMDD-HHMMSS-001.csv`
+++  - ...
+++- Every 5 minutes an event `CAPTURE_HEARTBEAT` records battery percentage, screen interactive state, and age of the last ACC/HR/IBI callback.
+++- The monitoring service uses `START_REDELIVER_INTENT`, so Android can restart it with the same start intent if the service process is reclaimed.
+++
+++## Tonight's recommended setup
+++
+++1. Install/build the **samsungDebug** flavor.
+++2. On the watch open **Power Nap Lab**.
+++3. Select **Samsung Health Sensor SDK** as `READ ENGINE` so the whole recording uses one known sensor path. Avoid `Auto` for this reference recording unless Samsung SDK cannot start.
+++4. Enable **RAW sleep capture**. `Record sensor data` is automatically enabled and locked ON.
+++5. Make sure sensor/background permissions are granted.
+++6. Exact-alarm permission is not required for RAW sleep capture because this mode intentionally schedules no nap alarm.
+++7. Wear the watch normally and reasonably snugly. Start with enough battery for the intended capture and avoid enabling battery-saver mode during the experiment if possible.
+++8. Press **START** shortly before trying to sleep. From then on, leave the app alone.
+++9. If the UI later says `SLEEP_CONFIRMED`, that is only the old detector's marker. **Recording continues.**
+++10. After waking, open the app and press **STOP / CANCEL** before pulling files.
+++
+++## Pull the complete newest session
+++
+++If one watch is connected:
+++
+++```bash
+++./scripts/pull-sessions.sh \
+++  --package com.example.powernapwatch \
+++  --latest \
+++  --output powernap-night \
+++  --timeout 180
+++```
+++
+++If ADB sees more than one device, add the watch serial:
+++
+++```bash
+++./scripts/pull-sessions.sh \
+++  --package com.example.powernapwatch \
+++  --latest \
+++  --output powernap-night \
+++  --serial 'YOUR_WATCH_SERIAL' \
+++  --timeout 180
+++```
+++
+++`--latest` now detects rotated files and downloads **all segments belonging to the newest session**.
+++
+++## Quick integrity check
+++
+++```bash
+++python3 scripts/analyze-session.py powernap-night
+++```
+++
+++For the final analysis, provide every `YYYYMMDD-HHMMSS-NNN.csv` file from that session. Do not merge or edit them manually; the global `seq` column preserves ordering across segments.
+++
+++## Expected size
+++
+++Previous captures were approximately 7 MiB/hour at the current Samsung RAW rates. A full night may therefore produce tens of MiB. Rotation at 10 MiB keeps each individual file manageable while retaining all samples.
++diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/README.md /mnt/data/powernap_work/PowerNap/README.md
++--- /mnt/data/powernap_original/PowerNap/README.md	2026-09-24 18:52:06.000000000 +0000
+++++ /mnt/data/powernap_work/PowerNap/README.md	2026-09-24 20:55:46.743254143 +0000
++@@ -236,3 +236,7 @@
++ * `pull-sessions.sh` now uses a finite ADB timeout and explicit watch selection.
++ * Added `adb-watch-diagnostics.sh`.
++ * Samsung `SDK_POLICY_ERROR` message now includes the exact Health Sensor Service developer-mode path.
+++
+++## v0.2.3-nightcapture
+++
+++For collecting a real overnight RAW reference recording, use the dedicated **RAW sleep capture** mode. It does not stop at the current detector's `SLEEP_CONFIRMED` result and does not schedule the 10-minute alarm; recording continues until manual STOP. See `NIGHT_CAPTURE.md` for the exact procedure and updated pull command.
++diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/app/build.gradle /mnt/data/powernap_work/PowerNap/app/build.gradle
++--- /mnt/data/powernap_original/PowerNap/app/build.gradle	2026-09-24 17:28:12.000000000 +0000
+++++ /mnt/data/powernap_work/PowerNap/app/build.gradle	2026-09-24 20:53:07.002808693 +0000
++@@ -10,8 +10,8 @@
++         applicationId 'com.example.powernapwatch'
++         minSdk 30
++         targetSdk 36
++-        versionCode 2
++-        versionName '0.2.0'
+++        versionCode 3
+++        versionName '0.2.3-nightcapture'
++     }
++ 
++     flavorDimensions += 'sensors'
++diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/service/NapMonitoringService.java /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/service/NapMonitoringService.java
++--- /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/service/NapMonitoringService.java	2026-09-24 18:50:58.000000000 +0000
+++++ /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/service/NapMonitoringService.java	2026-09-24 20:54:01.241476078 +0000
++@@ -6,10 +6,13 @@
++ import android.app.Service;
++ import android.content.Intent;
++ import android.content.pm.ServiceInfo;
+++import android.os.BatteryManager;
++ import android.os.Build;
++ import android.os.Handler;
++ import android.os.IBinder;
++ import android.os.Looper;
+++import android.os.PowerManager;
+++import android.os.SystemClock;
++ import android.util.Log;
++ 
++ import com.example.powernapwatch.R;
++@@ -31,11 +34,13 @@
++     public static final String ACTION_STOP = "com.example.powernapwatch.STOP";
++     public static final String EXTRA_ENGINE = "sensor_engine";
++     public static final String EXTRA_LOGGING = "record_sensor_data";
+++    public static final String EXTRA_RAW_SLEEP_CAPTURE = "raw_sleep_capture";
++ 
++     private static final String TAG = "PowerNap";
++     private static final String CHANNEL = "power_nap_monitor";
++     private static final int NOTIFICATION_ID = 1101;
++     private static final long NAP_DURATION_MS = 10 * 60_000L;
+++    private static final long CAPTURE_HEARTBEAT_MS = 5 * 60_000L;
++ 
++     private final Handler mainHandler = new Handler(Looper.getMainLooper());
++     private SleepSignalSource source;
++@@ -43,6 +48,19 @@
++     private CsvSessionLogger logger;
++     private SessionStore store;
++     private boolean active;
+++    private boolean rawSleepCapture;
+++    private long captureStartElapsed;
+++    private long lastAccElapsed;
+++    private long lastHrElapsed;
+++    private long lastIbiElapsed;
+++
+++    private final Runnable captureHeartbeat = new Runnable() {
+++        @Override public void run() {
+++            if (!active || !rawSleepCapture) return;
+++            writeCaptureHeartbeat();
+++            mainHandler.postDelayed(this, CAPTURE_HEARTBEAT_MS);
+++        }
+++    };
++ 
++     @Override
++     public void onCreate() {
++@@ -59,41 +77,54 @@
++             return START_NOT_STICKY;
++         }
++         if (!active) startMonitoring(intent);
++-        return START_NOT_STICKY;
+++        return START_REDELIVER_INTENT;
++     }
++ 
++     private void startMonitoring(Intent intent) {
++-        Notification notification = monitorNotification("Collecting baseline...");
+++        UserPreferences preferences = new UserPreferences(this);
+++        rawSleepCapture = intent != null && intent.hasExtra(EXTRA_RAW_SLEEP_CAPTURE)
+++                ? intent.getBooleanExtra(EXTRA_RAW_SLEEP_CAPTURE, false)
+++                : preferences.rawSleepCaptureEnabled();
+++
+++        Notification notification = monitorNotification(rawSleepCapture
+++                ? "RAW sleep capture starting..."
+++                : "Collecting baseline...");
++         if (Build.VERSION.SDK_INT >= 29) {
++             startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH);
++         } else {
++             startForeground(NOTIFICATION_ID, notification);
++         }
++ 
++-        if (!NapAlarmScheduler.canScheduleExact(this)) {
+++        // A long RAW sleep capture deliberately has no power-nap alarm.
+++        if (!rawSleepCapture && !NapAlarmScheduler.canScheduleExact(this)) {
++             store.state(NapState.ERROR, "Exact alarm permission is required");
++             stopForeground(STOP_FOREGROUND_REMOVE);
++             stopSelf();
++             return;
++         }
++ 
++-        UserPreferences preferences = new UserPreferences(this);
++         SensorEngine selectedEngine = SensorEngine.fromName(
++                 intent == null ? null : intent.getStringExtra(EXTRA_ENGINE));
++         if (intent == null || !intent.hasExtra(EXTRA_ENGINE)) selectedEngine = preferences.engine();
++         boolean loggingEnabled = intent != null && intent.hasExtra(EXTRA_LOGGING)
++                 ? intent.getBooleanExtra(EXTRA_LOGGING, true)
++                 : preferences.loggingEnabled();
+++        if (rawSleepCapture) loggingEnabled = true;
++ 
++         preferences.engine(selectedEngine);
++         preferences.loggingEnabled(loggingEnabled);
+++        preferences.rawSleepCaptureEnabled(rawSleepCapture);
++         active = true;
+++        captureStartElapsed = SystemClock.elapsedRealtime();
+++        lastAccElapsed = captureStartElapsed;
+++        lastHrElapsed = captureStartElapsed;
+++        lastIbiElapsed = captureStartElapsed;
++ 
++         String loggingProblem = null;
++         if (loggingEnabled) {
++             try {
++                 logger = new CsvSessionLogger(this);
++-                Log.i(TAG, "Diagnostic CSV: " + logger.path());
+++                Log.i(TAG, "Diagnostic CSV session=" + logger.sessionId() + " file=" + logger.path());
++             } catch (IOException e) {
++                 loggingProblem = "CSV logger unavailable: " + e.getMessage();
++                 Log.e(TAG, loggingProblem, e);
++@@ -108,11 +139,18 @@
++         }
++ 
++         boolean loggingActive = logger != null;
++-        store.reset(selectedEngine.label(), source.name(), loggingActive, logger == null ? "" : logger.path());
+++        store.reset(selectedEngine.label(), source.name(), loggingActive, rawSleepCapture,
+++                logger == null ? "" : logger.path());
++         if (loggingProblem != null) store.providerMessage(source.name(), loggingProblem);
++-        if (logger != null) logger.writeSessionHeader(selectedEngine.label(), source.name());
+++        if (logger != null) {
+++            logger.writeSessionHeader(selectedEngine.label(), source.name(), rawSleepCapture);
+++            if (rawSleepCapture) {
+++                logger.event(System.currentTimeMillis(),
+++                        "RAW_SLEEP_CAPTURE_START no_alarm=true; stop_condition=USER_STOP");
+++            }
+++        }
++         Log.i(TAG, "Selected engine=" + selectedEngine + ", source=" + source.name()
++-                + ", logging=" + loggingEnabled);
+++                + ", logging=" + loggingEnabled + ", rawSleepCapture=" + rawSleepCapture);
++ 
++         SleepOnsetDetector.Config cfg = new SleepOnsetDetector.Config();
++         detector = new SleepOnsetDetector(cfg, new SleepOnsetDetector.Listener() {
++@@ -120,7 +158,9 @@
++             public void onSnapshot(DetectorSnapshot snapshot) {
++                 store.snapshot(snapshot);
++                 if (logger != null) logger.snapshot(snapshot);
++-                updateNotification(snapshot.state() + "  " + Math.round(snapshot.confidence() * 100) + "%");
+++                updateNotification(rawSleepCapture
+++                        ? "RAW capture • " + snapshot.state() + " • " + Math.round(snapshot.confidence() * 100) + "%"
+++                        : snapshot.state() + "  " + Math.round(snapshot.confidence() * 100) + "%");
++             }
++ 
++             @Override
++@@ -134,6 +174,7 @@
++             @Override
++             public void onAcceleration(long timestampMs, double x, double y, double z) {
++                 if (!active) return;
+++                lastAccElapsed = SystemClock.elapsedRealtime();
++                 if (logger != null) logger.accel(timestampMs, x, y, z);
++                 detector.onAcceleration(timestampMs, x, y, z);
++             }
++@@ -141,6 +182,7 @@
++             @Override
++             public void onHeartRate(long timestampMs, double bpm, int status) {
++                 if (!active) return;
+++                lastHrElapsed = SystemClock.elapsedRealtime();
++                 if (logger != null) logger.heart(timestampMs, bpm, status);
++                 detector.onHeartRate(timestampMs, bpm);
++             }
++@@ -148,6 +190,7 @@
++             @Override
++             public void onIbi(long timestampMs, double ibiMs, int status) {
++                 if (!active) return;
+++                lastIbiElapsed = SystemClock.elapsedRealtime();
++                 if (logger != null) logger.ibi(timestampMs, ibiMs, status);
++                 if (status == 0) detector.onIbi(timestampMs, ibiMs);
++             }
++@@ -181,11 +224,29 @@
++                 mainHandler.post(() -> failAndStop(errorMessage, error));
++             }
++         });
+++
+++        if (rawSleepCapture) {
+++            writeCaptureHeartbeat();
+++            mainHandler.removeCallbacks(captureHeartbeat);
+++            mainHandler.postDelayed(captureHeartbeat, CAPTURE_HEARTBEAT_MS);
+++        }
++     }
++ 
++     private synchronized void handleSleepConfirmed(long estimatedOnsetMs, double confidence) {
++         if (!active) return;
++         long now = System.currentTimeMillis();
+++
+++        if (rawSleepCapture) {
+++            if (logger != null) logger.event(now,
+++                    "DETECTOR_SLEEP_MARKER estimatedOnset=" + estimatedOnsetMs
+++                            + "; confidence=" + confidence
+++                            + "; action=CONTINUE_RAW_CAPTURE");
+++            store.state(NapState.SLEEP_CONFIRMED,
+++                    "Detector marked sleep; RAW capture continues until STOP.");
+++            updateNotification("RAW capture • sleep marker detected • recording continues");
+++            return;
+++        }
+++
++         long alarmAt = Math.max(now + 2_000, estimatedOnsetMs + NAP_DURATION_MS);
++         if (logger != null) logger.event(now, "SLEEP_CONFIRMED sleepOnset=" + estimatedOnsetMs
++                 + "; alarmAt=" + alarmAt + "; confidence=" + confidence);
++@@ -195,11 +256,36 @@
++ 
++         if (source != null) source.stop();
++         active = false;
+++        stopCaptureHeartbeat();
++         closeLogger();
++         stopForeground(STOP_FOREGROUND_REMOVE);
++         stopSelf();
++     }
++ 
+++    private void writeCaptureHeartbeat() {
+++        CsvSessionLogger l = logger;
+++        if (l == null) return;
+++        long now = SystemClock.elapsedRealtime();
+++        BatteryManager battery = (BatteryManager) getSystemService(BATTERY_SERVICE);
+++        int batteryPct = battery == null ? -1 : battery.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+++        PowerManager power = (PowerManager) getSystemService(POWER_SERVICE);
+++        boolean interactive = power != null && power.isInteractive();
+++        l.event(System.currentTimeMillis(),
+++                "CAPTURE_HEARTBEAT elapsed_ms=" + (now - captureStartElapsed)
+++                        + "; battery_pct=" + batteryPct
+++                        + "; interactive=" + interactive
+++                        + "; acc_age_ms=" + Math.max(0, now - lastAccElapsed)
+++                        + "; hr_age_ms=" + Math.max(0, now - lastHrElapsed)
+++                        + "; ibi_age_ms=" + Math.max(0, now - lastIbiElapsed)
+++                        + "; segment=" + l.segmentIndex()
+++                        + (l.lastError().isEmpty() ? "" : "; logger_error=" + l.lastError()));
+++        store.currentFile(l.path());
+++    }
+++
+++    private void stopCaptureHeartbeat() {
+++        mainHandler.removeCallbacks(captureHeartbeat);
+++    }
+++
++     private synchronized void failAndStop(String reason, Throwable error) {
++         if (!active) return;
++         Log.e(TAG, "Stopping after error: " + reason, error);
++@@ -209,6 +295,7 @@
++             try { source.stop(); } catch (Throwable ignored) { }
++         }
++         active = false;
+++        stopCaptureHeartbeat();
++         closeLogger();
++         stopForeground(STOP_FOREGROUND_REMOVE);
++         stopSelf();
++@@ -216,10 +303,14 @@
++ 
++     private synchronized void cancelAndStop(String reason) {
++         NapAlarmScheduler.cancel(this);
+++        stopCaptureHeartbeat();
++         if (source != null) {
++             try { source.stop(); } catch (Throwable ignored) { }
++         }
++-        if (logger != null) logger.event(System.currentTimeMillis(), reason);
+++        if (logger != null) {
+++            logger.event(System.currentTimeMillis(),
+++                    rawSleepCapture ? "RAW_SLEEP_CAPTURE_STOP " + reason : reason);
+++        }
++         active = false;
++         closeLogger();
++         store.state(NapState.CANCELLED, reason);
++@@ -237,7 +328,7 @@
++     private Notification monitorNotification(String text) {
++         return new Notification.Builder(this, CHANNEL)
++                 .setSmallIcon(R.drawable.ic_nap)
++-                .setContentTitle("Power Nap")
+++                .setContentTitle(rawSleepCapture ? "Power Nap • RAW sleep capture" : "Power Nap")
++                 .setContentText(text)
++                 .setOngoing(true)
++                 .setCategory(Notification.CATEGORY_SERVICE)
++@@ -257,6 +348,7 @@
++ 
++     @Override
++     public void onDestroy() {
+++        stopCaptureHeartbeat();
++         if (source != null && active) {
++             try { source.stop(); } catch (Throwable ignored) { }
++         }
++diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/ui/MainActivity.java /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/ui/MainActivity.java
++--- /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/ui/MainActivity.java	2026-09-24 17:26:18.000000000 +0000
+++++ /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/ui/MainActivity.java	2026-09-24 20:53:04.202674537 +0000
++@@ -48,6 +48,7 @@
++     private TextView message;
++     private Spinner engineSpinner;
++     private Switch loggingSwitch;
+++    private Switch rawSleepCaptureSwitch;
++     private List<SensorEngine> engines;
++     private boolean bindingControls;
++ 
++@@ -72,6 +73,7 @@
++         message = findViewById(R.id.message);
++         engineSpinner = findViewById(R.id.engineSpinner);
++         loggingSwitch = findViewById(R.id.loggingSwitch);
+++        rawSleepCaptureSwitch = findViewById(R.id.rawSleepCaptureSwitch);
++ 
++         Button start = findViewById(R.id.startButton);
++         Button stop = findViewById(R.id.stopButton);
++@@ -106,7 +108,9 @@
++                 message.setText("Grant sensor permissions, then press START again.");
++                 return;
++             }
++-            if (!NapAlarmScheduler.canScheduleExact(this)) {
+++
+++            boolean rawSleepCapture = rawSleepCaptureSwitch.isChecked();
+++            if (!rawSleepCapture && !NapAlarmScheduler.canScheduleExact(this)) {
++                 Toast.makeText(this, "Missing exact alarm permission", Toast.LENGTH_SHORT).show();
++                 requestExactAlarmAccess();
++                 message.setText("Grant exact-alarm access, then press START again.");
++@@ -114,16 +118,20 @@
++             }
++ 
++             SensorEngine selected = selectedEngine();
++-            boolean record = loggingSwitch.isChecked();
+++            boolean record = rawSleepCapture || loggingSwitch.isChecked();
++             preferences.engine(selected);
++             preferences.loggingEnabled(record);
+++            preferences.rawSleepCaptureEnabled(rawSleepCapture);
++ 
++             Intent i = new Intent(this, NapMonitoringService.class);
++             i.setAction(NapMonitoringService.ACTION_START);
++             i.putExtra(NapMonitoringService.EXTRA_ENGINE, selected.name());
++             i.putExtra(NapMonitoringService.EXTRA_LOGGING, record);
+++            i.putExtra(NapMonitoringService.EXTRA_RAW_SLEEP_CAPTURE, rawSleepCapture);
++             startForegroundService(i);
++-            message.setText("Starting " + selected.label() + (record ? " with CSV logging..." : "..."));
+++            message.setText(rawSleepCapture
+++                    ? "Starting RAW sleep capture. No nap alarm; recording continues until STOP."
+++                    : "Starting " + selected.label() + (record ? " with CSV logging..." : "..."));
++         });
++ 
++         stop.setOnClickListener(v -> {
++@@ -150,6 +158,11 @@
++         if (index < 0) index = 0;
++         engineSpinner.setSelection(index);
++         loggingSwitch.setChecked(preferences.loggingEnabled());
+++        rawSleepCaptureSwitch.setChecked(preferences.rawSleepCaptureEnabled());
+++        if (rawSleepCaptureSwitch.isChecked()) {
+++            loggingSwitch.setChecked(true);
+++            loggingSwitch.setEnabled(false);
+++        }
++         bindingControls = false;
++ 
++         engineSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
++@@ -161,6 +174,18 @@
++         loggingSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
++             if (!bindingControls) preferences.loggingEnabled(isChecked);
++         });
+++        rawSleepCaptureSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+++            if (bindingControls) return;
+++            preferences.rawSleepCaptureEnabled(isChecked);
+++            if (isChecked) {
+++                loggingSwitch.setChecked(true);
+++                loggingSwitch.setEnabled(false);
+++                preferences.loggingEnabled(true);
+++                message.setText("RAW sleep capture: no 10-minute alarm; recording ends only with STOP.");
+++            } else {
+++                loggingSwitch.setEnabled(true);
+++            }
+++        });
++     }
++ 
++     private SensorEngine selectedEngine() {
++@@ -222,7 +247,7 @@
++ 
++         if (s.loggingEnabled()) {
++             String file = s.file().isEmpty() ? "starting..." : new File(s.file()).getName();
++-            logStatus.setText("recording: ON  •  " + file);
+++            logStatus.setText((s.rawSleepCapture() ? "RAW SLEEP CAPTURE" : "recording: ON") + "  •  " + file);
++         } else {
++             logStatus.setText("recording: OFF");
++         }
++@@ -238,7 +263,9 @@
++                 "HR %s | RMSSD %s ms\nMotion %s | confidence %.0f%%",
++                 hr, rmssd, motion, s.confidence() * 100.0);
++ 
++-        if (s.alarmAtMs() > 0 && s.alarmAtMs() > System.currentTimeMillis()) {
+++        if (s.rawSleepCapture()) {
+++            text += "\nRAW capture runs until STOP";
+++        } else if (s.alarmAtMs() > 0 && s.alarmAtMs() > System.currentTimeMillis()) {
++             long sec = (s.alarmAtMs() - System.currentTimeMillis()) / 1000;
++             text += String.format(Locale.ROOT, "\nAlarm in %d:%02d", sec / 60, sec % 60);
++         }
++@@ -246,13 +273,15 @@
++ 
++         boolean monitoring = isMonitoringState(s.state());
++         engineSpinner.setEnabled(!monitoring);
++-        loggingSwitch.setEnabled(!monitoring);
+++        rawSleepCaptureSwitch.setEnabled(!monitoring);
+++        loggingSwitch.setEnabled(!monitoring && !rawSleepCaptureSwitch.isChecked());
++     }
++ 
++     private static boolean isMonitoringState(NapState state) {
++         return state == NapState.BASELINE
++                 || state == NapState.WAITING_FOR_SLEEP
++                 || state == NapState.SLEEP_CANDIDATE
++-                || state == NapState.SLEEP_CONFIRMED;
+++                || state == NapState.SLEEP_CONFIRMED
+++                || state == NapState.NAPPING;
++     }
++ }
++diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/util/CsvSessionLogger.java /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/util/CsvSessionLogger.java
++--- /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/util/CsvSessionLogger.java	2026-09-24 18:49:48.000000000 +0000
+++++ /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/util/CsvSessionLogger.java	2026-09-24 20:54:22.053781853 +0000
++@@ -2,6 +2,7 @@
++ 
++ import android.content.Context;
++ import android.os.Build;
+++import android.util.Log;
++ 
++ import com.example.powernapwatch.core.DetectorSnapshot;
++ 
++@@ -9,39 +10,57 @@
++ import java.io.File;
++ import java.io.FileWriter;
++ import java.io.IOException;
+++import java.nio.charset.StandardCharsets;
++ import java.text.SimpleDateFormat;
++ import java.util.Date;
++ import java.util.Locale;
++ 
++ /**
++- * Raw diagnostic logger. Besides the sensor timestamp it records when the app
++- * actually received each sample. delivery_delay_ms makes batching, stalls and
++- * timestamp anomalies visible during post-session analysis.
+++ * RAW diagnostic logger suitable for long sleep captures.
+++ *
+++ * Files are rotated so an overnight capture does not depend on one very large
+++ * file surviving until STOP. All segments share one session id and a global
+++ * sequence number, so they can be merged losslessly afterwards.
++  */
++ public final class CsvSessionLogger implements AutoCloseable {
+++    private static final String TAG = "PowerNap";
++     private static final int AUTO_FLUSH_LINES = 100;
++-
++-    private final BufferedWriter writer;
++-    private final File file;
+++    private static final long MAX_SEGMENT_BYTES = 10L * 1024L * 1024L;
+++    private static final String HEADER =
+++            "seq,type,sensor_timestamp_ms,received_timestamp_ms,delivery_delay_ms,x,y,z,hr,ibi,status,state,confidence,motion_rms,rmssd,reason\n";
+++
+++    private final File dir;
+++    private final String sessionId;
+++    private BufferedWriter writer;
+++    private File file;
++     private long sequence;
+++    private long bytesWritten;
++     private int pendingLines;
+++    private int segmentIndex;
+++    private boolean closed;
+++    private String lastError = "";
++ 
++     public CsvSessionLogger(Context context) throws IOException {
++-        File dir = new File(context.getFilesDir(), "sessions");
+++        dir = new File(context.getFilesDir(), "sessions");
++         if (!dir.exists() && !dir.mkdirs()) throw new IOException("Cannot create sessions directory");
++-        String name = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT).format(new Date()) + ".csv";
++-        file = new File(dir, name);
++-        writer = new BufferedWriter(new FileWriter(file, false), 64 * 1024);
++-        writer.write("seq,type,sensor_timestamp_ms,received_timestamp_ms,delivery_delay_ms,x,y,z,hr,ibi,status,state,confidence,motion_rms,rmssd,reason\n");
++-        writer.flush();
+++        sessionId = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT).format(new Date());
+++        openSegment(0, false);
++     }
++ 
++-    public String path() { return file.getAbsolutePath(); }
++-    public String fileName() { return file.getName(); }
++-
++-    public synchronized void writeSessionHeader(String selectedEngine, String effectiveProvider) {
++-        event(System.currentTimeMillis(), "SESSION_START selectedEngine=" + selectedEngine
+++    public synchronized String path() { return file == null ? "" : file.getAbsolutePath(); }
+++    public synchronized String fileName() { return file == null ? "" : file.getName(); }
+++    public String sessionId() { return sessionId; }
+++    public synchronized int segmentIndex() { return segmentIndex; }
+++    public synchronized String lastError() { return lastError; }
+++
+++    public synchronized void writeSessionHeader(String selectedEngine, String effectiveProvider,
+++                                                boolean rawSleepCapture) {
+++        event(System.currentTimeMillis(), "SESSION_START session_id=" + sessionId
+++                + "; selectedEngine=" + selectedEngine
++                 + "; provider=" + effectiveProvider
+++                + "; mode=" + (rawSleepCapture ? "RAW_SLEEP_CAPTURE" : "POWER_NAP")
+++                + "; rotate_bytes=" + MAX_SEGMENT_BYTES
+++                + "; usable_space_mb=" + (dir.getUsableSpace() / (1024L * 1024L))
++                 + "; device=" + Build.MANUFACTURER + " " + Build.MODEL
++                 + "; android=" + Build.VERSION.RELEASE
++                 + "; sdk=" + Build.VERSION.SDK_INT);
++@@ -73,34 +92,103 @@
++         line("EVENT", sensorT, received, null, null, null, null, null, null, null, null, null, null, text);
++     }
++ 
++-    /** Diagnostic metadata. Unlike EVENT it does not force an immediate fsync/flush. */
+++    /** Diagnostic metadata. Unlike EVENT it does not force an immediate flush. */
++     public synchronized void diagnostic(String text) {
++         long now = System.currentTimeMillis();
++         line("DIAG", now, now, null, null, null, null, null, null, null, null, null, null, text);
++     }
++ 
+++    public synchronized void flush() {
+++        if (writer == null) return;
+++        try {
+++            writer.flush();
+++            pendingLines = 0;
+++        } catch (IOException e) {
+++            recordFailure("flush", e);
+++        }
+++    }
+++
++     private void line(String type, long sensorT, long receivedT,
++                       Double x, Double y, Double z, Double hr, Double ibi,
++                       Integer status, String state, Double confidence, Double motion, Double rmssd,
++                       String reason) {
+++        if (closed || writer == null) return;
+++        String preview = row(sequence + 1, type, sensorT, receivedT, x, y, z, hr, ibi, status, state,
+++                confidence, motion, rmssd, reason);
+++        int rowBytes = preview.getBytes(StandardCharsets.UTF_8).length;
++         try {
++-            writer.write(Long.toString(++sequence)); writer.write(',');
++-            writer.write(type); writer.write(',');
++-            writer.write(Long.toString(sensorT)); writer.write(',');
++-            writer.write(Long.toString(receivedT)); writer.write(',');
++-            writer.write(Long.toString(receivedT - sensorT)); writer.write(',');
++-            writer.write(num(x)); writer.write(','); writer.write(num(y)); writer.write(','); writer.write(num(z)); writer.write(',');
++-            writer.write(num(hr)); writer.write(','); writer.write(num(ibi)); writer.write(',');
++-            writer.write(status == null ? "" : status.toString()); writer.write(',');
++-            writer.write(csv(state)); writer.write(','); writer.write(num(confidence)); writer.write(',');
++-            writer.write(num(motion)); writer.write(','); writer.write(num(rmssd)); writer.write(',');
++-            writer.write(csv(reason)); writer.write('\n');
+++            if (bytesWritten > HEADER.length() && bytesWritten + rowBytes > MAX_SEGMENT_BYTES) {
+++                rotate();
+++            }
+++            String row = row(++sequence, type, sensorT, receivedT, x, y, z, hr, ibi, status, state,
+++                    confidence, motion, rmssd, reason);
+++            rowBytes = row.getBytes(StandardCharsets.UTF_8).length;
+++            writer.write(row);
+++            bytesWritten += rowBytes;
++             pendingLines++;
++             if (pendingLines >= AUTO_FLUSH_LINES || "EVENT".equals(type)) {
++                 writer.flush();
++                 pendingLines = 0;
++             }
++-        } catch (IOException ignored) { }
+++        } catch (IOException e) {
+++            recordFailure("write", e);
+++        }
+++    }
+++
+++    private String row(long seq, String type, long sensorT, long receivedT,
+++                       Double x, Double y, Double z, Double hr, Double ibi,
+++                       Integer status, String state, Double confidence, Double motion, Double rmssd,
+++                       String reason) {
+++        StringBuilder b = new StringBuilder(192);
+++        b.append(seq).append(',').append(type).append(',')
+++                .append(sensorT).append(',').append(receivedT).append(',')
+++                .append(receivedT - sensorT).append(',')
+++                .append(num(x)).append(',').append(num(y)).append(',').append(num(z)).append(',')
+++                .append(num(hr)).append(',').append(num(ibi)).append(',')
+++                .append(status == null ? "" : status).append(',')
+++                .append(csv(state)).append(',').append(num(confidence)).append(',')
+++                .append(num(motion)).append(',').append(num(rmssd)).append(',')
+++                .append(csv(reason)).append('\n');
+++        return b.toString();
+++    }
+++
+++    private void rotate() throws IOException {
+++        String nextName = fileNameFor(segmentIndex + 1);
+++        long now = System.currentTimeMillis();
+++        String marker = row(++sequence, "EVENT", now, now,
+++                null, null, null, null, null, null, null, null, null, null,
+++                "SEGMENT_END next=" + nextName);
+++        writer.write(marker);
+++        writer.flush();
+++        writer.close();
+++        openSegment(segmentIndex + 1, true);
+++    }
+++
+++    private void openSegment(int index, boolean rotated) throws IOException {
+++        segmentIndex = index;
+++        file = new File(dir, fileNameFor(index));
+++        writer = new BufferedWriter(new FileWriter(file, false), 64 * 1024);
+++        writer.write(HEADER);
+++        bytesWritten = HEADER.getBytes(StandardCharsets.UTF_8).length;
+++        pendingLines = 0;
+++        if (rotated) {
+++            long now = System.currentTimeMillis();
+++            String marker = row(++sequence, "EVENT", now, now,
+++                    null, null, null, null, null, null, null, null, null, null,
+++                    "SEGMENT_START session_id=" + sessionId + "; segment=" + index);
+++            writer.write(marker);
+++            bytesWritten += marker.getBytes(StandardCharsets.UTF_8).length;
+++            writer.flush();
+++        }
+++    }
+++
+++    private String fileNameFor(int index) {
+++        return String.format(Locale.ROOT, "%s-%03d.csv", sessionId, index);
+++    }
+++
+++    private void recordFailure(String operation, IOException e) {
+++        lastError = operation + ": " + e.getMessage();
+++        Log.e(TAG, "CSV logger " + lastError, e);
++     }
++ 
++     private static String num(Double d) {
++@@ -115,7 +203,12 @@
++ 
++     @Override
++     public synchronized void close() {
++-        try { writer.flush(); } catch (IOException ignored) { }
++-        try { writer.close(); } catch (IOException ignored) { }
+++        if (closed) return;
+++        closed = true;
+++        if (writer != null) {
+++            try { writer.flush(); } catch (IOException e) { recordFailure("final flush", e); }
+++            try { writer.close(); } catch (IOException e) { recordFailure("close", e); }
+++            writer = null;
+++        }
++     }
++ }
++diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/util/SessionStore.java /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/util/SessionStore.java
++--- /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/util/SessionStore.java	2026-09-24 17:26:18.000000000 +0000
+++++ /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/util/SessionStore.java	2026-09-24 20:52:32.499486080 +0000
++@@ -14,12 +14,14 @@
++         p = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
++     }
++ 
++-    public void reset(String selectedEngine, String provider, boolean loggingEnabled, String file) {
+++    public void reset(String selectedEngine, String provider, boolean loggingEnabled,
+++                      boolean rawSleepCapture, String file) {
++         p.edit().clear()
++                 .putString("state", NapState.BASELINE.name())
++                 .putString("selectedEngine", selectedEngine)
++                 .putString("provider", provider)
++                 .putBoolean("loggingEnabled", loggingEnabled)
+++                .putBoolean("rawSleepCapture", rawSleepCapture)
++                 .putString("file", file == null ? "" : file)
++                 .apply();
++     }
++@@ -44,6 +46,10 @@
++         p.edit().putString("provider", provider).putString("message", message).apply();
++     }
++ 
+++    public void currentFile(String file) {
+++        p.edit().putString("file", file == null ? "" : file).apply();
+++    }
+++
++     public void napScheduled(long onsetAtMs, long alarmAtMs, double confidence) {
++         p.edit().putString("state", NapState.NAPPING.name())
++                 .putLong("onsetAt", onsetAtMs)
++@@ -62,6 +68,7 @@
++                 p.getString("selectedEngine", "--"),
++                 p.getString("provider", "--"),
++                 p.getBoolean("loggingEnabled", false),
+++                p.getBoolean("rawSleepCapture", false),
++                 p.getFloat("hr", Float.NaN),
++                 p.getFloat("baselineHr", Float.NaN),
++                 p.getFloat("motion", Float.NaN),
++@@ -74,7 +81,8 @@
++         );
++     }
++ 
++-    public record Snapshot(NapState state, String selectedEngine, String provider, boolean loggingEnabled,
+++    public record Snapshot(NapState state, String selectedEngine, String provider,
+++                           boolean loggingEnabled, boolean rawSleepCapture,
++                            float heartRate, float baselineHeartRate, float movement, float rmssd,
++                            float confidence, String message, long onsetAtMs, long alarmAtMs, String file) {}
++ }
++diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/util/UserPreferences.java /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/util/UserPreferences.java
++--- /mnt/data/powernap_original/PowerNap/app/src/main/java/com/example/powernapwatch/util/UserPreferences.java	2026-09-24 17:26:18.000000000 +0000
+++++ /mnt/data/powernap_work/PowerNap/app/src/main/java/com/example/powernapwatch/util/UserPreferences.java	2026-09-24 20:52:32.498036819 +0000
++@@ -9,6 +9,7 @@
++     private static final String PREFS = "power_nap_preferences";
++     private static final String KEY_ENGINE = "sensor_engine";
++     private static final String KEY_LOGGING = "record_sensor_data";
+++    private static final String KEY_RAW_SLEEP_CAPTURE = "raw_sleep_capture";
++ 
++     private final SharedPreferences preferences;
++ 
++@@ -31,4 +32,12 @@
++     public void loggingEnabled(boolean enabled) {
++         preferences.edit().putBoolean(KEY_LOGGING, enabled).apply();
++     }
+++
+++    public boolean rawSleepCaptureEnabled() {
+++        return preferences.getBoolean(KEY_RAW_SLEEP_CAPTURE, false);
+++    }
+++
+++    public void rawSleepCaptureEnabled(boolean enabled) {
+++        preferences.edit().putBoolean(KEY_RAW_SLEEP_CAPTURE, enabled).apply();
+++    }
++ }
++diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/app/src/main/res/layout/activity_main.xml /mnt/data/powernap_work/PowerNap/app/src/main/res/layout/activity_main.xml
++--- /mnt/data/powernap_original/PowerNap/app/src/main/res/layout/activity_main.xml	2026-09-24 17:26:18.000000000 +0000
+++++ /mnt/data/powernap_work/PowerNap/app/src/main/res/layout/activity_main.xml	2026-09-24 20:53:05.393198086 +0000
++@@ -66,6 +66,15 @@
++             android:textColor="#FFFFFF"
++             android:textSize="11sp" />
++ 
+++        <Switch
+++            android:id="@+id/rawSleepCaptureSwitch"
+++            android:layout_width="210dp"
+++            android:layout_height="wrap_content"
+++            android:layout_marginTop="2dp"
+++            android:text="RAW sleep capture"
+++            android:textColor="#FFFFFF"
+++            android:textSize="11sp" />
+++
++         <TextView
++             android:id="@+id/provider"
++             android:layout_width="match_parent"
++diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/scripts/analyze-session.py /mnt/data/powernap_work/PowerNap/scripts/analyze-session.py
++--- /mnt/data/powernap_original/PowerNap/scripts/analyze-session.py	2026-09-24 18:51:52.000000000 +0000
+++++ /mnt/data/powernap_work/PowerNap/scripts/analyze-session.py	2026-09-24 20:55:11.313285245 +0000
++@@ -3,13 +3,40 @@
++ from collections import Counter
++ from pathlib import Path
++ 
++-if len(sys.argv) != 2:
++-    print("Usage: analyze-session.py SESSION.csv", file=sys.stderr)
+++if len(sys.argv) < 2:
+++    print("Usage: analyze-session.py SESSION.csv [SEGMENT.csv ...] | DIRECTORY", file=sys.stderr)
++     sys.exit(2)
++ 
++-path = Path(sys.argv[1])
++-rows = list(csv.DictReader(path.open(newline='', encoding='utf-8')))
++-print(f"File: {path}")
+++inputs = [Path(x) for x in sys.argv[1:]]
+++if len(inputs) == 1 and inputs[0].is_dir():
+++    paths = sorted(inputs[0].glob('*.csv'))
+++else:
+++    paths = []
+++    for p in inputs:
+++        if any(ch in str(p) for ch in '*?['):
+++            paths.extend(sorted(Path('.').glob(str(p))))
+++        else:
+++            paths.append(p)
+++
+++if not paths:
+++    print("No CSV files found", file=sys.stderr)
+++    sys.exit(1)
+++
+++rows=[]
+++for path in paths:
+++    with path.open(newline='', encoding='utf-8') as f:
+++        for r in csv.DictReader(f):
+++            r['_file'] = path.name
+++            rows.append(r)
+++
+++# Rotated v0.2.3+ logs have a session-global sequence number.
+++def seq_key(r):
+++    try: return int(r.get('seq') or 0)
+++    except ValueError: return 0
+++rows.sort(key=seq_key)
+++
+++print("Files:")
+++for p in paths: print(f"  {p}")
++ print(f"Rows: {len(rows)}")
++ counts = Counter(r['type'] for r in rows)
++ print("Types:", dict(counts))
++@@ -60,7 +87,6 @@
++     print("Detector states:", dict(states))
++     if conf: print(f"Confidence max={max(conf)*100:.0f}% median={statistics.median(conf)*100:.0f}%")
++ 
++-# v0.2.2 source-level diagnostics
++ for label in ('HR','ACC'):
++     req=[]; complete=[]; skipped=[]
++     for r in rows:
++@@ -80,7 +106,13 @@
++         if complete:
++             print(f"  completion latency median={statistics.median(complete):.0f}ms max={max(complete)}ms")
++ 
+++heartbeats=[]
++ print("Events:")
++ for r in rows:
++     if r['type']=='EVENT':
++-        print(f"  {r['sensor_timestamp_ms']}: {r['reason']}")
+++        reason=r.get('reason','') or ''
+++        print(f"  {r['sensor_timestamp_ms']}: {reason}")
+++        if reason.startswith('CAPTURE_HEARTBEAT'):
+++            heartbeats.append(reason)
+++if heartbeats:
+++    print(f"Capture heartbeats: {len(heartbeats)}")
++diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/scripts/pull-latest-session.sh /mnt/data/powernap_work/PowerNap/scripts/pull-latest-session.sh
++--- /mnt/data/powernap_original/PowerNap/scripts/pull-latest-session.sh	2026-09-23 14:55:08.000000000 +0000
+++++ /mnt/data/powernap_work/PowerNap/scripts/pull-latest-session.sh	2026-09-24 20:55:11.310252819 +0000
++@@ -1,11 +1,4 @@
++ #!/usr/bin/env bash
++ set -euo pipefail
++-PKG="${1:-com.example.powernapwatch}"
++-REMOTE=$(adb shell "run-as $PKG sh -c 'ls -t files/sessions/*.csv 2>/dev/null | head -1'" | tr -d '\r')
++-if [[ -z "$REMOTE" ]]; then
++-  echo "No CSV session found for package $PKG" >&2
++-  exit 1
++-fi
++-OUT="$(basename "$REMOTE")"
++-adb exec-out run-as "$PKG" cat "$REMOTE" > "$OUT"
++-echo "Saved $OUT"
+++SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+++exec "$SCRIPT_DIR/pull-sessions.sh" --package "${1:-com.example.powernapwatch}" --latest --output "${2:-powernap-sessions}"
++diff -ruN '--exclude=.gradle' '--exclude=.idea' '--exclude=build' '--exclude=app/build' '--exclude=__pycache__' /mnt/data/powernap_original/PowerNap/scripts/pull-sessions.sh /mnt/data/powernap_work/PowerNap/scripts/pull-sessions.sh
++--- /mnt/data/powernap_original/PowerNap/scripts/pull-sessions.sh	2026-09-24 18:06:38.000000000 +0000
+++++ /mnt/data/powernap_work/PowerNap/scripts/pull-sessions.sh	2026-09-24 20:55:11.305631910 +0000
++@@ -5,30 +5,40 @@
++ MODE="--latest"
++ OUT_DIR="powernap-sessions"
++ SERIAL="${ANDROID_SERIAL:-}"
++-ADB_TIMEOUT="15"
+++ADB_TIMEOUT="120"
+++SESSION_ID=""
++ 
++ usage() {
++   cat <<USAGE
++ Usage:
++   $0 [PACKAGE] [--latest|--all] [OUT_DIR] [--serial SERIAL] [--timeout SECONDS]
+++  $0 --package PACKAGE --latest --output OUT_DIR [--serial SERIAL]
+++  $0 --package PACKAGE --session YYYYMMDD-HHMMSS --output OUT_DIR [--serial SERIAL]
+++
+++--latest pulls the complete newest session. For v0.2.3+ this means all rotated
+++segments (SESSION-000.csv, SESSION-001.csv, ...), not only the newest file.
++ 
++ Examples:
++-  $0
++-  $0 com.example.powernapwatch --latest
++-  $0 com.example.powernapwatch --all powernap-sessions
++-  $0 com.example.powernapwatch --latest powernap-sessions --serial 192.168.1.20:5555
+++  $0 --package com.example.powernapwatch --latest --output powernap-sessions
+++  $0 --package com.example.powernapwatch --all --output powernap-sessions
+++  $0 --package com.example.powernapwatch --session 20260924-230501 --output powernap-sessions
++ 
++ If ANDROID_SERIAL is set, it is used unless --serial is supplied.
++ USAGE
++ }
++ 
++-# Backwards-compatible positional arguments first.
+++# Backwards-compatible positional arguments.
++ if [[ $# -gt 0 && "$1" != --* ]]; then PKG="$1"; shift; fi
++ if [[ $# -gt 0 && ( "$1" == "--latest" || "$1" == "--all" ) ]]; then MODE="$1"; shift; fi
++ if [[ $# -gt 0 && "$1" != --* ]]; then OUT_DIR="$1"; shift; fi
++ 
++ while [[ $# -gt 0 ]]; do
++   case "$1" in
+++    --package) PKG="${2:?Missing value for --package}"; shift 2 ;;
+++    --latest) MODE="--latest"; SESSION_ID=""; shift ;;
+++    --all) MODE="--all"; SESSION_ID=""; shift ;;
+++    --session) MODE="--session"; SESSION_ID="${2:?Missing value for --session}"; shift 2 ;;
+++    --output) OUT_DIR="${2:?Missing value for --output}"; shift 2 ;;
++     --serial) SERIAL="${2:?Missing value for --serial}"; shift 2 ;;
++     --timeout) ADB_TIMEOUT="${2:?Missing value for --timeout}"; shift 2 ;;
++     -h|--help) usage; exit 0 ;;
++@@ -43,11 +53,10 @@
++   exit 1
++ fi
++ if ! command -v timeout >/dev/null 2>&1; then
++-  echo "ERROR: GNU timeout not found. Install coreutils or run the adb commands manually." >&2
+++  echo "ERROR: GNU timeout not found. Install coreutils or run adb manually." >&2
++   exit 1
++ fi
++ 
++-# Pick a device explicitly. This avoids adb waiting/ambiguity when both phone and watch are connected.
++ if [[ -z "$SERIAL" ]]; then
++   mapfile -t DEVICES < <(adb devices | awk 'NR>1 && $2=="device" {print $1}')
++   if [[ ${#DEVICES[@]} -eq 0 ]]; then
++@@ -67,30 +76,53 @@
++   timeout --foreground "${ADB_TIMEOUT}s" "${ADB[@]}" "$@"
++ }
++ 
+++shell_run_as() {
+++  local cmd="$1"
+++  run_adb shell "run-as $PKG sh -c '$cmd'"
+++}
+++
++ echo "ADB device: $SERIAL"
++ if ! run_adb get-state >/dev/null; then
++   echo "ERROR: watch is not responding to adb within ${ADB_TIMEOUT}s." >&2
++   adb devices -l >&2 || true
++-  echo "Tip: reconnect Wireless debugging / adb connect, then retry." >&2
++   exit 1
++ fi
++ 
++-# Verify run-as early so a non-debuggable/wrong package fails immediately instead of looking like a hang.
++-if ! run_adb shell run-as "$PKG" sh -c 'pwd >/dev/null' >/dev/null 2>&1; then
+++if ! shell_run_as 'pwd >/dev/null' >/dev/null 2>&1; then
++   echo "ERROR: 'run-as $PKG' failed. Is the debug build installed and is the package name correct?" >&2
++   exit 1
++ fi
++ 
++-list_remote() {
++-  run_adb shell run-as "$PKG" sh -c 'ls -1t files/sessions/*.csv 2>/dev/null' | tr -d '\r'
+++list_all() {
+++  shell_run_as 'ls -1t files/sessions/*.csv 2>/dev/null' | tr -d '\r'
+++}
+++
+++list_session() {
+++  local id="$1"
+++  shell_run_as "ls -1 files/sessions/${id}-*.csv 2>/dev/null | sort" | tr -d '\r'
++ }
++ 
++ REMOTE_LIST=""
++-if ! REMOTE_LIST="$(list_remote)"; then
++-  rc=$?
++-  echo "ERROR: listing session logs failed (adb timeout or connection error, rc=$rc)." >&2
++-  exit 1
++-fi
+++case "$MODE" in
+++  --all)
+++    REMOTE_LIST="$(list_all || true)"
+++    ;;
+++  --session)
+++    REMOTE_LIST="$(list_session "$SESSION_ID" || true)"
+++    ;;
+++  --latest)
+++    LATEST="$(list_all | head -n 1 || true)"
+++    if [[ -n "$LATEST" ]]; then
+++      base="$(basename "$LATEST")"
+++      if [[ "$base" =~ ^([0-9]{8}-[0-9]{6})-[0-9]{3}\.csv$ ]]; then
+++        SESSION_ID="${BASH_REMATCH[1]}"
+++        REMOTE_LIST="$(list_session "$SESSION_ID" || true)"
+++      else
+++        REMOTE_LIST="$LATEST"
+++      fi
+++    fi
+++    ;;
+++esac
++ 
++ mapfile -t FILES <<< "$REMOTE_LIST"
++ if [[ ${#FILES[@]} -eq 0 || -z "${FILES[0]:-}" ]]; then
++@@ -98,9 +130,7 @@
++   exit 1
++ fi
++ 
++-if [[ "$MODE" != "--all" ]]; then
++-  FILES=("${FILES[0]}")
++-fi
+++echo "Files to pull: ${#FILES[@]}${SESSION_ID:+ (session $SESSION_ID)}"
++ 
++ for remote in "${FILES[@]}"; do
++   [[ -z "$remote" ]] && continue

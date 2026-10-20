@@ -1,0 +1,20 @@
+com.example.powernapwatch
+drawable ic_nap
+id engineSpinner
+id engineTitle
+id exactAlarmButton
+id feedbackNo
+id feedbackPanel
+id feedbackYes
+id logStatus
+id loggingSwitch
+id message
+id metrics
+id permissionsButton
+id provider
+id startButton
+id state
+id title
+layout activity_main
+string app_name
+style AppTheme

@@ -1,0 +1,165 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.example.powernapwatch"
+4    android:versionCode="8"
+5    android:versionName="0.2.4-samsung" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="30"
+9        android:targetSdkVersion="36" />
+10
+11    <uses-feature
+11-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:4:5-88
+12        android:name="android.hardware.type.watch"
+12-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:4:19-61
+13        android:required="true" />
+13-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:4:62-85
+14    <uses-feature
+14-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:5:5-94
+15        android:name="android.hardware.sensor.heartrate"
+15-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:5:19-67
+16        android:required="true" />
+16-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:5:68-91
+17
+18    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+18-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:7:5-79
+18-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:7:22-76
+19    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+19-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:8:5-77
+19-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:8:22-74
+20    <uses-permission android:name="android.permission.VIBRATE" />
+20-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:9:5-66
+20-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:9:22-63
+21    <uses-permission android:name="android.permission.WAKE_LOCK" />
+21-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:10:5-68
+21-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:10:22-65
+22    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+22-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:11:5-77
+22-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:11:22-74
+23    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
+23-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:12:5-84
+23-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:12:22-81
+24    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+24-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:13:5-79
+24-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:13:22-76
+25
+26    <!-- Wear OS Body Sensors & Background -->
+27    <uses-permission
+27-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:16:5-98
+28        android:name="android.permission.BODY_SENSORS"
+28-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:16:22-68
+29        android:maxSdkVersion="35" />
+29-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:16:69-95
+30    <uses-permission
+30-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:17:5-109
+31        android:name="android.permission.BODY_SENSORS_BACKGROUND"
+31-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:17:22-79
+32        android:maxSdkVersion="35" />
+32-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:17:80-106
+33
+34    <!-- Health data permissions -->
+35    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
+35-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:20:5-81
+35-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:20:22-78
+36    <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" />
+36-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:21:5-96
+36-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:21:22-93
+37
+38    <queries>
+38-->[samsung-health-sensor-api.aar] /home/user/.gradle/caches/9.1.0/transforms/4dcb5e157af04b19a0117d831d25cbd4/transformed/samsung-health-sensor-api/AndroidManifest.xml:7:5-9:15
+39        <package android:name="com.sec.android.app.samsungapps" />
+39-->[samsung-health-sensor-api.aar] /home/user/.gradle/caches/9.1.0/transforms/4dcb5e157af04b19a0117d831d25cbd4/transformed/samsung-health-sensor-api/AndroidManifest.xml:8:9-67
+39-->[samsung-health-sensor-api.aar] /home/user/.gradle/caches/9.1.0/transforms/4dcb5e157af04b19a0117d831d25cbd4/transformed/samsung-health-sensor-api/AndroidManifest.xml:8:18-64
+40        <package android:name="com.google.android.wearable.healthservices" />
+40-->[androidx.health:health-services-client:1.1.0] /home/user/.gradle/caches/9.1.0/transforms/1b84a29c2c3495b98a94d6a62fcbb58d/transformed/health-services-client-1.1.0/AndroidManifest.xml:20:9-78
+40-->[androidx.health:health-services-client:1.1.0] /home/user/.gradle/caches/9.1.0/transforms/1b84a29c2c3495b98a94d6a62fcbb58d/transformed/health-services-client-1.1.0/AndroidManifest.xml:20:18-75
+41    </queries>
+42    <queries>
+42-->[samsung-health-sensor-api.aar] /home/user/.gradle/caches/9.1.0/transforms/4dcb5e157af04b19a0117d831d25cbd4/transformed/samsung-health-sensor-api/AndroidManifest.xml:7:5-9:15
+43        <package android:name="com.samsung.android.service.health" />
+44    </queries>
+45
+46    <application
+46-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:23:5-57:19
+47        android:allowBackup="false"
+47-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:24:9-36
+48        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+48-->[androidx.core:core:1.7.0] /home/user/.gradle/caches/9.1.0/transforms/e2e12c01af8f99e8a4f0dad01d30788c/transformed/core-1.7.0/AndroidManifest.xml:24:18-86
+49        android:debuggable="true"
+50        android:extractNativeLibs="false"
+51        android:icon="@drawable/ic_nap"
+51-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:25:9-40
+52        android:label="Power Nap Lab"
+52-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:26:9-38
+53        android:supportsRtl="true"
+53-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:27:9-35
+54        android:theme="@style/AppTheme" >
+54-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:28:9-40
+55        <activity
+55-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:30:9-37:20
+56            android:name="com.example.powernapwatch.ui.MainActivity"
+56-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:31:13-44
+57            android:exported="true" >
+57-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:32:13-36
+58            <intent-filter>
+58-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:33:13-36:29
+59                <action android:name="android.intent.action.MAIN" />
+59-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:34:17-69
+59-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:34:25-66
+60
+61                <category android:name="android.intent.category.LAUNCHER" />
+61-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:35:17-77
+61-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:35:27-74
+62            </intent-filter>
+63        </activity>
+64
+65        <service
+65-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:39:9-42:54
+66            android:name="com.example.powernapwatch.service.NapMonitoringService"
+66-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:40:13-57
+67            android:exported="false"
+67-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:41:13-37
+68            android:foregroundServiceType="health" />
+68-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:42:13-51
+69
+70        <receiver
+70-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:44:9-46:40
+71            android:name="com.example.powernapwatch.service.NapAlarmReceiver"
+71-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:45:13-53
+72            android:exported="false" />
+72-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:46:13-37
+73
+74        <service
+74-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:48:9-51:60
+75            android:name="com.example.powernapwatch.service.NapAlarmService"
+75-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:49:13-52
+76            android:exported="false"
+76-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:50:13-37
+77            android:foregroundServiceType="shortService" />
+77-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:51:13-57
+78
+79        <receiver
+79-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:53:9-55:40
+80            android:name="com.example.powernapwatch.service.StopAlarmReceiver"
+80-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:54:13-54
+81            android:exported="false" />
+81-->/work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/AndroidManifest.xml:55:13-37
+82
+83        <service
+83-->[androidx.health:health-services-client:1.1.0] /home/user/.gradle/caches/9.1.0/transforms/1b84a29c2c3495b98a94d6a62fcbb58d/transformed/health-services-client-1.1.0/AndroidManifest.xml:24:9-31:19
+84            android:name="androidx.health.services.client.VersionApiService"
+84-->[androidx.health:health-services-client:1.1.0] /home/user/.gradle/caches/9.1.0/transforms/1b84a29c2c3495b98a94d6a62fcbb58d/transformed/health-services-client-1.1.0/AndroidManifest.xml:25:13-77
+85            android:exported="true"
+85-->[androidx.health:health-services-client:1.1.0] /home/user/.gradle/caches/9.1.0/transforms/1b84a29c2c3495b98a94d6a62fcbb58d/transformed/health-services-client-1.1.0/AndroidManifest.xml:26:13-36
+86            android:permission="com.google.android.wearable.healthservices.permission.PASSIVE_DATA_BINDING" >
+86-->[androidx.health:health-services-client:1.1.0] /home/user/.gradle/caches/9.1.0/transforms/1b84a29c2c3495b98a94d6a62fcbb58d/transformed/health-services-client-1.1.0/AndroidManifest.xml:27:13-108
+87            <intent-filter>
+87-->[androidx.health:health-services-client:1.1.0] /home/user/.gradle/caches/9.1.0/transforms/1b84a29c2c3495b98a94d6a62fcbb58d/transformed/health-services-client-1.1.0/AndroidManifest.xml:28:13-30:29
+88                <action android:name="hs.versionclient.BIND" />
+88-->[androidx.health:health-services-client:1.1.0] /home/user/.gradle/caches/9.1.0/transforms/1b84a29c2c3495b98a94d6a62fcbb58d/transformed/health-services-client-1.1.0/AndroidManifest.xml:29:17-64
+88-->[androidx.health:health-services-client:1.1.0] /home/user/.gradle/caches/9.1.0/transforms/1b84a29c2c3495b98a94d6a62fcbb58d/transformed/health-services-client-1.1.0/AndroidManifest.xml:29:25-61
+89            </intent-filter>
+90        </service>
+91    </application>
+92
+93</manifest>

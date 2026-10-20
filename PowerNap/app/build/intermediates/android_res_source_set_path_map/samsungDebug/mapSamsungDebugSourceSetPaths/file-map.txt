@@ -1,0 +1,14 @@
+com.example.powernapwatch.app-health-services-client-1.1.0-0 /home/user/.gradle/caches/9.1.0/transforms/1b84a29c2c3495b98a94d6a62fcbb58d/transformed/health-services-client-1.1.0/res
+com.example.powernapwatch.app-annotation-experimental-1.1.0-1 /home/user/.gradle/caches/9.1.0/transforms/6c619ecdcc6e2c4a3161037f76457e07/transformed/annotation-experimental-1.1.0/res
+com.example.powernapwatch.app-core-ktx-1.7.0-2 /home/user/.gradle/caches/9.1.0/transforms/d91a1f6ff50611bfb720ddb71d7470ed/transformed/core-ktx-1.7.0/res
+com.example.powernapwatch.app-lifecycle-runtime-2.3.1-3 /home/user/.gradle/caches/9.1.0/transforms/e043f9ab23b8e33c70e3cb137e5e2ccf/transformed/lifecycle-runtime-2.3.1/res
+com.example.powernapwatch.app-core-1.7.0-4 /home/user/.gradle/caches/9.1.0/transforms/e2e12c01af8f99e8a4f0dad01d30788c/transformed/core-1.7.0/res
+com.example.powernapwatch.app-samsung-5 /work/projects/github.com/mikoreg/sandbox/PowerNap/app/build/generated/res/pngs/samsung/debug
+com.example.powernapwatch.app-updated_navigation_xml-6 /work/projects/github.com/mikoreg/sandbox/PowerNap/app/build/generated/updated_navigation_xml/samsungDebug
+com.example.powernapwatch.app-packageSamsungDebugResources-7 /work/projects/github.com/mikoreg/sandbox/PowerNap/app/build/intermediates/incremental/samsungDebug/packageSamsungDebugResources/merged.dir
+com.example.powernapwatch.app-packageSamsungDebugResources-8 /work/projects/github.com/mikoreg/sandbox/PowerNap/app/build/intermediates/incremental/samsungDebug/packageSamsungDebugResources/stripped.dir
+com.example.powernapwatch.app-samsungDebug-9 /work/projects/github.com/mikoreg/sandbox/PowerNap/app/build/intermediates/merged_res/samsungDebug/mergeSamsungDebugResources
+com.example.powernapwatch.app-debug-10 /work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/debug/res
+com.example.powernapwatch.app-main-11 /work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/main/res
+com.example.powernapwatch.app-samsung-12 /work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/samsung/res
+com.example.powernapwatch.app-samsungDebug-13 /work/projects/github.com/mikoreg/sandbox/PowerNap/app/src/samsungDebug/res

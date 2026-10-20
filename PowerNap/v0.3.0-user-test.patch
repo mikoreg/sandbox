@@ -1,0 +1,2178 @@
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/BUILD_REQUIRED.txt /mnt/data/PowerNap-v0.3.0-user-test/BUILD_REQUIRED.txt
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/BUILD_REQUIRED.txt	2026-09-24 20:58:09.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/BUILD_REQUIRED.txt	2026-09-25 11:12:27.128411111 +0000
+@@ -1,10 +1,12 @@
+-This source package intentionally contains no APK from older versions.
+-Build a fresh samsungDebug APK after extracting:
++PowerNap v0.3.0-user-test
+ 
+-  ./gradlew :app:assembleSamsungDebug
++Build the Samsung flavor on the development workstation:
+ 
+-Then install it on the watch, for example:
++    ./gradlew :app:assembleSamsungDebug
+ 
+-  adb -s "$ANDROID_SERIAL" install -r app/build/outputs/apk/samsung/debug/app-samsung-debug.apk
++APK:
+ 
+-Use NIGHT_CAPTURE.md for tonight's RAW sleep-capture procedure.
++    app/build/outputs/apk/samsung/debug/app-samsung-debug.apk
++
++Recommended validation settings are in USER_TEST.md.
++The alarm is always enabled and targets detected sleep onset + 10 minutes.
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/CHANGELOG-v0.3.0-user-test.md /mnt/data/PowerNap-v0.3.0-user-test/CHANGELOG-v0.3.0-user-test.md
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/CHANGELOG-v0.3.0-user-test.md	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/CHANGELOG-v0.3.0-user-test.md	2026-09-25 11:10:37.243120417 +0000
+@@ -0,0 +1,23 @@
++# PowerNap v0.3.0-user-test
++
++This build switches back from overnight capture to real PowerNap behavior while retaining diagnostic controls.
++
++## Behavior
++
++- Alarm is always enabled and scheduled for `estimated sleep onset + 10 minutes`.
++- Exact-alarm permission is required for every normal session.
++- Sleep candidate confirmation was increased from 45 s to 120 s after two recorded quiet-awake false positives.
++- `Keep RAW until alarm` no longer disables the alarm. It keeps ACC/HR/IBI logging alive after sleep detection and closes the monitoring service when the alarm fires.
++- `Record RAW sensor data`, sensor-engine selection, permissions, and exact-alarm controls remain visible during field validation.
++- Application/UI label is now `Power Nap` rather than `Power Nap Lab`.
++
++## Replay evidence used for this build
++
++- Both previously recorded quiet-awake sessions no longer reach `SLEEP_CONFIRMED` with the 120 s confirmation window.
++- Replaying the 24/25 Sep real-sleep session with the new default gives approximately:
++  - estimated onset: 23:15:24
++  - confirmation: 23:17:56
++  - resulting alarm target: 23:25:24
++- Samsung Health placed sleep onset around 23:14 (screen-derived reference), so this deliberately conservative detector is late rather than early.
++
++This is still a user-test build, not a medical sleep classifier.
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/IMPLEMENTATION_NOTES.md /mnt/data/PowerNap-v0.3.0-user-test/IMPLEMENTATION_NOTES.md
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/IMPLEMENTATION_NOTES.md	2026-09-24 18:05:10.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/IMPLEMENTATION_NOTES.md	2026-09-25 11:12:27.128492280 +0000
+@@ -6,7 +6,7 @@
+ 
+ ## Why Samsung data are explicitly flushed
+ 
+-Samsung Health Sensor SDK batches continuous samples after the display turns off. Power Nap cannot wait for the normal batch interval, so `SamsungHealthSensorSource` calls `flush()` on HR and accelerometer trackers every 10 seconds while waiting for sleep.
++Samsung Health Sensor SDK batches continuous samples after the display turns off. Power Nap cannot wait for the normal batch interval, so `SamsungHealthSensorSource` calls `flush()` on HR and accelerometer trackers every 5 seconds while waiting for sleep.
+ 
+ The detector processes the timestamps belonging to the samples and estimates the onset retrospectively. Therefore the timer is not `callback time + 10 minutes`; it is `estimated sleep onset + 10 minutes`.
+ 
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/NIGHT_CAPTURE.md /mnt/data/PowerNap-v0.3.0-user-test/NIGHT_CAPTURE.md
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/NIGHT_CAPTURE.md	2026-09-24 20:55:46.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/NIGHT_CAPTURE.md	2026-09-25 11:12:27.128261842 +0000
+@@ -1,69 +1,8 @@
+-# PowerNap v0.2.3-nightcapture — overnight RAW capture
++# Historical note: v0.2.3 night-capture mode
+ 
+-This build is intended to collect a real **awake -> sleep -> sleeping** session before we redesign the sleep-onset detector.
++The no-alarm overnight mode was used only to collect the first full-night reference recording.
++It is **not** the behavior of v0.3.0-user-test.
+ 
+-## What is different
+-
+-`RAW sleep capture` is a dedicated laboratory mode:
+-
+-- CSV RAW logging is forced ON.
+-- The existing detector still runs and writes `SNAP` rows and a `DETECTOR_SLEEP_MARKER` event.
+-- A detector `SLEEP_CONFIRMED` result **does not stop sensors**.
+-- No 10-minute power-nap alarm is scheduled in this mode.
+-- Capture continues until the user presses **STOP / CANCEL**.
+-- RAW CSV is rotated at 10 MiB into one logical session:
+-  - `YYYYMMDD-HHMMSS-000.csv`
+-  - `YYYYMMDD-HHMMSS-001.csv`
+-  - ...
+-- Every 5 minutes an event `CAPTURE_HEARTBEAT` records battery percentage, screen interactive state, and age of the last ACC/HR/IBI callback.
+-- The monitoring service uses `START_REDELIVER_INTENT`, so Android can restart it with the same start intent if the service process is reclaimed.
+-
+-## Tonight's recommended setup
+-
+-1. Install/build the **samsungDebug** flavor.
+-2. On the watch open **Power Nap Lab**.
+-3. Select **Samsung Health Sensor SDK** as `READ ENGINE` so the whole recording uses one known sensor path. Avoid `Auto` for this reference recording unless Samsung SDK cannot start.
+-4. Enable **RAW sleep capture**. `Record sensor data` is automatically enabled and locked ON.
+-5. Make sure sensor/background permissions are granted.
+-6. Exact-alarm permission is not required for RAW sleep capture because this mode intentionally schedules no nap alarm.
+-7. Wear the watch normally and reasonably snugly. Start with enough battery for the intended capture and avoid enabling battery-saver mode during the experiment if possible.
+-8. Press **START** shortly before trying to sleep. From then on, leave the app alone.
+-9. If the UI later says `SLEEP_CONFIRMED`, that is only the old detector's marker. **Recording continues.**
+-10. After waking, open the app and press **STOP / CANCEL** before pulling files.
+-
+-## Pull the complete newest session
+-
+-If one watch is connected:
+-
+-```bash
+-./scripts/pull-sessions.sh \
+-  --package com.example.powernapwatch \
+-  --latest \
+-  --output powernap-night \
+-  --timeout 180
+-```
+-
+-If ADB sees more than one device, add the watch serial:
+-
+-```bash
+-./scripts/pull-sessions.sh \
+-  --package com.example.powernapwatch \
+-  --latest \
+-  --output powernap-night \
+-  --serial 'YOUR_WATCH_SERIAL' \
+-  --timeout 180
+-```
+-
+-`--latest` now detects rotated files and downloads **all segments belonging to the newest session**.
+-
+-## Quick integrity check
+-
+-```bash
+-python3 scripts/analyze-session.py powernap-night
+-```
+-
+-For the final analysis, provide every `YYYYMMDD-HHMMSS-NNN.csv` file from that session. Do not merge or edit them manually; the global `seq` column preserves ordering across segments.
+-
+-## Expected size
+-
+-Previous captures were approximately 7 MiB/hour at the current Samsung RAW rates. A full night may therefore produce tens of MiB. Rotation at 10 MiB keeps each individual file manageable while retaining all samples.
++For current use see `USER_TEST.md`. In v0.3.0 the alarm is always scheduled for
++`estimated sleep onset + 10 minutes`. The `Keep RAW until alarm` switch only keeps
++raw sensor recording alive through the nap so field behavior can still be validated.
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/README.md /mnt/data/PowerNap-v0.3.0-user-test/README.md
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/README.md	2026-09-24 20:55:46.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/README.md	2026-09-25 11:12:27.128728898 +0000
+@@ -1,8 +1,8 @@
+-# PowerNapWatch v0.2.2
++# PowerNap v0.3.0-user-test
+ 
+ # PowerNapWatch4 v0.2 diagnostics
+ 
+-This revision adds **runtime sensor-engine selection** and an explicit **Record sensor data** switch.
++This user-test revision keeps **runtime sensor-engine selection** and diagnostic RAW controls visible while restoring normal PowerNap alarm behavior.
+ 
+ **Important:** the AAR that was present in the previously supplied project was a compile-only stub (its service and tracker methods were no-ops). v0.2 source archives intentionally do not ship that file. Download the official Samsung Health Sensor SDK v1.4.1 AAR and run `./scripts/check-samsung-sdk.sh` before building `samsungDebug`.
+ 
+@@ -14,7 +14,7 @@
+ 
+ The `standardDebug` build exposes Auto and Wear OS only.
+ 
+-The `Record sensor data` switch is persisted. When enabled, the session CSV contains raw ACC/HR/IBI samples, detector snapshots and events. New diagnostic columns include both `sensor_timestamp_ms` and `received_timestamp_ms`; `delivery_delay_ms` makes Samsung batching, stalls and delayed callbacks directly measurable.
++The `Record RAW sensor data` switch is persisted. When enabled, the session CSV contains raw ACC/HR/IBI samples, detector snapshots and events. New diagnostic columns include both `sensor_timestamp_ms` and `received_timestamp_ms`; `delivery_delay_ms` makes Samsung batching, stalls and delayed callbacks directly measurable.
+ 
+ Pull the newest recording:
+ 
+@@ -115,7 +115,7 @@
+ 
+ * `HEART_RATE_CONTINUOUS` — HR + IBI
+ * `ACCELEROMETER_CONTINUOUS` — 25 Hz
+-* an explicit `flush()` every 10 seconds while waiting for sleep, because Samsung batches continuous data when the display is off.
++* an explicit `flush()` every 5 seconds while waiting for sleep, because Samsung batches continuous data when the display is off.
+ 
+ ## Enable Samsung Health Sensor Service developer mode
+ 
+@@ -164,7 +164,7 @@
+ 
+ ## First run
+ 
+-The UI has an engine selector, a `Record sensor data` switch, and four actions:
++The UI has an engine selector, `Record RAW sensor data`, `Keep RAW until alarm`, and four actions:
+ 
+ * `PERMISSIONS` — grants activity, HR, notification and background health/sensor permissions. Background permission is intentionally requested as a separate step.
+ * `EXACT ALARM` — grants special exact-alarm access.
+@@ -177,13 +177,13 @@
+ BASELINE -> WAITING_FOR_SLEEP -> SLEEP_CANDIDATE -> SLEEP_CONFIRMED -> NAPPING -> ALARMING -> FINISHED
+ ```
+ 
+-Once sleep is confirmed, sensor tracking is stopped and an exact `AlarmManager` alarm is scheduled for:
++Once sleep is confirmed, an exact `AlarmManager` alarm is scheduled for:
+ 
+ ```text
+ estimatedSleepOnset + 10 minutes
+ ```
+ 
+-The detector deliberately backdates sleep onset rather than starting the 10-minute timer at the later confirmation callback.
++The detector deliberately estimates the earlier sleep-onset boundary rather than starting the 10-minute timer at the later confirmation callback. If `Keep RAW until alarm` is OFF, sensor tracking stops after scheduling. If it is ON, ACC/HR/IBI collection continues until the alarm fires so real-world behavior can still be inspected.
+ 
+ ## Diagnostic CSV
+ 
+@@ -216,7 +216,7 @@
+ * HR trend,
+ * RMSSD if IBI is available,
+ * sustained quiet time,
+-* 45 s candidate confirmation with hysteresis.
++* 120 s candidate confirmation with hysteresis, chosen conservatively after quiet-awake false positives.
+ 
+ These thresholds are intentionally conservative placeholders. The next engineering step is to collect several labelled sessions (`awake`, `trying to sleep`, `actual nap`) and tune them from Watch4 data rather than guessing fixed thresholds.
+ 
+@@ -237,6 +237,10 @@
+ * Added `adb-watch-diagnostics.sh`.
+ * Samsung `SDK_POLICY_ERROR` message now includes the exact Health Sensor Service developer-mode path.
+ 
+-## v0.2.3-nightcapture
++## v0.3.0-user-test
+ 
+-For collecting a real overnight RAW reference recording, use the dedicated **RAW sleep capture** mode. It does not stop at the current detector's `SLEEP_CONFIRMED` result and does not schedule the 10-minute alarm; recording continues until manual STOP. See `NIGHT_CAPTURE.md` for the exact procedure and updated pull command.
++This is the current field-validation build. The alarm is always active and is scheduled for `estimatedSleepOnset + 10 minutes`.
++
++For validation, enable **Record RAW sensor data** and **Keep RAW until alarm**. The second switch does not disable the alarm; it only keeps raw sensor acquisition alive during the 10-minute nap and stops it when the alarm fires.
++
++The sleep-candidate confirmation interval is now 120 seconds. Replaying both previously recorded quiet-awake sessions no longer confirms sleep, while the real-sleep night still confirms and produces an onset close to the Samsung Health reference. See `USER_TEST.md` and `CHANGELOG-v0.3.0-user-test.md`.
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/USER_TEST.md /mnt/data/PowerNap-v0.3.0-user-test/USER_TEST.md
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/USER_TEST.md	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/USER_TEST.md	2026-09-25 11:10:37.243153415 +0000
+@@ -0,0 +1,20 @@
++# PowerNap user-test checklist
++
++Recommended settings on Galaxy Watch during validation:
++
++- Read engine: `Samsung Health Sensor SDK`
++- Record RAW sensor data: `ON`
++- Keep RAW until alarm: `ON`
++- Exact alarm permission: granted
++
++Expected flow:
++
++1. Press START just before trying to nap.
++2. The detector collects baseline and waits for a stable sleep candidate.
++3. A candidate must remain plausible for 120 seconds.
++4. When sleep is confirmed, the alarm is scheduled for estimated onset + 10 minutes.
++5. With `Keep RAW until alarm` enabled, sensor logging continues during the nap.
++6. At the alarm boundary monitoring is stopped and the wake-up vibration starts.
++7. Press STOP on the alarm.
++
++For field reports, preserve the CSV session and note whether the alarm felt early, correct, or late.
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/build.gradle /mnt/data/PowerNap-v0.3.0-user-test/app/build.gradle
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/build.gradle	2026-09-24 20:53:07.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/app/build.gradle	2026-09-25 11:10:37.242175199 +0000
+@@ -10,8 +10,8 @@
+         applicationId 'com.example.powernapwatch'
+         minSdk 30
+         targetSdk 36
+-        versionCode 3
+-        versionName '0.2.3-nightcapture'
++        versionCode 4
++        versionName '0.3.0-user-test'
+     }
+ 
+     flavorDimensions += 'sensors'
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/AndroidManifest.xml /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/AndroidManifest.xml
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/AndroidManifest.xml	2026-09-24 17:26:18.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/AndroidManifest.xml	2026-09-25 11:10:37.242487507 +0000
+@@ -23,7 +23,7 @@
+     <application
+         android:allowBackup="false"
+         android:icon="@drawable/ic_nap"
+-        android:label="Power Nap Lab"
++        android:label="Power Nap"
+         android:supportsRtl="true"
+         android:theme="@style/AppTheme">
+ 
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/java/com/example/powernapwatch/core/SleepOnsetDetector.java /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/java/com/example/powernapwatch/core/SleepOnsetDetector.java
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/java/com/example/powernapwatch/core/SleepOnsetDetector.java	2026-09-24 18:51:14.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/java/com/example/powernapwatch/core/SleepOnsetDetector.java	2026-09-25 11:10:37.242330887 +0000
+@@ -7,10 +7,12 @@
+ import java.util.List;
+ 
+ /**
+- * Experimental Wake -> Sleep onset detector.
++ * Wake -> Sleep onset detector used by the PowerNap user-test build.
+  *
+- * This is deliberately transparent and heuristic. It is meant to be tuned with
+- * real CSV sessions from the watch, not treated as a medical sleep classifier.
++ * The detector is deliberately conservative: a candidate must remain plausible
++ * for two minutes before it is accepted. This is intentional after recorded
++ * quiet-awake sessions showed that immobility + a falling heart rate can mimic
++ * sleep. It remains a transparent heuristic, not a medical sleep classifier.
+  */
+ public final class SleepOnsetDetector {
+ 
+@@ -25,7 +27,7 @@
+         public long motionWindowMs = 30_000;
+         public long heartWindowMs = 30_000;
+         public long hrvWindowMs = 45_000;
+-        public long candidateConfirmMs = 45_000;
++        public long candidateConfirmMs = 120_000;
+         public long quietFallbackMs = 120_000;
+ 
+         public double quietMotionRms = 0.18;
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/java/com/example/powernapwatch/service/NapAlarmReceiver.java /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/java/com/example/powernapwatch/service/NapAlarmReceiver.java
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/java/com/example/powernapwatch/service/NapAlarmReceiver.java	2026-09-23 20:27:06.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/java/com/example/powernapwatch/service/NapAlarmReceiver.java	2026-09-25 11:10:37.242917058 +0000
+@@ -11,8 +11,11 @@
+ public final class NapAlarmReceiver extends BroadcastReceiver {
+     @Override
+     public void onReceive(Context context, Intent intent) {
+-        Log.i("PowerNap", "NapAlarmReceiver onReceive: Alarm fired! Starting NapAlarmService...");
+-        new SessionStore(context).state(NapState.ALARMING, "Wake up");
++        Log.i("PowerNap", "NapAlarmReceiver onReceive: Alarm fired! Stopping monitoring and starting NapAlarmService...");
++        // In RAW validation mode NapMonitoringService intentionally remains alive
++        // after sleep detection. Stop it exactly when the +10 minute alarm fires.
++        context.stopService(new Intent(context, NapMonitoringService.class));
++        new SessionStore(context).state(NapState.ALARMING, "Wake up — 10 minutes of detected sleep elapsed");
+         Intent service = new Intent(context, NapAlarmService.class);
+         service.setAction(NapAlarmService.ACTION_ALARM);
+         context.startForegroundService(service);
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/java/com/example/powernapwatch/service/NapMonitoringService.java /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/java/com/example/powernapwatch/service/NapMonitoringService.java
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/java/com/example/powernapwatch/service/NapMonitoringService.java	2026-09-24 20:54:01.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/java/com/example/powernapwatch/service/NapMonitoringService.java	2026-09-25 11:13:45.174359380 +0000
+@@ -87,7 +87,7 @@
+                 : preferences.rawSleepCaptureEnabled();
+ 
+         Notification notification = monitorNotification(rawSleepCapture
+-                ? "RAW sleep capture starting..."
++                ? "RAW validation capture starting..."
+                 : "Collecting baseline...");
+         if (Build.VERSION.SDK_INT >= 29) {
+             startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH);
+@@ -95,8 +95,8 @@
+             startForeground(NOTIFICATION_ID, notification);
+         }
+ 
+-        // A long RAW sleep capture deliberately has no power-nap alarm.
+-        if (!rawSleepCapture && !NapAlarmScheduler.canScheduleExact(this)) {
++        // The user-test build always behaves as a Power Nap: sleep onset + 10 minutes.
++        if (!NapAlarmScheduler.canScheduleExact(this)) {
+             store.state(NapState.ERROR, "Exact alarm permission is required");
+             stopForeground(STOP_FOREGROUND_REMOVE);
+             stopSelf();
+@@ -146,7 +146,8 @@
+             logger.writeSessionHeader(selectedEngine.label(), source.name(), rawSleepCapture);
+             if (rawSleepCapture) {
+                 logger.event(System.currentTimeMillis(),
+-                        "RAW_SLEEP_CAPTURE_START no_alarm=true; stop_condition=USER_STOP");
++                        "RAW_VALIDATION_START alarm=true; alarm_offset_ms=" + NAP_DURATION_MS
++                                + "; stop_condition=ALARM_OR_USER_STOP");
+             }
+         }
+         Log.i(TAG, "Selected engine=" + selectedEngine + ", source=" + source.name()
+@@ -159,7 +160,7 @@
+                 store.snapshot(snapshot);
+                 if (logger != null) logger.snapshot(snapshot);
+                 updateNotification(rawSleepCapture
+-                        ? "RAW capture • " + snapshot.state() + " • " + Math.round(snapshot.confidence() * 100) + "%"
++                        ? "RAW validation • " + snapshot.state() + " • " + Math.round(snapshot.confidence() * 100) + "%"
+                         : snapshot.state() + "  " + Math.round(snapshot.confidence() * 100) + "%");
+             }
+ 
+@@ -236,24 +237,21 @@
+         if (!active) return;
+         long now = System.currentTimeMillis();
+ 
+-        if (rawSleepCapture) {
+-            if (logger != null) logger.event(now,
+-                    "DETECTOR_SLEEP_MARKER estimatedOnset=" + estimatedOnsetMs
+-                            + "; confidence=" + confidence
+-                            + "; action=CONTINUE_RAW_CAPTURE");
+-            store.state(NapState.SLEEP_CONFIRMED,
+-                    "Detector marked sleep; RAW capture continues until STOP.");
+-            updateNotification("RAW capture • sleep marker detected • recording continues");
+-            return;
+-        }
+-
+         long alarmAt = Math.max(now + 2_000, estimatedOnsetMs + NAP_DURATION_MS);
+         if (logger != null) logger.event(now, "SLEEP_CONFIRMED sleepOnset=" + estimatedOnsetMs
+-                + "; alarmAt=" + alarmAt + "; confidence=" + confidence);
++                + "; alarmAt=" + alarmAt + "; confidence=" + confidence
++                + "; keepRawUntilAlarm=" + rawSleepCapture);
+         NapAlarmScheduler.schedule(this, alarmAt);
+         store.napScheduled(estimatedOnsetMs, alarmAt, confidence);
+-        updateNotification("Sleep detected. Alarm scheduled.");
+ 
++        if (rawSleepCapture) {
++            // Validation mode: keep collecting raw ACC/HR/IBI during the actual
++            // 10-minute nap. NapAlarmReceiver stops this service when the alarm fires.
++            updateNotification("Sleep detected • alarm +10 min • RAW recording continues");
++            return;
++        }
++
++        updateNotification("Sleep detected. Alarm scheduled for +10 min.");
+         if (source != null) source.stop();
+         active = false;
+         stopCaptureHeartbeat();
+@@ -309,7 +307,7 @@
+         }
+         if (logger != null) {
+             logger.event(System.currentTimeMillis(),
+-                    rawSleepCapture ? "RAW_SLEEP_CAPTURE_STOP " + reason : reason);
++                    rawSleepCapture ? "RAW_VALIDATION_STOP " + reason : reason);
+         }
+         active = false;
+         closeLogger();
+@@ -328,7 +326,7 @@
+     private Notification monitorNotification(String text) {
+         return new Notification.Builder(this, CHANNEL)
+                 .setSmallIcon(R.drawable.ic_nap)
+-                .setContentTitle(rawSleepCapture ? "Power Nap • RAW sleep capture" : "Power Nap")
++                .setContentTitle(rawSleepCapture ? "Power Nap • RAW validation" : "Power Nap")
+                 .setContentText(text)
+                 .setOngoing(true)
+                 .setCategory(Notification.CATEGORY_SERVICE)
+@@ -349,6 +347,15 @@
+     @Override
+     public void onDestroy() {
+         stopCaptureHeartbeat();
++        if (logger != null && active) {
++            long now = System.currentTimeMillis();
++            SessionStore.Snapshot snapshot = store.read();
++            boolean atAlarmBoundary = snapshot.alarmAtMs() > 0
++                    && Math.abs(now - snapshot.alarmAtMs()) <= 60_000L;
++            logger.event(now, atAlarmBoundary
++                    ? "ALARM_BOUNDARY_STOP"
++                    : "MONITORING_SERVICE_DESTROY");
++        }
+         if (source != null && active) {
+             try { source.stop(); } catch (Throwable ignored) { }
+         }
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/java/com/example/powernapwatch/ui/MainActivity.java /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/java/com/example/powernapwatch/ui/MainActivity.java
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/java/com/example/powernapwatch/ui/MainActivity.java	2026-09-24 20:53:04.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/java/com/example/powernapwatch/ui/MainActivity.java	2026-09-25 11:10:37.242679980 +0000
+@@ -110,7 +110,7 @@
+             }
+ 
+             boolean rawSleepCapture = rawSleepCaptureSwitch.isChecked();
+-            if (!rawSleepCapture && !NapAlarmScheduler.canScheduleExact(this)) {
++            if (!NapAlarmScheduler.canScheduleExact(this)) {
+                 Toast.makeText(this, "Missing exact alarm permission", Toast.LENGTH_SHORT).show();
+                 requestExactAlarmAccess();
+                 message.setText("Grant exact-alarm access, then press START again.");
+@@ -130,8 +130,9 @@
+             i.putExtra(NapMonitoringService.EXTRA_RAW_SLEEP_CAPTURE, rawSleepCapture);
+             startForegroundService(i);
+             message.setText(rawSleepCapture
+-                    ? "Starting RAW sleep capture. No nap alarm; recording continues until STOP."
+-                    : "Starting " + selected.label() + (record ? " with CSV logging..." : "..."));
++                    ? "Starting Power Nap. Alarm = detected sleep + 10 min; RAW continues until alarm."
++                    : "Starting " + selected.label() + ". Alarm = detected sleep + 10 min"
++                            + (record ? " with RAW logging..." : "..."));
+         });
+ 
+         stop.setOnClickListener(v -> {
+@@ -181,7 +182,7 @@
+                 loggingSwitch.setChecked(true);
+                 loggingSwitch.setEnabled(false);
+                 preferences.loggingEnabled(true);
+-                message.setText("RAW sleep capture: no 10-minute alarm; recording ends only with STOP.");
++                message.setText("RAW validation mode: alarm stays active; recording continues until it fires.");
+             } else {
+                 loggingSwitch.setEnabled(true);
+             }
+@@ -247,7 +248,7 @@
+ 
+         if (s.loggingEnabled()) {
+             String file = s.file().isEmpty() ? "starting..." : new File(s.file()).getName();
+-            logStatus.setText((s.rawSleepCapture() ? "RAW SLEEP CAPTURE" : "recording: ON") + "  •  " + file);
++            logStatus.setText((s.rawSleepCapture() ? "RAW UNTIL ALARM" : "recording: ON") + "  •  " + file);
+         } else {
+             logStatus.setText("recording: OFF");
+         }
+@@ -263,11 +264,12 @@
+                 "HR %s | RMSSD %s ms\nMotion %s | confidence %.0f%%",
+                 hr, rmssd, motion, s.confidence() * 100.0);
+ 
+-        if (s.rawSleepCapture()) {
+-            text += "\nRAW capture runs until STOP";
+-        } else if (s.alarmAtMs() > 0 && s.alarmAtMs() > System.currentTimeMillis()) {
++        if (s.alarmAtMs() > 0 && s.alarmAtMs() > System.currentTimeMillis()) {
+             long sec = (s.alarmAtMs() - System.currentTimeMillis()) / 1000;
+             text += String.format(Locale.ROOT, "\nAlarm in %d:%02d", sec / 60, sec % 60);
++            if (s.rawSleepCapture()) text += " • RAW recording";
++        } else if (s.rawSleepCapture()) {
++            text += "\nRAW validation mode armed";
+         }
+         metrics.setText(text);
+ 
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/res/layout/activity_main.xml /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/res/layout/activity_main.xml
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/res/layout/activity_main.xml	2026-09-24 20:53:05.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/res/layout/activity_main.xml	2026-09-25 11:10:37.242423513 +0000
+@@ -18,7 +18,7 @@
+             android:id="@+id/title"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+-            android:text="POWER NAP LAB"
++            android:text="POWER NAP"
+             android:textColor="#FFFFFF"
+             android:textSize="18sp"
+             android:textStyle="bold" />
+@@ -62,7 +62,7 @@
+             android:layout_width="210dp"
+             android:layout_height="wrap_content"
+             android:layout_marginTop="2dp"
+-            android:text="Record sensor data"
++            android:text="Record RAW sensor data"
+             android:textColor="#FFFFFF"
+             android:textSize="11sp" />
+ 
+@@ -71,7 +71,7 @@
+             android:layout_width="210dp"
+             android:layout_height="wrap_content"
+             android:layout_marginTop="2dp"
+-            android:text="RAW sleep capture"
++            android:text="Keep RAW until alarm"
+             android:textColor="#FFFFFF"
+             android:textSize="11sp" />
+ 
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/RecordedQuietAwakeRegressionTest.java /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/RecordedQuietAwakeRegressionTest.java
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/RecordedQuietAwakeRegressionTest.java	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/RecordedQuietAwakeRegressionTest.java	2026-09-25 11:11:25.927668907 +0000
+@@ -0,0 +1,57 @@
++import com.example.powernapwatch.core.*;
++import java.io.*;
++import java.nio.file.*;
++
++public class RecordedQuietAwakeRegressionTest {
++    private static boolean replay(Path path) throws Exception {
++        final boolean[] detected = {false};
++        SleepOnsetDetector detector = new SleepOnsetDetector(
++                new SleepOnsetDetector.Config(),
++                new SleepOnsetDetector.Listener() {
++                    @Override public void onSnapshot(DetectorSnapshot s) { }
++                    @Override public void onSleepConfirmed(long onset, double confidence) {
++                        detected[0] = true;
++                    }
++                });
++
++        boolean started = false;
++        try (BufferedReader br = Files.newBufferedReader(path)) {
++            String line = br.readLine(); // header
++            while ((line = br.readLine()) != null) {
++                String[] a = line.split(",", 16);
++                if (a.length < 16 || a[2].isEmpty()) continue;
++                long t = Long.parseLong(a[2]);
++                if (!started) {
++                    detector.start(t);
++                    started = true;
++                }
++                switch (a[1]) {
++                    case "ACC" -> detector.onAcceleration(t,
++                            Double.parseDouble(a[5]), Double.parseDouble(a[6]), Double.parseDouble(a[7]));
++                    case "HR" -> {
++                        if (!a[8].isEmpty()) detector.onHeartRate(t, Double.parseDouble(a[8]));
++                    }
++                    case "IBI" -> {
++                        if (!a[9].isEmpty()) detector.onIbi(t, Double.parseDouble(a[9]));
++                    }
++                    case "EVENT" -> {
++                        if (a[15].contains("onBody=true")) detector.onBodyState(true, t);
++                        else if (a[15].contains("onBody=false")) detector.onBodyState(false, t);
++                    }
++                }
++            }
++        }
++        return detected[0];
++    }
++
++    public static void main(String[] args) throws Exception {
++        if (args.length == 0) throw new IllegalArgumentException("CSV paths required");
++        for (String arg : args) {
++            Path path = Path.of(arg);
++            if (replay(path)) {
++                throw new AssertionError("Recorded quiet-awake session was falsely detected as sleep: " + path);
++            }
++            System.out.println("Quiet-awake regression OK: " + path.getFileName());
++        }
++    }
++}
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/ReplayCsvTest.java /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/ReplayCsvTest.java
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/ReplayCsvTest.java	2026-09-24 18:52:52.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/ReplayCsvTest.java	2026-09-25 11:13:06.142804162 +0000
+@@ -2,30 +2,65 @@
+ import java.io.*;
+ import java.nio.file.*;
+ 
++/** Replays one CSV or a sequence of rotated CSV segments through the current detector. */
+ public class ReplayCsvTest {
+-  public static void main(String[] args) throws Exception {
+-    if (args.length != 1) throw new IllegalArgumentException("csv");
+-    final long[] onset={0}; final double[] conf={0};
+-    SleepOnsetDetector d=new SleepOnsetDetector(new SleepOnsetDetector.Config(), new SleepOnsetDetector.Listener(){
+-      public void onSnapshot(DetectorSnapshot s) {}
+-      public void onSleepConfirmed(long o,double c){onset[0]=o; conf[0]=c;}
+-    });
+-    boolean started=false;
+-    try(BufferedReader br=Files.newBufferedReader(Path.of(args[0]))) {
+-      String line=br.readLine();
+-      while((line=br.readLine())!=null){
+-        String[] a=line.split(",",16);
+-        if(a.length<16) continue;
+-        String type=a[1]; long t=Long.parseLong(a[2]);
+-        if(!started){d.start(t); started=true;}
+-        switch(type){
+-          case "ACC" -> d.onAcceleration(t,Double.parseDouble(a[5]),Double.parseDouble(a[6]),Double.parseDouble(a[7]));
+-          case "HR" -> { if(!a[8].isEmpty()) d.onHeartRate(t,Double.parseDouble(a[8])); }
+-          case "IBI" -> { if(!a[9].isEmpty()) d.onIbi(t,Double.parseDouble(a[9])); }
+-          case "EVENT" -> { if(a[15].contains("onBody=true")) d.onBodyState(true,t); else if(a[15].contains("onBody=false")) d.onBodyState(false,t); }
++    public static void main(String[] args) throws Exception {
++        if (args.length == 0) throw new IllegalArgumentException("CSV path(s) required");
++
++        final long[] onset = {0};
++        final long[] confirmedAt = {0};
++        final double[] confidence = {0};
++
++        SleepOnsetDetector detector = new SleepOnsetDetector(
++                new SleepOnsetDetector.Config(),
++                new SleepOnsetDetector.Listener() {
++                    @Override public void onSnapshot(DetectorSnapshot s) {
++                        if (s.state() == NapState.SLEEP_CONFIRMED) confirmedAt[0] = s.timestampMs();
++                    }
++                    @Override public void onSleepConfirmed(long o, double c) {
++                        onset[0] = o;
++                        confidence[0] = c;
++                    }
++                });
++
++        boolean started = false;
++        outer:
++        for (String arg : args) {
++            try (BufferedReader br = Files.newBufferedReader(Path.of(arg))) {
++                String line = br.readLine(); // header
++                while ((line = br.readLine()) != null) {
++                    String[] a = line.split(",", 16);
++                    if (a.length < 16 || a[2].isEmpty()) continue;
++                    long t;
++                    try { t = Long.parseLong(a[2]); }
++                    catch (NumberFormatException ignored) { continue; }
++
++                    if (!started) {
++                        detector.start(t);
++                        started = true;
++                    }
++
++                    switch (a[1]) {
++                        case "ACC" -> detector.onAcceleration(t,
++                                Double.parseDouble(a[5]), Double.parseDouble(a[6]), Double.parseDouble(a[7]));
++                        case "HR" -> {
++                            if (!a[8].isEmpty()) detector.onHeartRate(t, Double.parseDouble(a[8]));
++                        }
++                        case "IBI" -> {
++                            if (!a[9].isEmpty()) detector.onIbi(t, Double.parseDouble(a[9]));
++                        }
++                        case "EVENT" -> {
++                            if (a[15].contains("onBody=true")) detector.onBodyState(true, t);
++                            else if (a[15].contains("onBody=false")) detector.onBodyState(false, t);
++                        }
++                    }
++                    if (onset[0] != 0) break outer;
++                }
++            }
+         }
+-      }
++
++        System.out.println("onset=" + onset[0]
++                + " confirmedAt=" + confirmedAt[0]
++                + " confidence=" + confidence[0]);
+     }
+-    System.out.println("onset="+onset[0]+" confidence="+conf[0]);
+-  }
+ }
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/com/example/powernapwatch/core/DetectorSnapshot.java /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/com/example/powernapwatch/core/DetectorSnapshot.java
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/com/example/powernapwatch/core/DetectorSnapshot.java	2026-09-23 14:55:08.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/com/example/powernapwatch/core/DetectorSnapshot.java	1970-01-01 00:00:00.000000000 +0000
+@@ -1,16 +0,0 @@
+-package com.example.powernapwatch.core;
+-
+-public record DetectorSnapshot(
+-        long timestampMs,
+-        NapState state,
+-        double confidence,
+-        double baselineHeartRate,
+-        double currentHeartRate,
+-        double heartRateSlopeBpmPerSecond,
+-        double movementRms,
+-        double rmssdMs,
+-        long quietDurationMs,
+-        long candidateDurationMs,
+-        boolean onBody,
+-        String reason) {
+-}
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/com/example/powernapwatch/core/NapState.java /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/com/example/powernapwatch/core/NapState.java
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/com/example/powernapwatch/core/NapState.java	2026-09-23 14:55:08.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/com/example/powernapwatch/core/NapState.java	1970-01-01 00:00:00.000000000 +0000
+@@ -1,14 +0,0 @@
+-package com.example.powernapwatch.core;
+-
+-public enum NapState {
+-    IDLE,
+-    BASELINE,
+-    WAITING_FOR_SLEEP,
+-    SLEEP_CANDIDATE,
+-    SLEEP_CONFIRMED,
+-    NAPPING,
+-    ALARMING,
+-    FINISHED,
+-    CANCELLED,
+-    ERROR
+-}
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/com/example/powernapwatch/core/SleepOnsetDetector.java /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/com/example/powernapwatch/core/SleepOnsetDetector.java
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/com/example/powernapwatch/core/SleepOnsetDetector.java	2026-09-23 14:57:26.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/com/example/powernapwatch/core/SleepOnsetDetector.java	1970-01-01 00:00:00.000000000 +0000
+@@ -1,344 +0,0 @@
+-package com.example.powernapwatch.core;
+-
+-import java.util.ArrayDeque;
+-import java.util.ArrayList;
+-import java.util.Collections;
+-import java.util.Comparator;
+-import java.util.List;
+-
+-/**
+- * Experimental Wake -> Sleep onset detector.
+- *
+- * This is deliberately transparent and heuristic. It is meant to be tuned with
+- * real CSV sessions from the watch, not treated as a medical sleep classifier.
+- */
+-public final class SleepOnsetDetector {
+-
+-    public interface Listener {
+-        void onSnapshot(DetectorSnapshot snapshot);
+-        void onSleepConfirmed(long estimatedOnsetMs, double confidence);
+-    }
+-
+-    public static final class Config {
+-        public long baselineDurationMs = 45_000;
+-        public long evaluationStepMs = 5_000;
+-        public long motionWindowMs = 30_000;
+-        public long heartWindowMs = 30_000;
+-        public long hrvWindowMs = 45_000;
+-        public long candidateConfirmMs = 45_000;
+-        public long quietFallbackMs = 120_000;
+-
+-        public double quietMotionRms = 0.18;
+-        public double veryQuietMotionRms = 0.08;
+-        public double strongMovementDelta = 1.00;
+-        public int maxStrongMovements = 1;
+-        public double candidateThreshold = 0.65;
+-        public double candidateCancelThreshold = 0.45;
+-    }
+-
+-    private record MotionPoint(long t, double delta) {}
+-    private record HeartPoint(long t, double bpm) {}
+-    private record IbiPoint(long t, double ms) {}
+-    private record Vec(long t, double x, double y, double z) {}
+-
+-    private final Config cfg;
+-    private final Listener listener;
+-    private final ArrayDeque<MotionPoint> motion = new ArrayDeque<>();
+-    private final ArrayDeque<HeartPoint> heart = new ArrayDeque<>();
+-    private final ArrayDeque<IbiPoint> ibi = new ArrayDeque<>();
+-
+-    private NapState state = NapState.IDLE;
+-    private long sessionStartMs;
+-    private long latestMotionMs;
+-    private long latestHeartMs;
+-    private long lastEvaluationMs;
+-    private long quietSinceMs;
+-    private long candidateSinceMs;
+-    private long candidateEstimatedOnsetMs;
+-    private boolean onBody = true;
+-    private Vec previousAcceleration;
+-    private boolean sleepReported;
+-
+-    public SleepOnsetDetector(Config cfg, Listener listener) {
+-        this.cfg = cfg;
+-        this.listener = listener;
+-    }
+-
+-    public synchronized void start(long nowMs) {
+-        motion.clear();
+-        heart.clear();
+-        ibi.clear();
+-        sessionStartMs = nowMs;
+-        latestMotionMs = 0;
+-        latestHeartMs = 0;
+-        lastEvaluationMs = 0;
+-        quietSinceMs = 0;
+-        candidateSinceMs = 0;
+-        candidateEstimatedOnsetMs = 0;
+-        previousAcceleration = null;
+-        sleepReported = false;
+-        onBody = true;
+-        state = NapState.BASELINE;
+-    }
+-
+-    public synchronized void onBodyState(boolean onBody, long timestampMs) {
+-        this.onBody = onBody;
+-        if (!onBody) {
+-            candidateSinceMs = 0;
+-            candidateEstimatedOnsetMs = 0;
+-            quietSinceMs = 0;
+-            if (!sleepReported && state != NapState.BASELINE) {
+-                state = NapState.WAITING_FOR_SLEEP;
+-            }
+-        }
+-        maybeEvaluate(timestampMs, true);
+-    }
+-
+-    public synchronized void onAcceleration(long timestampMs, double x, double y, double z) {
+-        Vec current = new Vec(timestampMs, x, y, z);
+-        if (previousAcceleration != null && timestampMs > previousAcceleration.t()) {
+-            double dx = x - previousAcceleration.x();
+-            double dy = y - previousAcceleration.y();
+-            double dz = z - previousAcceleration.z();
+-            double delta = Math.sqrt(dx * dx + dy * dy + dz * dz);
+-            motion.addLast(new MotionPoint(timestampMs, delta));
+-            latestMotionMs = Math.max(latestMotionMs, timestampMs);
+-        }
+-        previousAcceleration = current;
+-        prune(timestampMs);
+-        maybeEvaluate(timestampMs, false);
+-    }
+-
+-    public synchronized void onHeartRate(long timestampMs, double bpm) {
+-        if (bpm < 30 || bpm > 220) return;
+-        heart.addLast(new HeartPoint(timestampMs, bpm));
+-        latestHeartMs = Math.max(latestHeartMs, timestampMs);
+-        prune(timestampMs);
+-        maybeEvaluate(timestampMs, false);
+-    }
+-
+-    public synchronized void onIbi(long timestampMs, double ibiMs) {
+-        if (ibiMs < 250 || ibiMs > 2_000) return;
+-        ibi.addLast(new IbiPoint(timestampMs, ibiMs));
+-        prune(timestampMs);
+-    }
+-
+-    private void prune(long nowMs) {
+-        long cutoff = nowMs - 240_000;
+-        while (!motion.isEmpty() && motion.peekFirst().t() < cutoff) motion.removeFirst();
+-        while (!heart.isEmpty() && heart.peekFirst().t() < cutoff) heart.removeFirst();
+-        while (!ibi.isEmpty() && ibi.peekFirst().t() < cutoff) ibi.removeFirst();
+-    }
+-
+-    private void maybeEvaluate(long hintMs, boolean force) {
+-        if (sleepReported || state == NapState.IDLE) return;
+-        if (latestMotionMs == 0 || latestHeartMs == 0) return;
+-
+-        long evalAt = Math.min(latestMotionMs, latestHeartMs);
+-        if (!force && lastEvaluationMs != 0 && evalAt - lastEvaluationMs < cfg.evaluationStepMs) return;
+-        if (evalAt <= lastEvaluationMs) return;
+-        lastEvaluationMs = evalAt;
+-        evaluate(evalAt);
+-    }
+-
+-    private void evaluate(long t) {
+-        double baselineHr = percentileHeart(sessionStartMs, Math.min(t, sessionStartMs + 90_000), 0.70);
+-        double currentHr = medianHeart(t - cfg.heartWindowMs, t);
+-        double hrSlope = heartSlope(t - 45_000, t);
+-        double motionRms = motionRms(t - cfg.motionWindowMs, t);
+-        int strongMoves = strongMovements(t - cfg.motionWindowMs, t, cfg.strongMovementDelta);
+-        double rmssd = rmssd(t - cfg.hrvWindowMs, t);
+-        double baselineRmssd = rmssd(sessionStartMs, Math.min(t, sessionStartMs + 90_000));
+-
+-        boolean enoughHeart = countHeart(t - cfg.heartWindowMs, t) >= 8;
+-        boolean enoughMotion = countMotion(t - cfg.motionWindowMs, t) >= 30;
+-        boolean quiet = enoughMotion && motionRms <= cfg.quietMotionRms && strongMoves <= cfg.maxStrongMovements;
+-
+-        if (quiet && onBody) {
+-            // The full motion window is already quiet, so backdate the start of
+-            // sustained immobility to the beginning of that window.
+-            if (quietSinceMs == 0) quietSinceMs = Math.max(sessionStartMs, t - cfg.motionWindowMs);
+-        } else {
+-            quietSinceMs = 0;
+-        }
+-        long quietDuration = quietSinceMs == 0 ? 0 : Math.max(0, t - quietSinceMs);
+-
+-        if (t - sessionStartMs < cfg.baselineDurationMs || !enoughHeart || !enoughMotion) {
+-            state = NapState.BASELINE;
+-            emit(t, 0, baselineHr, currentHr, hrSlope, motionRms, rmssd,
+-                    quietDuration, 0, "collecting baseline");
+-            return;
+-        }
+-
+-        double score = 0.0;
+-        StringBuilder reason = new StringBuilder();
+-
+-        if (!onBody) {
+-            state = NapState.WAITING_FOR_SLEEP;
+-            emit(t, 0, baselineHr, currentHr, hrSlope, motionRms, rmssd,
+-                    0, 0, "watch off wrist");
+-            return;
+-        }
+-
+-        if (quiet) {
+-            if (motionRms <= cfg.veryQuietMotionRms) score += 0.55;
+-            else score += 0.40;
+-            reason.append("quiet ");
+-        }
+-
+-        if (!Double.isNaN(baselineHr) && !Double.isNaN(currentHr)) {
+-            double drop = baselineHr - currentHr;
+-            if (drop >= 3.0 || currentHr <= baselineHr * 0.96) {
+-                score += 0.25;
+-                reason.append("HRdrop ");
+-            } else if (drop >= 1.5) {
+-                score += 0.12;
+-                reason.append("HRsoft ");
+-            }
+-        }
+-
+-        if (!Double.isNaN(hrSlope) && hrSlope <= -0.025) {
+-            score += 0.10;
+-            reason.append("HRslope ");
+-        }
+-
+-        if (!Double.isNaN(rmssd)) {
+-            score += 0.04; // Valid IBI itself improves confidence slightly.
+-            if (!Double.isNaN(baselineRmssd) && rmssd >= baselineRmssd * 1.10) {
+-                score += 0.06;
+-                reason.append("HRVup ");
+-            }
+-        }
+-
+-        if (quietDuration >= cfg.quietFallbackMs) {
+-            score += 0.18;
+-            reason.append("longQuiet ");
+-        }
+-
+-        score = Math.min(1.0, score);
+-
+-        if (state == NapState.SLEEP_CANDIDATE) {
+-            if (!quiet || score < cfg.candidateCancelThreshold) {
+-                candidateSinceMs = 0;
+-                candidateEstimatedOnsetMs = 0;
+-                state = NapState.WAITING_FOR_SLEEP;
+-            } else if (t - candidateSinceMs >= cfg.candidateConfirmMs) {
+-                state = NapState.SLEEP_CONFIRMED;
+-                sleepReported = true;
+-                emit(t, score, baselineHr, currentHr, hrSlope, motionRms, rmssd,
+-                        quietDuration, t - candidateSinceMs, "sleep confirmed " + reason);
+-                listener.onSleepConfirmed(candidateEstimatedOnsetMs, score);
+-                return;
+-            }
+-        } else if (score >= cfg.candidateThreshold && quiet) {
+-            state = NapState.SLEEP_CANDIDATE;
+-            candidateSinceMs = t;
+-            // Backdate the probable onset. We avoid using the first second of immobility,
+-            // but also avoid starting later merely because callbacks were batched.
+-            long fromQuiet = quietSinceMs == 0 ? t : quietSinceMs + 15_000;
+-            long recent = t - 30_000;
+-            candidateEstimatedOnsetMs = Math.max(sessionStartMs, Math.max(fromQuiet, recent));
+-        } else {
+-            state = NapState.WAITING_FOR_SLEEP;
+-        }
+-
+-        long candidateDuration = candidateSinceMs == 0 ? 0 : Math.max(0, t - candidateSinceMs);
+-        emit(t, score, baselineHr, currentHr, hrSlope, motionRms, rmssd,
+-                quietDuration, candidateDuration, reason.toString().trim());
+-    }
+-
+-    private void emit(long t, double score, double baselineHr, double currentHr,
+-                      double hrSlope, double motionRms, double rmssd,
+-                      long quietDuration, long candidateDuration, String reason) {
+-        listener.onSnapshot(new DetectorSnapshot(
+-                t, state, score, baselineHr, currentHr, hrSlope, motionRms,
+-                rmssd, quietDuration, candidateDuration, onBody, reason));
+-    }
+-
+-    private int countMotion(long from, long to) {
+-        int c = 0;
+-        for (MotionPoint p : motion) if (p.t() >= from && p.t() <= to) c++;
+-        return c;
+-    }
+-
+-    private int countHeart(long from, long to) {
+-        int c = 0;
+-        for (HeartPoint p : heart) if (p.t() >= from && p.t() <= to) c++;
+-        return c;
+-    }
+-
+-    private double motionRms(long from, long to) {
+-        double sumSq = 0;
+-        int n = 0;
+-        for (MotionPoint p : motion) {
+-            if (p.t() >= from && p.t() <= to) {
+-                sumSq += p.delta() * p.delta();
+-                n++;
+-            }
+-        }
+-        return n == 0 ? Double.NaN : Math.sqrt(sumSq / n);
+-    }
+-
+-    private int strongMovements(long from, long to, double threshold) {
+-        int n = 0;
+-        for (MotionPoint p : motion) {
+-            if (p.t() >= from && p.t() <= to && p.delta() >= threshold) n++;
+-        }
+-        return n;
+-    }
+-
+-    private double medianHeart(long from, long to) {
+-        List<Double> values = new ArrayList<>();
+-        for (HeartPoint p : heart) if (p.t() >= from && p.t() <= to) values.add(p.bpm());
+-        return percentile(values, 0.50);
+-    }
+-
+-    private double percentileHeart(long from, long to, double q) {
+-        List<Double> values = new ArrayList<>();
+-        for (HeartPoint p : heart) if (p.t() >= from && p.t() <= to) values.add(p.bpm());
+-        return percentile(values, q);
+-    }
+-
+-    private static double percentile(List<Double> values, double q) {
+-        if (values.isEmpty()) return Double.NaN;
+-        Collections.sort(values);
+-        int index = (int) Math.round((values.size() - 1) * q);
+-        index = Math.max(0, Math.min(values.size() - 1, index));
+-        return values.get(index);
+-    }
+-
+-    private double heartSlope(long from, long to) {
+-        List<HeartPoint> points = new ArrayList<>();
+-        for (HeartPoint p : heart) if (p.t() >= from && p.t() <= to) points.add(p);
+-        if (points.size() < 5) return Double.NaN;
+-        points.sort(Comparator.comparingLong(HeartPoint::t));
+-        double t0 = points.get(0).t();
+-        double sx = 0, sy = 0, sxx = 0, sxy = 0;
+-        int n = points.size();
+-        for (HeartPoint p : points) {
+-            double x = (p.t() - t0) / 1000.0;
+-            double y = p.bpm();
+-            sx += x;
+-            sy += y;
+-            sxx += x * x;
+-            sxy += x * y;
+-        }
+-        double den = n * sxx - sx * sx;
+-        return Math.abs(den) < 1e-9 ? Double.NaN : (n * sxy - sx * sy) / den;
+-    }
+-
+-    private double rmssd(long from, long to) {
+-        List<IbiPoint> points = new ArrayList<>();
+-        for (IbiPoint p : ibi) if (p.t() >= from && p.t() <= to) points.add(p);
+-        if (points.size() < 5) return Double.NaN;
+-        points.sort(Comparator.comparingLong(IbiPoint::t));
+-        double sum = 0;
+-        int n = 0;
+-        for (int i = 1; i < points.size(); i++) {
+-            double d = points.get(i).ms() - points.get(i - 1).ms();
+-            sum += d * d;
+-            n++;
+-        }
+-        return n == 0 ? Double.NaN : Math.sqrt(sum / n);
+-    }
+-}
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/scripts/replay-detector.sh /mnt/data/PowerNap-v0.3.0-user-test/scripts/replay-detector.sh
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/scripts/replay-detector.sh	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/scripts/replay-detector.sh	2026-09-25 11:13:06.143737278 +0000
+@@ -0,0 +1,16 @@
++#!/usr/bin/env bash
++set -euo pipefail
++if [[ $# -lt 1 ]]; then
++  echo "Usage: $0 SESSION.csv [SEGMENT.csv ...]" >&2
++  exit 2
++fi
++ROOT="$(cd "$(dirname "$0")/.." && pwd)"
++OUT="$ROOT/core-smoke/replay-out"
++rm -rf "$OUT"
++mkdir -p "$OUT"
++javac -d "$OUT" \
++  "$ROOT"/app/src/main/java/com/example/powernapwatch/core/DetectorSnapshot.java \
++  "$ROOT"/app/src/main/java/com/example/powernapwatch/core/NapState.java \
++  "$ROOT"/app/src/main/java/com/example/powernapwatch/core/SleepOnsetDetector.java \
++  "$ROOT"/core-smoke/ReplayCsvTest.java
++java -cp "$OUT" ReplayCsvTest "$@"
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/scripts/test-core.sh /mnt/data/PowerNap-v0.3.0-user-test/scripts/test-core.sh
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/scripts/test-core.sh	2026-09-24 17:30:08.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/scripts/test-core.sh	2026-09-25 11:11:26.475634748 +0000
+@@ -9,6 +9,10 @@
+   "$ROOT"/app/src/main/java/com/example/powernapwatch/core/NapState.java \
+   "$ROOT"/app/src/main/java/com/example/powernapwatch/core/SleepOnsetDetector.java \
+   "$ROOT"/core-smoke/DetectorSmokeTest.java \
+-  "$ROOT"/core-smoke/DetectorNoSleepSmokeTest.java
++  "$ROOT"/core-smoke/DetectorNoSleepSmokeTest.java \
++  "$ROOT"/core-smoke/RecordedQuietAwakeRegressionTest.java
+ java -cp "$OUT" DetectorSmokeTest
+ java -cp "$OUT" DetectorNoSleepSmokeTest
++java -cp "$OUT" RecordedQuietAwakeRegressionTest \
++  "$ROOT"/powernap-sessions/20260924-201341.csv \
++  "$ROOT"/powernap-sessions/20260924-220408.csv
+diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/v0.3.0-user-test.patch /mnt/data/PowerNap-v0.3.0-user-test/v0.3.0-user-test.patch
+--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/v0.3.0-user-test.patch	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/PowerNap-v0.3.0-user-test/v0.3.0-user-test.patch	2026-09-25 11:13:58.561779365 +0000
+@@ -0,0 +1,1087 @@
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/BUILD_REQUIRED.txt /mnt/data/PowerNap-v0.3.0-user-test/BUILD_REQUIRED.txt
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/BUILD_REQUIRED.txt	2026-09-24 20:58:09.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/BUILD_REQUIRED.txt	2026-09-25 11:12:27.128411111 +0000
++@@ -1,10 +1,12 @@
++-This source package intentionally contains no APK from older versions.
++-Build a fresh samsungDebug APK after extracting:
+++PowerNap v0.3.0-user-test
++ 
++-  ./gradlew :app:assembleSamsungDebug
+++Build the Samsung flavor on the development workstation:
++ 
++-Then install it on the watch, for example:
+++    ./gradlew :app:assembleSamsungDebug
++ 
++-  adb -s "$ANDROID_SERIAL" install -r app/build/outputs/apk/samsung/debug/app-samsung-debug.apk
+++APK:
++ 
++-Use NIGHT_CAPTURE.md for tonight's RAW sleep-capture procedure.
+++    app/build/outputs/apk/samsung/debug/app-samsung-debug.apk
+++
+++Recommended validation settings are in USER_TEST.md.
+++The alarm is always enabled and targets detected sleep onset + 10 minutes.
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/CHANGELOG-v0.3.0-user-test.md /mnt/data/PowerNap-v0.3.0-user-test/CHANGELOG-v0.3.0-user-test.md
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/CHANGELOG-v0.3.0-user-test.md	1970-01-01 00:00:00.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/CHANGELOG-v0.3.0-user-test.md	2026-09-25 11:10:37.243120417 +0000
++@@ -0,0 +1,23 @@
+++# PowerNap v0.3.0-user-test
+++
+++This build switches back from overnight capture to real PowerNap behavior while retaining diagnostic controls.
+++
+++## Behavior
+++
+++- Alarm is always enabled and scheduled for `estimated sleep onset + 10 minutes`.
+++- Exact-alarm permission is required for every normal session.
+++- Sleep candidate confirmation was increased from 45 s to 120 s after two recorded quiet-awake false positives.
+++- `Keep RAW until alarm` no longer disables the alarm. It keeps ACC/HR/IBI logging alive after sleep detection and closes the monitoring service when the alarm fires.
+++- `Record RAW sensor data`, sensor-engine selection, permissions, and exact-alarm controls remain visible during field validation.
+++- Application/UI label is now `Power Nap` rather than `Power Nap Lab`.
+++
+++## Replay evidence used for this build
+++
+++- Both previously recorded quiet-awake sessions no longer reach `SLEEP_CONFIRMED` with the 120 s confirmation window.
+++- Replaying the 24/25 Sep real-sleep session with the new default gives approximately:
+++  - estimated onset: 23:15:24
+++  - confirmation: 23:17:56
+++  - resulting alarm target: 23:25:24
+++- Samsung Health placed sleep onset around 23:14 (screen-derived reference), so this deliberately conservative detector is late rather than early.
+++
+++This is still a user-test build, not a medical sleep classifier.
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/IMPLEMENTATION_NOTES.md /mnt/data/PowerNap-v0.3.0-user-test/IMPLEMENTATION_NOTES.md
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/IMPLEMENTATION_NOTES.md	2026-09-24 18:05:10.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/IMPLEMENTATION_NOTES.md	2026-09-25 11:12:27.128492280 +0000
++@@ -6,7 +6,7 @@
++ 
++ ## Why Samsung data are explicitly flushed
++ 
++-Samsung Health Sensor SDK batches continuous samples after the display turns off. Power Nap cannot wait for the normal batch interval, so `SamsungHealthSensorSource` calls `flush()` on HR and accelerometer trackers every 10 seconds while waiting for sleep.
+++Samsung Health Sensor SDK batches continuous samples after the display turns off. Power Nap cannot wait for the normal batch interval, so `SamsungHealthSensorSource` calls `flush()` on HR and accelerometer trackers every 5 seconds while waiting for sleep.
++ 
++ The detector processes the timestamps belonging to the samples and estimates the onset retrospectively. Therefore the timer is not `callback time + 10 minutes`; it is `estimated sleep onset + 10 minutes`.
++ 
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/NIGHT_CAPTURE.md /mnt/data/PowerNap-v0.3.0-user-test/NIGHT_CAPTURE.md
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/NIGHT_CAPTURE.md	2026-09-24 20:55:46.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/NIGHT_CAPTURE.md	2026-09-25 11:12:27.128261842 +0000
++@@ -1,69 +1,8 @@
++-# PowerNap v0.2.3-nightcapture — overnight RAW capture
+++# Historical note: v0.2.3 night-capture mode
++ 
++-This build is intended to collect a real **awake -> sleep -> sleeping** session before we redesign the sleep-onset detector.
+++The no-alarm overnight mode was used only to collect the first full-night reference recording.
+++It is **not** the behavior of v0.3.0-user-test.
++ 
++-## What is different
++-
++-`RAW sleep capture` is a dedicated laboratory mode:
++-
++-- CSV RAW logging is forced ON.
++-- The existing detector still runs and writes `SNAP` rows and a `DETECTOR_SLEEP_MARKER` event.
++-- A detector `SLEEP_CONFIRMED` result **does not stop sensors**.
++-- No 10-minute power-nap alarm is scheduled in this mode.
++-- Capture continues until the user presses **STOP / CANCEL**.
++-- RAW CSV is rotated at 10 MiB into one logical session:
++-  - `YYYYMMDD-HHMMSS-000.csv`
++-  - `YYYYMMDD-HHMMSS-001.csv`
++-  - ...
++-- Every 5 minutes an event `CAPTURE_HEARTBEAT` records battery percentage, screen interactive state, and age of the last ACC/HR/IBI callback.
++-- The monitoring service uses `START_REDELIVER_INTENT`, so Android can restart it with the same start intent if the service process is reclaimed.
++-
++-## Tonight's recommended setup
++-
++-1. Install/build the **samsungDebug** flavor.
++-2. On the watch open **Power Nap Lab**.
++-3. Select **Samsung Health Sensor SDK** as `READ ENGINE` so the whole recording uses one known sensor path. Avoid `Auto` for this reference recording unless Samsung SDK cannot start.
++-4. Enable **RAW sleep capture**. `Record sensor data` is automatically enabled and locked ON.
++-5. Make sure sensor/background permissions are granted.
++-6. Exact-alarm permission is not required for RAW sleep capture because this mode intentionally schedules no nap alarm.
++-7. Wear the watch normally and reasonably snugly. Start with enough battery for the intended capture and avoid enabling battery-saver mode during the experiment if possible.
++-8. Press **START** shortly before trying to sleep. From then on, leave the app alone.
++-9. If the UI later says `SLEEP_CONFIRMED`, that is only the old detector's marker. **Recording continues.**
++-10. After waking, open the app and press **STOP / CANCEL** before pulling files.
++-
++-## Pull the complete newest session
++-
++-If one watch is connected:
++-
++-```bash
++-./scripts/pull-sessions.sh \
++-  --package com.example.powernapwatch \
++-  --latest \
++-  --output powernap-night \
++-  --timeout 180
++-```
++-
++-If ADB sees more than one device, add the watch serial:
++-
++-```bash
++-./scripts/pull-sessions.sh \
++-  --package com.example.powernapwatch \
++-  --latest \
++-  --output powernap-night \
++-  --serial 'YOUR_WATCH_SERIAL' \
++-  --timeout 180
++-```
++-
++-`--latest` now detects rotated files and downloads **all segments belonging to the newest session**.
++-
++-## Quick integrity check
++-
++-```bash
++-python3 scripts/analyze-session.py powernap-night
++-```
++-
++-For the final analysis, provide every `YYYYMMDD-HHMMSS-NNN.csv` file from that session. Do not merge or edit them manually; the global `seq` column preserves ordering across segments.
++-
++-## Expected size
++-
++-Previous captures were approximately 7 MiB/hour at the current Samsung RAW rates. A full night may therefore produce tens of MiB. Rotation at 10 MiB keeps each individual file manageable while retaining all samples.
+++For current use see `USER_TEST.md`. In v0.3.0 the alarm is always scheduled for
+++`estimated sleep onset + 10 minutes`. The `Keep RAW until alarm` switch only keeps
+++raw sensor recording alive through the nap so field behavior can still be validated.
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/README.md /mnt/data/PowerNap-v0.3.0-user-test/README.md
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/README.md	2026-09-24 20:55:46.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/README.md	2026-09-25 11:12:27.128728898 +0000
++@@ -1,8 +1,8 @@
++-# PowerNapWatch v0.2.2
+++# PowerNap v0.3.0-user-test
++ 
++ # PowerNapWatch4 v0.2 diagnostics
++ 
++-This revision adds **runtime sensor-engine selection** and an explicit **Record sensor data** switch.
+++This user-test revision keeps **runtime sensor-engine selection** and diagnostic RAW controls visible while restoring normal PowerNap alarm behavior.
++ 
++ **Important:** the AAR that was present in the previously supplied project was a compile-only stub (its service and tracker methods were no-ops). v0.2 source archives intentionally do not ship that file. Download the official Samsung Health Sensor SDK v1.4.1 AAR and run `./scripts/check-samsung-sdk.sh` before building `samsungDebug`.
++ 
++@@ -14,7 +14,7 @@
++ 
++ The `standardDebug` build exposes Auto and Wear OS only.
++ 
++-The `Record sensor data` switch is persisted. When enabled, the session CSV contains raw ACC/HR/IBI samples, detector snapshots and events. New diagnostic columns include both `sensor_timestamp_ms` and `received_timestamp_ms`; `delivery_delay_ms` makes Samsung batching, stalls and delayed callbacks directly measurable.
+++The `Record RAW sensor data` switch is persisted. When enabled, the session CSV contains raw ACC/HR/IBI samples, detector snapshots and events. New diagnostic columns include both `sensor_timestamp_ms` and `received_timestamp_ms`; `delivery_delay_ms` makes Samsung batching, stalls and delayed callbacks directly measurable.
++ 
++ Pull the newest recording:
++ 
++@@ -115,7 +115,7 @@
++ 
++ * `HEART_RATE_CONTINUOUS` — HR + IBI
++ * `ACCELEROMETER_CONTINUOUS` — 25 Hz
++-* an explicit `flush()` every 10 seconds while waiting for sleep, because Samsung batches continuous data when the display is off.
+++* an explicit `flush()` every 5 seconds while waiting for sleep, because Samsung batches continuous data when the display is off.
++ 
++ ## Enable Samsung Health Sensor Service developer mode
++ 
++@@ -164,7 +164,7 @@
++ 
++ ## First run
++ 
++-The UI has an engine selector, a `Record sensor data` switch, and four actions:
+++The UI has an engine selector, `Record RAW sensor data`, `Keep RAW until alarm`, and four actions:
++ 
++ * `PERMISSIONS` — grants activity, HR, notification and background health/sensor permissions. Background permission is intentionally requested as a separate step.
++ * `EXACT ALARM` — grants special exact-alarm access.
++@@ -177,13 +177,13 @@
++ BASELINE -> WAITING_FOR_SLEEP -> SLEEP_CANDIDATE -> SLEEP_CONFIRMED -> NAPPING -> ALARMING -> FINISHED
++ ```
++ 
++-Once sleep is confirmed, sensor tracking is stopped and an exact `AlarmManager` alarm is scheduled for:
+++Once sleep is confirmed, an exact `AlarmManager` alarm is scheduled for:
++ 
++ ```text
++ estimatedSleepOnset + 10 minutes
++ ```
++ 
++-The detector deliberately backdates sleep onset rather than starting the 10-minute timer at the later confirmation callback.
+++The detector deliberately estimates the earlier sleep-onset boundary rather than starting the 10-minute timer at the later confirmation callback. If `Keep RAW until alarm` is OFF, sensor tracking stops after scheduling. If it is ON, ACC/HR/IBI collection continues until the alarm fires so real-world behavior can still be inspected.
++ 
++ ## Diagnostic CSV
++ 
++@@ -216,7 +216,7 @@
++ * HR trend,
++ * RMSSD if IBI is available,
++ * sustained quiet time,
++-* 45 s candidate confirmation with hysteresis.
+++* 120 s candidate confirmation with hysteresis, chosen conservatively after quiet-awake false positives.
++ 
++ These thresholds are intentionally conservative placeholders. The next engineering step is to collect several labelled sessions (`awake`, `trying to sleep`, `actual nap`) and tune them from Watch4 data rather than guessing fixed thresholds.
++ 
++@@ -237,6 +237,10 @@
++ * Added `adb-watch-diagnostics.sh`.
++ * Samsung `SDK_POLICY_ERROR` message now includes the exact Health Sensor Service developer-mode path.
++ 
++-## v0.2.3-nightcapture
+++## v0.3.0-user-test
++ 
++-For collecting a real overnight RAW reference recording, use the dedicated **RAW sleep capture** mode. It does not stop at the current detector's `SLEEP_CONFIRMED` result and does not schedule the 10-minute alarm; recording continues until manual STOP. See `NIGHT_CAPTURE.md` for the exact procedure and updated pull command.
+++This is the current field-validation build. The alarm is always active and is scheduled for `estimatedSleepOnset + 10 minutes`.
+++
+++For validation, enable **Record RAW sensor data** and **Keep RAW until alarm**. The second switch does not disable the alarm; it only keeps raw sensor acquisition alive during the 10-minute nap and stops it when the alarm fires.
+++
+++The sleep-candidate confirmation interval is now 120 seconds. Replaying both previously recorded quiet-awake sessions no longer confirms sleep, while the real-sleep night still confirms and produces an onset close to the Samsung Health reference. See `USER_TEST.md` and `CHANGELOG-v0.3.0-user-test.md`.
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/USER_TEST.md /mnt/data/PowerNap-v0.3.0-user-test/USER_TEST.md
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/USER_TEST.md	1970-01-01 00:00:00.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/USER_TEST.md	2026-09-25 11:10:37.243153415 +0000
++@@ -0,0 +1,20 @@
+++# PowerNap user-test checklist
+++
+++Recommended settings on Galaxy Watch during validation:
+++
+++- Read engine: `Samsung Health Sensor SDK`
+++- Record RAW sensor data: `ON`
+++- Keep RAW until alarm: `ON`
+++- Exact alarm permission: granted
+++
+++Expected flow:
+++
+++1. Press START just before trying to nap.
+++2. The detector collects baseline and waits for a stable sleep candidate.
+++3. A candidate must remain plausible for 120 seconds.
+++4. When sleep is confirmed, the alarm is scheduled for estimated onset + 10 minutes.
+++5. With `Keep RAW until alarm` enabled, sensor logging continues during the nap.
+++6. At the alarm boundary monitoring is stopped and the wake-up vibration starts.
+++7. Press STOP on the alarm.
+++
+++For field reports, preserve the CSV session and note whether the alarm felt early, correct, or late.
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/build.gradle /mnt/data/PowerNap-v0.3.0-user-test/app/build.gradle
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/build.gradle	2026-09-24 20:53:07.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/app/build.gradle	2026-09-25 11:10:37.242175199 +0000
++@@ -10,8 +10,8 @@
++         applicationId 'com.example.powernapwatch'
++         minSdk 30
++         targetSdk 36
++-        versionCode 3
++-        versionName '0.2.3-nightcapture'
+++        versionCode 4
+++        versionName '0.3.0-user-test'
++     }
++ 
++     flavorDimensions += 'sensors'
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/AndroidManifest.xml /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/AndroidManifest.xml
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/AndroidManifest.xml	2026-09-24 17:26:18.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/AndroidManifest.xml	2026-09-25 11:10:37.242487507 +0000
++@@ -23,7 +23,7 @@
++     <application
++         android:allowBackup="false"
++         android:icon="@drawable/ic_nap"
++-        android:label="Power Nap Lab"
+++        android:label="Power Nap"
++         android:supportsRtl="true"
++         android:theme="@style/AppTheme">
++ 
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/java/com/example/powernapwatch/core/SleepOnsetDetector.java /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/java/com/example/powernapwatch/core/SleepOnsetDetector.java
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/java/com/example/powernapwatch/core/SleepOnsetDetector.java	2026-09-24 18:51:14.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/java/com/example/powernapwatch/core/SleepOnsetDetector.java	2026-09-25 11:10:37.242330887 +0000
++@@ -7,10 +7,12 @@
++ import java.util.List;
++ 
++ /**
++- * Experimental Wake -> Sleep onset detector.
+++ * Wake -> Sleep onset detector used by the PowerNap user-test build.
++  *
++- * This is deliberately transparent and heuristic. It is meant to be tuned with
++- * real CSV sessions from the watch, not treated as a medical sleep classifier.
+++ * The detector is deliberately conservative: a candidate must remain plausible
+++ * for two minutes before it is accepted. This is intentional after recorded
+++ * quiet-awake sessions showed that immobility + a falling heart rate can mimic
+++ * sleep. It remains a transparent heuristic, not a medical sleep classifier.
++  */
++ public final class SleepOnsetDetector {
++ 
++@@ -25,7 +27,7 @@
++         public long motionWindowMs = 30_000;
++         public long heartWindowMs = 30_000;
++         public long hrvWindowMs = 45_000;
++-        public long candidateConfirmMs = 45_000;
+++        public long candidateConfirmMs = 120_000;
++         public long quietFallbackMs = 120_000;
++ 
++         public double quietMotionRms = 0.18;
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/java/com/example/powernapwatch/service/NapAlarmReceiver.java /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/java/com/example/powernapwatch/service/NapAlarmReceiver.java
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/java/com/example/powernapwatch/service/NapAlarmReceiver.java	2026-09-23 20:27:06.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/java/com/example/powernapwatch/service/NapAlarmReceiver.java	2026-09-25 11:10:37.242917058 +0000
++@@ -11,8 +11,11 @@
++ public final class NapAlarmReceiver extends BroadcastReceiver {
++     @Override
++     public void onReceive(Context context, Intent intent) {
++-        Log.i("PowerNap", "NapAlarmReceiver onReceive: Alarm fired! Starting NapAlarmService...");
++-        new SessionStore(context).state(NapState.ALARMING, "Wake up");
+++        Log.i("PowerNap", "NapAlarmReceiver onReceive: Alarm fired! Stopping monitoring and starting NapAlarmService...");
+++        // In RAW validation mode NapMonitoringService intentionally remains alive
+++        // after sleep detection. Stop it exactly when the +10 minute alarm fires.
+++        context.stopService(new Intent(context, NapMonitoringService.class));
+++        new SessionStore(context).state(NapState.ALARMING, "Wake up — 10 minutes of detected sleep elapsed");
++         Intent service = new Intent(context, NapAlarmService.class);
++         service.setAction(NapAlarmService.ACTION_ALARM);
++         context.startForegroundService(service);
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/java/com/example/powernapwatch/service/NapMonitoringService.java /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/java/com/example/powernapwatch/service/NapMonitoringService.java
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/java/com/example/powernapwatch/service/NapMonitoringService.java	2026-09-24 20:54:01.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/java/com/example/powernapwatch/service/NapMonitoringService.java	2026-09-25 11:13:45.174359380 +0000
++@@ -87,7 +87,7 @@
++                 : preferences.rawSleepCaptureEnabled();
++ 
++         Notification notification = monitorNotification(rawSleepCapture
++-                ? "RAW sleep capture starting..."
+++                ? "RAW validation capture starting..."
++                 : "Collecting baseline...");
++         if (Build.VERSION.SDK_INT >= 29) {
++             startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH);
++@@ -95,8 +95,8 @@
++             startForeground(NOTIFICATION_ID, notification);
++         }
++ 
++-        // A long RAW sleep capture deliberately has no power-nap alarm.
++-        if (!rawSleepCapture && !NapAlarmScheduler.canScheduleExact(this)) {
+++        // The user-test build always behaves as a Power Nap: sleep onset + 10 minutes.
+++        if (!NapAlarmScheduler.canScheduleExact(this)) {
++             store.state(NapState.ERROR, "Exact alarm permission is required");
++             stopForeground(STOP_FOREGROUND_REMOVE);
++             stopSelf();
++@@ -146,7 +146,8 @@
++             logger.writeSessionHeader(selectedEngine.label(), source.name(), rawSleepCapture);
++             if (rawSleepCapture) {
++                 logger.event(System.currentTimeMillis(),
++-                        "RAW_SLEEP_CAPTURE_START no_alarm=true; stop_condition=USER_STOP");
+++                        "RAW_VALIDATION_START alarm=true; alarm_offset_ms=" + NAP_DURATION_MS
+++                                + "; stop_condition=ALARM_OR_USER_STOP");
++             }
++         }
++         Log.i(TAG, "Selected engine=" + selectedEngine + ", source=" + source.name()
++@@ -159,7 +160,7 @@
++                 store.snapshot(snapshot);
++                 if (logger != null) logger.snapshot(snapshot);
++                 updateNotification(rawSleepCapture
++-                        ? "RAW capture • " + snapshot.state() + " • " + Math.round(snapshot.confidence() * 100) + "%"
+++                        ? "RAW validation • " + snapshot.state() + " • " + Math.round(snapshot.confidence() * 100) + "%"
++                         : snapshot.state() + "  " + Math.round(snapshot.confidence() * 100) + "%");
++             }
++ 
++@@ -236,24 +237,21 @@
++         if (!active) return;
++         long now = System.currentTimeMillis();
++ 
++-        if (rawSleepCapture) {
++-            if (logger != null) logger.event(now,
++-                    "DETECTOR_SLEEP_MARKER estimatedOnset=" + estimatedOnsetMs
++-                            + "; confidence=" + confidence
++-                            + "; action=CONTINUE_RAW_CAPTURE");
++-            store.state(NapState.SLEEP_CONFIRMED,
++-                    "Detector marked sleep; RAW capture continues until STOP.");
++-            updateNotification("RAW capture • sleep marker detected • recording continues");
++-            return;
++-        }
++-
++         long alarmAt = Math.max(now + 2_000, estimatedOnsetMs + NAP_DURATION_MS);
++         if (logger != null) logger.event(now, "SLEEP_CONFIRMED sleepOnset=" + estimatedOnsetMs
++-                + "; alarmAt=" + alarmAt + "; confidence=" + confidence);
+++                + "; alarmAt=" + alarmAt + "; confidence=" + confidence
+++                + "; keepRawUntilAlarm=" + rawSleepCapture);
++         NapAlarmScheduler.schedule(this, alarmAt);
++         store.napScheduled(estimatedOnsetMs, alarmAt, confidence);
++-        updateNotification("Sleep detected. Alarm scheduled.");
++ 
+++        if (rawSleepCapture) {
+++            // Validation mode: keep collecting raw ACC/HR/IBI during the actual
+++            // 10-minute nap. NapAlarmReceiver stops this service when the alarm fires.
+++            updateNotification("Sleep detected • alarm +10 min • RAW recording continues");
+++            return;
+++        }
+++
+++        updateNotification("Sleep detected. Alarm scheduled for +10 min.");
++         if (source != null) source.stop();
++         active = false;
++         stopCaptureHeartbeat();
++@@ -309,7 +307,7 @@
++         }
++         if (logger != null) {
++             logger.event(System.currentTimeMillis(),
++-                    rawSleepCapture ? "RAW_SLEEP_CAPTURE_STOP " + reason : reason);
+++                    rawSleepCapture ? "RAW_VALIDATION_STOP " + reason : reason);
++         }
++         active = false;
++         closeLogger();
++@@ -328,7 +326,7 @@
++     private Notification monitorNotification(String text) {
++         return new Notification.Builder(this, CHANNEL)
++                 .setSmallIcon(R.drawable.ic_nap)
++-                .setContentTitle(rawSleepCapture ? "Power Nap • RAW sleep capture" : "Power Nap")
+++                .setContentTitle(rawSleepCapture ? "Power Nap • RAW validation" : "Power Nap")
++                 .setContentText(text)
++                 .setOngoing(true)
++                 .setCategory(Notification.CATEGORY_SERVICE)
++@@ -349,6 +347,15 @@
++     @Override
++     public void onDestroy() {
++         stopCaptureHeartbeat();
+++        if (logger != null && active) {
+++            long now = System.currentTimeMillis();
+++            SessionStore.Snapshot snapshot = store.read();
+++            boolean atAlarmBoundary = snapshot.alarmAtMs() > 0
+++                    && Math.abs(now - snapshot.alarmAtMs()) <= 60_000L;
+++            logger.event(now, atAlarmBoundary
+++                    ? "ALARM_BOUNDARY_STOP"
+++                    : "MONITORING_SERVICE_DESTROY");
+++        }
++         if (source != null && active) {
++             try { source.stop(); } catch (Throwable ignored) { }
++         }
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/java/com/example/powernapwatch/ui/MainActivity.java /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/java/com/example/powernapwatch/ui/MainActivity.java
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/java/com/example/powernapwatch/ui/MainActivity.java	2026-09-24 20:53:04.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/java/com/example/powernapwatch/ui/MainActivity.java	2026-09-25 11:10:37.242679980 +0000
++@@ -110,7 +110,7 @@
++             }
++ 
++             boolean rawSleepCapture = rawSleepCaptureSwitch.isChecked();
++-            if (!rawSleepCapture && !NapAlarmScheduler.canScheduleExact(this)) {
+++            if (!NapAlarmScheduler.canScheduleExact(this)) {
++                 Toast.makeText(this, "Missing exact alarm permission", Toast.LENGTH_SHORT).show();
++                 requestExactAlarmAccess();
++                 message.setText("Grant exact-alarm access, then press START again.");
++@@ -130,8 +130,9 @@
++             i.putExtra(NapMonitoringService.EXTRA_RAW_SLEEP_CAPTURE, rawSleepCapture);
++             startForegroundService(i);
++             message.setText(rawSleepCapture
++-                    ? "Starting RAW sleep capture. No nap alarm; recording continues until STOP."
++-                    : "Starting " + selected.label() + (record ? " with CSV logging..." : "..."));
+++                    ? "Starting Power Nap. Alarm = detected sleep + 10 min; RAW continues until alarm."
+++                    : "Starting " + selected.label() + ". Alarm = detected sleep + 10 min"
+++                            + (record ? " with RAW logging..." : "..."));
++         });
++ 
++         stop.setOnClickListener(v -> {
++@@ -181,7 +182,7 @@
++                 loggingSwitch.setChecked(true);
++                 loggingSwitch.setEnabled(false);
++                 preferences.loggingEnabled(true);
++-                message.setText("RAW sleep capture: no 10-minute alarm; recording ends only with STOP.");
+++                message.setText("RAW validation mode: alarm stays active; recording continues until it fires.");
++             } else {
++                 loggingSwitch.setEnabled(true);
++             }
++@@ -247,7 +248,7 @@
++ 
++         if (s.loggingEnabled()) {
++             String file = s.file().isEmpty() ? "starting..." : new File(s.file()).getName();
++-            logStatus.setText((s.rawSleepCapture() ? "RAW SLEEP CAPTURE" : "recording: ON") + "  •  " + file);
+++            logStatus.setText((s.rawSleepCapture() ? "RAW UNTIL ALARM" : "recording: ON") + "  •  " + file);
++         } else {
++             logStatus.setText("recording: OFF");
++         }
++@@ -263,11 +264,12 @@
++                 "HR %s | RMSSD %s ms\nMotion %s | confidence %.0f%%",
++                 hr, rmssd, motion, s.confidence() * 100.0);
++ 
++-        if (s.rawSleepCapture()) {
++-            text += "\nRAW capture runs until STOP";
++-        } else if (s.alarmAtMs() > 0 && s.alarmAtMs() > System.currentTimeMillis()) {
+++        if (s.alarmAtMs() > 0 && s.alarmAtMs() > System.currentTimeMillis()) {
++             long sec = (s.alarmAtMs() - System.currentTimeMillis()) / 1000;
++             text += String.format(Locale.ROOT, "\nAlarm in %d:%02d", sec / 60, sec % 60);
+++            if (s.rawSleepCapture()) text += " • RAW recording";
+++        } else if (s.rawSleepCapture()) {
+++            text += "\nRAW validation mode armed";
++         }
++         metrics.setText(text);
++ 
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/res/layout/activity_main.xml /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/res/layout/activity_main.xml
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/app/src/main/res/layout/activity_main.xml	2026-09-24 20:53:05.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/app/src/main/res/layout/activity_main.xml	2026-09-25 11:10:37.242423513 +0000
++@@ -18,7 +18,7 @@
++             android:id="@+id/title"
++             android:layout_width="wrap_content"
++             android:layout_height="wrap_content"
++-            android:text="POWER NAP LAB"
+++            android:text="POWER NAP"
++             android:textColor="#FFFFFF"
++             android:textSize="18sp"
++             android:textStyle="bold" />
++@@ -62,7 +62,7 @@
++             android:layout_width="210dp"
++             android:layout_height="wrap_content"
++             android:layout_marginTop="2dp"
++-            android:text="Record sensor data"
+++            android:text="Record RAW sensor data"
++             android:textColor="#FFFFFF"
++             android:textSize="11sp" />
++ 
++@@ -71,7 +71,7 @@
++             android:layout_width="210dp"
++             android:layout_height="wrap_content"
++             android:layout_marginTop="2dp"
++-            android:text="RAW sleep capture"
+++            android:text="Keep RAW until alarm"
++             android:textColor="#FFFFFF"
++             android:textSize="11sp" />
++ 
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/RecordedQuietAwakeRegressionTest.java /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/RecordedQuietAwakeRegressionTest.java
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/RecordedQuietAwakeRegressionTest.java	1970-01-01 00:00:00.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/RecordedQuietAwakeRegressionTest.java	2026-09-25 11:11:25.927668907 +0000
++@@ -0,0 +1,57 @@
+++import com.example.powernapwatch.core.*;
+++import java.io.*;
+++import java.nio.file.*;
+++
+++public class RecordedQuietAwakeRegressionTest {
+++    private static boolean replay(Path path) throws Exception {
+++        final boolean[] detected = {false};
+++        SleepOnsetDetector detector = new SleepOnsetDetector(
+++                new SleepOnsetDetector.Config(),
+++                new SleepOnsetDetector.Listener() {
+++                    @Override public void onSnapshot(DetectorSnapshot s) { }
+++                    @Override public void onSleepConfirmed(long onset, double confidence) {
+++                        detected[0] = true;
+++                    }
+++                });
+++
+++        boolean started = false;
+++        try (BufferedReader br = Files.newBufferedReader(path)) {
+++            String line = br.readLine(); // header
+++            while ((line = br.readLine()) != null) {
+++                String[] a = line.split(",", 16);
+++                if (a.length < 16 || a[2].isEmpty()) continue;
+++                long t = Long.parseLong(a[2]);
+++                if (!started) {
+++                    detector.start(t);
+++                    started = true;
+++                }
+++                switch (a[1]) {
+++                    case "ACC" -> detector.onAcceleration(t,
+++                            Double.parseDouble(a[5]), Double.parseDouble(a[6]), Double.parseDouble(a[7]));
+++                    case "HR" -> {
+++                        if (!a[8].isEmpty()) detector.onHeartRate(t, Double.parseDouble(a[8]));
+++                    }
+++                    case "IBI" -> {
+++                        if (!a[9].isEmpty()) detector.onIbi(t, Double.parseDouble(a[9]));
+++                    }
+++                    case "EVENT" -> {
+++                        if (a[15].contains("onBody=true")) detector.onBodyState(true, t);
+++                        else if (a[15].contains("onBody=false")) detector.onBodyState(false, t);
+++                    }
+++                }
+++            }
+++        }
+++        return detected[0];
+++    }
+++
+++    public static void main(String[] args) throws Exception {
+++        if (args.length == 0) throw new IllegalArgumentException("CSV paths required");
+++        for (String arg : args) {
+++            Path path = Path.of(arg);
+++            if (replay(path)) {
+++                throw new AssertionError("Recorded quiet-awake session was falsely detected as sleep: " + path);
+++            }
+++            System.out.println("Quiet-awake regression OK: " + path.getFileName());
+++        }
+++    }
+++}
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/ReplayCsvTest.java /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/ReplayCsvTest.java
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/ReplayCsvTest.java	2026-09-24 18:52:52.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/ReplayCsvTest.java	2026-09-25 11:13:06.142804162 +0000
++@@ -2,30 +2,65 @@
++ import java.io.*;
++ import java.nio.file.*;
++ 
+++/** Replays one CSV or a sequence of rotated CSV segments through the current detector. */
++ public class ReplayCsvTest {
++-  public static void main(String[] args) throws Exception {
++-    if (args.length != 1) throw new IllegalArgumentException("csv");
++-    final long[] onset={0}; final double[] conf={0};
++-    SleepOnsetDetector d=new SleepOnsetDetector(new SleepOnsetDetector.Config(), new SleepOnsetDetector.Listener(){
++-      public void onSnapshot(DetectorSnapshot s) {}
++-      public void onSleepConfirmed(long o,double c){onset[0]=o; conf[0]=c;}
++-    });
++-    boolean started=false;
++-    try(BufferedReader br=Files.newBufferedReader(Path.of(args[0]))) {
++-      String line=br.readLine();
++-      while((line=br.readLine())!=null){
++-        String[] a=line.split(",",16);
++-        if(a.length<16) continue;
++-        String type=a[1]; long t=Long.parseLong(a[2]);
++-        if(!started){d.start(t); started=true;}
++-        switch(type){
++-          case "ACC" -> d.onAcceleration(t,Double.parseDouble(a[5]),Double.parseDouble(a[6]),Double.parseDouble(a[7]));
++-          case "HR" -> { if(!a[8].isEmpty()) d.onHeartRate(t,Double.parseDouble(a[8])); }
++-          case "IBI" -> { if(!a[9].isEmpty()) d.onIbi(t,Double.parseDouble(a[9])); }
++-          case "EVENT" -> { if(a[15].contains("onBody=true")) d.onBodyState(true,t); else if(a[15].contains("onBody=false")) d.onBodyState(false,t); }
+++    public static void main(String[] args) throws Exception {
+++        if (args.length == 0) throw new IllegalArgumentException("CSV path(s) required");
+++
+++        final long[] onset = {0};
+++        final long[] confirmedAt = {0};
+++        final double[] confidence = {0};
+++
+++        SleepOnsetDetector detector = new SleepOnsetDetector(
+++                new SleepOnsetDetector.Config(),
+++                new SleepOnsetDetector.Listener() {
+++                    @Override public void onSnapshot(DetectorSnapshot s) {
+++                        if (s.state() == NapState.SLEEP_CONFIRMED) confirmedAt[0] = s.timestampMs();
+++                    }
+++                    @Override public void onSleepConfirmed(long o, double c) {
+++                        onset[0] = o;
+++                        confidence[0] = c;
+++                    }
+++                });
+++
+++        boolean started = false;
+++        outer:
+++        for (String arg : args) {
+++            try (BufferedReader br = Files.newBufferedReader(Path.of(arg))) {
+++                String line = br.readLine(); // header
+++                while ((line = br.readLine()) != null) {
+++                    String[] a = line.split(",", 16);
+++                    if (a.length < 16 || a[2].isEmpty()) continue;
+++                    long t;
+++                    try { t = Long.parseLong(a[2]); }
+++                    catch (NumberFormatException ignored) { continue; }
+++
+++                    if (!started) {
+++                        detector.start(t);
+++                        started = true;
+++                    }
+++
+++                    switch (a[1]) {
+++                        case "ACC" -> detector.onAcceleration(t,
+++                                Double.parseDouble(a[5]), Double.parseDouble(a[6]), Double.parseDouble(a[7]));
+++                        case "HR" -> {
+++                            if (!a[8].isEmpty()) detector.onHeartRate(t, Double.parseDouble(a[8]));
+++                        }
+++                        case "IBI" -> {
+++                            if (!a[9].isEmpty()) detector.onIbi(t, Double.parseDouble(a[9]));
+++                        }
+++                        case "EVENT" -> {
+++                            if (a[15].contains("onBody=true")) detector.onBodyState(true, t);
+++                            else if (a[15].contains("onBody=false")) detector.onBodyState(false, t);
+++                        }
+++                    }
+++                    if (onset[0] != 0) break outer;
+++                }
+++            }
++         }
++-      }
+++
+++        System.out.println("onset=" + onset[0]
+++                + " confirmedAt=" + confirmedAt[0]
+++                + " confidence=" + confidence[0]);
++     }
++-    System.out.println("onset="+onset[0]+" confidence="+conf[0]);
++-  }
++ }
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/com/example/powernapwatch/core/DetectorSnapshot.java /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/com/example/powernapwatch/core/DetectorSnapshot.java
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/com/example/powernapwatch/core/DetectorSnapshot.java	2026-09-23 14:55:08.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/com/example/powernapwatch/core/DetectorSnapshot.java	1970-01-01 00:00:00.000000000 +0000
++@@ -1,16 +0,0 @@
++-package com.example.powernapwatch.core;
++-
++-public record DetectorSnapshot(
++-        long timestampMs,
++-        NapState state,
++-        double confidence,
++-        double baselineHeartRate,
++-        double currentHeartRate,
++-        double heartRateSlopeBpmPerSecond,
++-        double movementRms,
++-        double rmssdMs,
++-        long quietDurationMs,
++-        long candidateDurationMs,
++-        boolean onBody,
++-        String reason) {
++-}
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/com/example/powernapwatch/core/NapState.java /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/com/example/powernapwatch/core/NapState.java
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/com/example/powernapwatch/core/NapState.java	2026-09-23 14:55:08.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/com/example/powernapwatch/core/NapState.java	1970-01-01 00:00:00.000000000 +0000
++@@ -1,14 +0,0 @@
++-package com.example.powernapwatch.core;
++-
++-public enum NapState {
++-    IDLE,
++-    BASELINE,
++-    WAITING_FOR_SLEEP,
++-    SLEEP_CANDIDATE,
++-    SLEEP_CONFIRMED,
++-    NAPPING,
++-    ALARMING,
++-    FINISHED,
++-    CANCELLED,
++-    ERROR
++-}
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/com/example/powernapwatch/core/SleepOnsetDetector.java /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/com/example/powernapwatch/core/SleepOnsetDetector.java
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/core-smoke/com/example/powernapwatch/core/SleepOnsetDetector.java	2026-09-23 14:57:26.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/core-smoke/com/example/powernapwatch/core/SleepOnsetDetector.java	1970-01-01 00:00:00.000000000 +0000
++@@ -1,344 +0,0 @@
++-package com.example.powernapwatch.core;
++-
++-import java.util.ArrayDeque;
++-import java.util.ArrayList;
++-import java.util.Collections;
++-import java.util.Comparator;
++-import java.util.List;
++-
++-/**
++- * Experimental Wake -> Sleep onset detector.
++- *
++- * This is deliberately transparent and heuristic. It is meant to be tuned with
++- * real CSV sessions from the watch, not treated as a medical sleep classifier.
++- */
++-public final class SleepOnsetDetector {
++-
++-    public interface Listener {
++-        void onSnapshot(DetectorSnapshot snapshot);
++-        void onSleepConfirmed(long estimatedOnsetMs, double confidence);
++-    }
++-
++-    public static final class Config {
++-        public long baselineDurationMs = 45_000;
++-        public long evaluationStepMs = 5_000;
++-        public long motionWindowMs = 30_000;
++-        public long heartWindowMs = 30_000;
++-        public long hrvWindowMs = 45_000;
++-        public long candidateConfirmMs = 45_000;
++-        public long quietFallbackMs = 120_000;
++-
++-        public double quietMotionRms = 0.18;
++-        public double veryQuietMotionRms = 0.08;
++-        public double strongMovementDelta = 1.00;
++-        public int maxStrongMovements = 1;
++-        public double candidateThreshold = 0.65;
++-        public double candidateCancelThreshold = 0.45;
++-    }
++-
++-    private record MotionPoint(long t, double delta) {}
++-    private record HeartPoint(long t, double bpm) {}
++-    private record IbiPoint(long t, double ms) {}
++-    private record Vec(long t, double x, double y, double z) {}
++-
++-    private final Config cfg;
++-    private final Listener listener;
++-    private final ArrayDeque<MotionPoint> motion = new ArrayDeque<>();
++-    private final ArrayDeque<HeartPoint> heart = new ArrayDeque<>();
++-    private final ArrayDeque<IbiPoint> ibi = new ArrayDeque<>();
++-
++-    private NapState state = NapState.IDLE;
++-    private long sessionStartMs;
++-    private long latestMotionMs;
++-    private long latestHeartMs;
++-    private long lastEvaluationMs;
++-    private long quietSinceMs;
++-    private long candidateSinceMs;
++-    private long candidateEstimatedOnsetMs;
++-    private boolean onBody = true;
++-    private Vec previousAcceleration;
++-    private boolean sleepReported;
++-
++-    public SleepOnsetDetector(Config cfg, Listener listener) {
++-        this.cfg = cfg;
++-        this.listener = listener;
++-    }
++-
++-    public synchronized void start(long nowMs) {
++-        motion.clear();
++-        heart.clear();
++-        ibi.clear();
++-        sessionStartMs = nowMs;
++-        latestMotionMs = 0;
++-        latestHeartMs = 0;
++-        lastEvaluationMs = 0;
++-        quietSinceMs = 0;
++-        candidateSinceMs = 0;
++-        candidateEstimatedOnsetMs = 0;
++-        previousAcceleration = null;
++-        sleepReported = false;
++-        onBody = true;
++-        state = NapState.BASELINE;
++-    }
++-
++-    public synchronized void onBodyState(boolean onBody, long timestampMs) {
++-        this.onBody = onBody;
++-        if (!onBody) {
++-            candidateSinceMs = 0;
++-            candidateEstimatedOnsetMs = 0;
++-            quietSinceMs = 0;
++-            if (!sleepReported && state != NapState.BASELINE) {
++-                state = NapState.WAITING_FOR_SLEEP;
++-            }
++-        }
++-        maybeEvaluate(timestampMs, true);
++-    }
++-
++-    public synchronized void onAcceleration(long timestampMs, double x, double y, double z) {
++-        Vec current = new Vec(timestampMs, x, y, z);
++-        if (previousAcceleration != null && timestampMs > previousAcceleration.t()) {
++-            double dx = x - previousAcceleration.x();
++-            double dy = y - previousAcceleration.y();
++-            double dz = z - previousAcceleration.z();
++-            double delta = Math.sqrt(dx * dx + dy * dy + dz * dz);
++-            motion.addLast(new MotionPoint(timestampMs, delta));
++-            latestMotionMs = Math.max(latestMotionMs, timestampMs);
++-        }
++-        previousAcceleration = current;
++-        prune(timestampMs);
++-        maybeEvaluate(timestampMs, false);
++-    }
++-
++-    public synchronized void onHeartRate(long timestampMs, double bpm) {
++-        if (bpm < 30 || bpm > 220) return;
++-        heart.addLast(new HeartPoint(timestampMs, bpm));
++-        latestHeartMs = Math.max(latestHeartMs, timestampMs);
++-        prune(timestampMs);
++-        maybeEvaluate(timestampMs, false);
++-    }
++-
++-    public synchronized void onIbi(long timestampMs, double ibiMs) {
++-        if (ibiMs < 250 || ibiMs > 2_000) return;
++-        ibi.addLast(new IbiPoint(timestampMs, ibiMs));
++-        prune(timestampMs);
++-    }
++-
++-    private void prune(long nowMs) {
++-        long cutoff = nowMs - 240_000;
++-        while (!motion.isEmpty() && motion.peekFirst().t() < cutoff) motion.removeFirst();
++-        while (!heart.isEmpty() && heart.peekFirst().t() < cutoff) heart.removeFirst();
++-        while (!ibi.isEmpty() && ibi.peekFirst().t() < cutoff) ibi.removeFirst();
++-    }
++-
++-    private void maybeEvaluate(long hintMs, boolean force) {
++-        if (sleepReported || state == NapState.IDLE) return;
++-        if (latestMotionMs == 0 || latestHeartMs == 0) return;
++-
++-        long evalAt = Math.min(latestMotionMs, latestHeartMs);
++-        if (!force && lastEvaluationMs != 0 && evalAt - lastEvaluationMs < cfg.evaluationStepMs) return;
++-        if (evalAt <= lastEvaluationMs) return;
++-        lastEvaluationMs = evalAt;
++-        evaluate(evalAt);
++-    }
++-
++-    private void evaluate(long t) {
++-        double baselineHr = percentileHeart(sessionStartMs, Math.min(t, sessionStartMs + 90_000), 0.70);
++-        double currentHr = medianHeart(t - cfg.heartWindowMs, t);
++-        double hrSlope = heartSlope(t - 45_000, t);
++-        double motionRms = motionRms(t - cfg.motionWindowMs, t);
++-        int strongMoves = strongMovements(t - cfg.motionWindowMs, t, cfg.strongMovementDelta);
++-        double rmssd = rmssd(t - cfg.hrvWindowMs, t);
++-        double baselineRmssd = rmssd(sessionStartMs, Math.min(t, sessionStartMs + 90_000));
++-
++-        boolean enoughHeart = countHeart(t - cfg.heartWindowMs, t) >= 8;
++-        boolean enoughMotion = countMotion(t - cfg.motionWindowMs, t) >= 30;
++-        boolean quiet = enoughMotion && motionRms <= cfg.quietMotionRms && strongMoves <= cfg.maxStrongMovements;
++-
++-        if (quiet && onBody) {
++-            // The full motion window is already quiet, so backdate the start of
++-            // sustained immobility to the beginning of that window.
++-            if (quietSinceMs == 0) quietSinceMs = Math.max(sessionStartMs, t - cfg.motionWindowMs);
++-        } else {
++-            quietSinceMs = 0;
++-        }
++-        long quietDuration = quietSinceMs == 0 ? 0 : Math.max(0, t - quietSinceMs);
++-
++-        if (t - sessionStartMs < cfg.baselineDurationMs || !enoughHeart || !enoughMotion) {
++-            state = NapState.BASELINE;
++-            emit(t, 0, baselineHr, currentHr, hrSlope, motionRms, rmssd,
++-                    quietDuration, 0, "collecting baseline");
++-            return;
++-        }
++-
++-        double score = 0.0;
++-        StringBuilder reason = new StringBuilder();
++-
++-        if (!onBody) {
++-            state = NapState.WAITING_FOR_SLEEP;
++-            emit(t, 0, baselineHr, currentHr, hrSlope, motionRms, rmssd,
++-                    0, 0, "watch off wrist");
++-            return;
++-        }
++-
++-        if (quiet) {
++-            if (motionRms <= cfg.veryQuietMotionRms) score += 0.55;
++-            else score += 0.40;
++-            reason.append("quiet ");
++-        }
++-
++-        if (!Double.isNaN(baselineHr) && !Double.isNaN(currentHr)) {
++-            double drop = baselineHr - currentHr;
++-            if (drop >= 3.0 || currentHr <= baselineHr * 0.96) {
++-                score += 0.25;
++-                reason.append("HRdrop ");
++-            } else if (drop >= 1.5) {
++-                score += 0.12;
++-                reason.append("HRsoft ");
++-            }
++-        }
++-
++-        if (!Double.isNaN(hrSlope) && hrSlope <= -0.025) {
++-            score += 0.10;
++-            reason.append("HRslope ");
++-        }
++-
++-        if (!Double.isNaN(rmssd)) {
++-            score += 0.04; // Valid IBI itself improves confidence slightly.
++-            if (!Double.isNaN(baselineRmssd) && rmssd >= baselineRmssd * 1.10) {
++-                score += 0.06;
++-                reason.append("HRVup ");
++-            }
++-        }
++-
++-        if (quietDuration >= cfg.quietFallbackMs) {
++-            score += 0.18;
++-            reason.append("longQuiet ");
++-        }
++-
++-        score = Math.min(1.0, score);
++-
++-        if (state == NapState.SLEEP_CANDIDATE) {
++-            if (!quiet || score < cfg.candidateCancelThreshold) {
++-                candidateSinceMs = 0;
++-                candidateEstimatedOnsetMs = 0;
++-                state = NapState.WAITING_FOR_SLEEP;
++-            } else if (t - candidateSinceMs >= cfg.candidateConfirmMs) {
++-                state = NapState.SLEEP_CONFIRMED;
++-                sleepReported = true;
++-                emit(t, score, baselineHr, currentHr, hrSlope, motionRms, rmssd,
++-                        quietDuration, t - candidateSinceMs, "sleep confirmed " + reason);
++-                listener.onSleepConfirmed(candidateEstimatedOnsetMs, score);
++-                return;
++-            }
++-        } else if (score >= cfg.candidateThreshold && quiet) {
++-            state = NapState.SLEEP_CANDIDATE;
++-            candidateSinceMs = t;
++-            // Backdate the probable onset. We avoid using the first second of immobility,
++-            // but also avoid starting later merely because callbacks were batched.
++-            long fromQuiet = quietSinceMs == 0 ? t : quietSinceMs + 15_000;
++-            long recent = t - 30_000;
++-            candidateEstimatedOnsetMs = Math.max(sessionStartMs, Math.max(fromQuiet, recent));
++-        } else {
++-            state = NapState.WAITING_FOR_SLEEP;
++-        }
++-
++-        long candidateDuration = candidateSinceMs == 0 ? 0 : Math.max(0, t - candidateSinceMs);
++-        emit(t, score, baselineHr, currentHr, hrSlope, motionRms, rmssd,
++-                quietDuration, candidateDuration, reason.toString().trim());
++-    }
++-
++-    private void emit(long t, double score, double baselineHr, double currentHr,
++-                      double hrSlope, double motionRms, double rmssd,
++-                      long quietDuration, long candidateDuration, String reason) {
++-        listener.onSnapshot(new DetectorSnapshot(
++-                t, state, score, baselineHr, currentHr, hrSlope, motionRms,
++-                rmssd, quietDuration, candidateDuration, onBody, reason));
++-    }
++-
++-    private int countMotion(long from, long to) {
++-        int c = 0;
++-        for (MotionPoint p : motion) if (p.t() >= from && p.t() <= to) c++;
++-        return c;
++-    }
++-
++-    private int countHeart(long from, long to) {
++-        int c = 0;
++-        for (HeartPoint p : heart) if (p.t() >= from && p.t() <= to) c++;
++-        return c;
++-    }
++-
++-    private double motionRms(long from, long to) {
++-        double sumSq = 0;
++-        int n = 0;
++-        for (MotionPoint p : motion) {
++-            if (p.t() >= from && p.t() <= to) {
++-                sumSq += p.delta() * p.delta();
++-                n++;
++-            }
++-        }
++-        return n == 0 ? Double.NaN : Math.sqrt(sumSq / n);
++-    }
++-
++-    private int strongMovements(long from, long to, double threshold) {
++-        int n = 0;
++-        for (MotionPoint p : motion) {
++-            if (p.t() >= from && p.t() <= to && p.delta() >= threshold) n++;
++-        }
++-        return n;
++-    }
++-
++-    private double medianHeart(long from, long to) {
++-        List<Double> values = new ArrayList<>();
++-        for (HeartPoint p : heart) if (p.t() >= from && p.t() <= to) values.add(p.bpm());
++-        return percentile(values, 0.50);
++-    }
++-
++-    private double percentileHeart(long from, long to, double q) {
++-        List<Double> values = new ArrayList<>();
++-        for (HeartPoint p : heart) if (p.t() >= from && p.t() <= to) values.add(p.bpm());
++-        return percentile(values, q);
++-    }
++-
++-    private static double percentile(List<Double> values, double q) {
++-        if (values.isEmpty()) return Double.NaN;
++-        Collections.sort(values);
++-        int index = (int) Math.round((values.size() - 1) * q);
++-        index = Math.max(0, Math.min(values.size() - 1, index));
++-        return values.get(index);
++-    }
++-
++-    private double heartSlope(long from, long to) {
++-        List<HeartPoint> points = new ArrayList<>();
++-        for (HeartPoint p : heart) if (p.t() >= from && p.t() <= to) points.add(p);
++-        if (points.size() < 5) return Double.NaN;
++-        points.sort(Comparator.comparingLong(HeartPoint::t));
++-        double t0 = points.get(0).t();
++-        double sx = 0, sy = 0, sxx = 0, sxy = 0;
++-        int n = points.size();
++-        for (HeartPoint p : points) {
++-            double x = (p.t() - t0) / 1000.0;
++-            double y = p.bpm();
++-            sx += x;
++-            sy += y;
++-            sxx += x * x;
++-            sxy += x * y;
++-        }
++-        double den = n * sxx - sx * sx;
++-        return Math.abs(den) < 1e-9 ? Double.NaN : (n * sxy - sx * sy) / den;
++-    }
++-
++-    private double rmssd(long from, long to) {
++-        List<IbiPoint> points = new ArrayList<>();
++-        for (IbiPoint p : ibi) if (p.t() >= from && p.t() <= to) points.add(p);
++-        if (points.size() < 5) return Double.NaN;
++-        points.sort(Comparator.comparingLong(IbiPoint::t));
++-        double sum = 0;
++-        int n = 0;
++-        for (int i = 1; i < points.size(); i++) {
++-            double d = points.get(i).ms() - points.get(i - 1).ms();
++-            sum += d * d;
++-            n++;
++-        }
++-        return n == 0 ? Double.NaN : Math.sqrt(sum / n);
++-    }
++-}
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/scripts/replay-detector.sh /mnt/data/PowerNap-v0.3.0-user-test/scripts/replay-detector.sh
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/scripts/replay-detector.sh	1970-01-01 00:00:00.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/scripts/replay-detector.sh	2026-09-25 11:13:06.143737278 +0000
++@@ -0,0 +1,16 @@
+++#!/usr/bin/env bash
+++set -euo pipefail
+++if [[ $# -lt 1 ]]; then
+++  echo "Usage: $0 SESSION.csv [SEGMENT.csv ...]" >&2
+++  exit 2
+++fi
+++ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+++OUT="$ROOT/core-smoke/replay-out"
+++rm -rf "$OUT"
+++mkdir -p "$OUT"
+++javac -d "$OUT" \
+++  "$ROOT"/app/src/main/java/com/example/powernapwatch/core/DetectorSnapshot.java \
+++  "$ROOT"/app/src/main/java/com/example/powernapwatch/core/NapState.java \
+++  "$ROOT"/app/src/main/java/com/example/powernapwatch/core/SleepOnsetDetector.java \
+++  "$ROOT"/core-smoke/ReplayCsvTest.java
+++java -cp "$OUT" ReplayCsvTest "$@"
++diff -ruN '--exclude=powernap-sessions' '--exclude=v0.2.3-nightcapture.patch' '--exclude=.gradle' '--exclude=build' '--exclude=out' /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/scripts/test-core.sh /mnt/data/PowerNap-v0.3.0-user-test/scripts/test-core.sh
++--- /mnt/data/powernap-finalize-src/PowerNap-v0.2.3-nightcapture/scripts/test-core.sh	2026-09-24 17:30:08.000000000 +0000
+++++ /mnt/data/PowerNap-v0.3.0-user-test/scripts/test-core.sh	2026-09-25 11:11:26.475634748 +0000
++@@ -9,6 +9,10 @@
++   "$ROOT"/app/src/main/java/com/example/powernapwatch/core/NapState.java \
++   "$ROOT"/app/src/main/java/com/example/powernapwatch/core/SleepOnsetDetector.java \
++   "$ROOT"/core-smoke/DetectorSmokeTest.java \
++-  "$ROOT"/core-smoke/DetectorNoSleepSmokeTest.java
+++  "$ROOT"/core-smoke/DetectorNoSleepSmokeTest.java \
+++  "$ROOT"/core-smoke/RecordedQuietAwakeRegressionTest.java
++ java -cp "$OUT" DetectorSmokeTest
++ java -cp "$OUT" DetectorNoSleepSmokeTest
+++java -cp "$OUT" RecordedQuietAwakeRegressionTest \
+++  "$ROOT"/powernap-sessions/20260924-201341.csv \
+++  "$ROOT"/powernap-sessions/20260924-220408.csv

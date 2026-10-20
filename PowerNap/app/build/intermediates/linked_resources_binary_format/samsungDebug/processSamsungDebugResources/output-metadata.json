@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "LINKED_RESOURCES_BINARY_FORMAT",
+    "kind": "Directory"
+  },
+  "applicationId": "com.example.powernapwatch",
+  "variantName": "samsungDebug",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "attributes": [],
+      "versionCode": 8,
+      "versionName": "0.2.4-samsung",
+      "outputFile": "linked-resources-binary-format-samsungDebug.ap_"
+    }
+  ],
+  "elementType": "File"
+}

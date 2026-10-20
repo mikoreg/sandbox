@@ -1,0 +1,21 @@
+PowerNap v0.4.0-multiengine
+
+A fresh APK must be built on a workstation with Android SDK 36 and network access to Google Maven.
+This revision adds:
+
+    androidx.health:health-services-client:1.1.0
+
+Build Samsung flavor:
+
+    ./gradlew :app:assembleSamsungDebug
+
+Expected APK:
+
+    app/build/outputs/apk/samsung/debug/app-samsung-debug.apk
+
+Install:
+
+    adb -s "$ANDROID_SERIAL" install -r app/build/outputs/apk/samsung/debug/app-samsung-debug.apk
+
+Before the first nap test, open the app and press CHECK DETECTORS to verify whether
+USER_ACTIVITY_ASLEEP is exposed by Health Services on the watch.

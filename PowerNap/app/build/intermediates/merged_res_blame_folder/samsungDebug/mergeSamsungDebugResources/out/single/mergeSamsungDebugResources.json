@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "com.example.powernapwatch.app-samsungDebug-8:/drawable_ic_nap.xml.flat",
+        "source": "com.example.powernapwatch.app-main-10:/drawable/ic_nap.xml"
+    },
+    {
+        "merged": "com.example.powernapwatch.app-samsungDebug-8:/layout_activity_main.xml.flat",
+        "source": "com.example.powernapwatch.app-main-10:/layout/activity_main.xml"
+    }
+]

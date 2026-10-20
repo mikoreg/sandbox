@@ -1,0 +1,56 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.example.powernapwatch'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'com.example.powernapwatch'
+        minSdk 30
+        targetSdk 36
+        versionCode 8
+        versionName '0.2.4'
+    }
+
+    flavorDimensions += 'sensors'
+    productFlavors {
+        standard {
+            dimension 'sensors'
+            applicationIdSuffix '.standard'
+            versionNameSuffix '-standard'
+        }
+        samsung {
+            dimension 'sensors'
+            versionNameSuffix '-samsung'
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+        }
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // Wear OS Health Services used by WearOsSleepStateDetector (src/main/java).
+    // Available to both samsungDebug and standardDebug.
+    implementation 'androidx.health:health-services-client:1.1.0'
+
+    // Future wykorzystywany przez Health Services API
+    implementation 'com.google.guava:listenablefuture:1.0'
+
+    // Only the samsung flavor needs Samsung's proprietary AAR.
+    // Download Samsung Health Sensor SDK and copy the AAR to app/libs/.
+    samsungImplementation files('libs/samsung-health-sensor-api.aar')
+}

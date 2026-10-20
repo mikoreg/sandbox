@@ -1,0 +1,900 @@
+15 kwi 2025 o 13:53
+Power Nap - to drzemka, która trwa ok. 10 minut aby zregenerować siły. Ważne aby  ona nie trwała dłużej aby nie wejść w jakąś kolejną fazę snu. Można ustawić budzik, ale problemem jest wyznaczenie czasu od chwili zaśnięcia. Zegarki Samsung Galaxy Wear (np. 5 PRO) posiadają monitorowanie snu i w finale potrafią podsumować sen, fazy snu, kiedy się pojawiły, itp.
+
+Zadanie jest następujące, zbadać dogłędnie temat i napisać apliację na Google Wear/Samsung Watch aplikację, co wykryje moment zaśniecia, uruchomienie Timer-a na 10 minut.
+
+Czy mógłbyś doprecyzować kilka rzeczy, zanim rozpocznę dokładne badanie tematu?
+
+Czy aplikacja ma działać wyłącznie na zegarkach Samsung Galaxy Watch (np. Watch 5 Pro), czy również na innych zegarkach z Wear OS?
+Czy interesuje Cię tylko platforma Wear OS (czyli Android na zegarki), czy również integracja z aplikacją mobilną (np. w telefonie)?
+Czy aplikacja może wykorzystywać istniejące API Samsunga (np. Samsung Health SDK), czy ma działać całkowicie niezależnie?
+Czy zależy Ci na wykryciu momentu faktycznego zaśnięcia na podstawie danych biometrycznych (np. tętno, bezruch, dane z akcelerometru), czy wystarczy przybliżone wykrycie momentu rozpoczęcia drzemki?
+Czy aplikacja ma działać automatycznie w tle, czy użytkownik musi ją ręcznie aktywować przed drzemką?
+
+Dzięki temu będę mógł zaproponować najbardziej adekwatne rozwiązania technologiczne i narzędzia.
+
+1. ma pracować na różnych urządzeniach z WearOs ale takich co umieją monitorować sen
+2. na początek tylko wearos
+3. nie wiem :)
+4. Sprawdź badania dotyczące PowerNap aby się dowiedzieć
+5. Użytkownik musi ją aktywować.
+
+Świetnie, zajmę się teraz szczegółowym zbadaniem tematu power napów oraz technicznych możliwości wykrywania momentu zaśnięcia na urządzeniach z Wear OS, które potrafią monitorować sen. Skupię się na badaniach naukowych dotyczących optymalnej długości drzemki, biologicznych sygnałach świadczących o zaśnięciu oraz możliwościach implementacyjnych aplikacji Wear OS wykrywającej zaśnięcie i automatycznie uruchamiającej 10-minutowy timer. Dam znać, gdy wszystko będzie gotowe.
+
+Research completed in 7mźródła – 19
+Krótka drzemka „Power Nap” – przegląd badań i koncepcja aplikacji Wear OS
+Wprowadzenie
+
+Power nap to potoczna nazwa krótkiej drzemki trwającej zwykle około 10–20 minut. Jej celem jest szybka regeneracja sił bez wchodzenia w głębokie fazy snu, co pozwala uniknąć tzw. „bezwładności snu” (uczucia dezorientacji i senności po przebudzeniu). W niniejszym raporcie przedstawiono:
+
+Badania naukowe dotyczące skuteczności bardzo krótkich drzemek (od kilku do kilkunastu minut).
+Fizjologiczne oznaki zasypiania, które mogą być wykrywane za pomocą sensorów dostępnych w smart-zegarkach (np. tętno, ruch).
+Możliwości stworzenia aplikacji na Wear OS wykrywającej moment zaśnięcia i uruchamiającej 10-minutowy timer (alarm). Omówiono dostępne czujniki, API do monitorowania snu oraz najlepsze praktyki projektowania aplikacji działających w tle.
+Na koniec zaproponowano koncepcję działania aplikacji krok po kroku wraz z oceną wykonalności technicznej.
+Korzyści z krótkiej drzemki (Power Nap) – wyniki badań
+
+Badania wskazują, że nawet bardzo krótka drzemka może pozytywnie wpłynąć na funkcjonowanie organizmu, o ile trwa na tyle krótko, by nie wejść w głęboki sen:
+
+Optymalna długość drzemki: Eksperymenty porównujące drzemki o różnym czasie trwania sugerują, że około 10 minut snu daje najwięcej korzyści. W klasycznym badaniu Tietzel i Lack (2001) porównano popołudniowe drzemki 0 min (brak drzemki), 10 min i 30 min po ograniczonej nocnej śnie. Okazało się, że 10-minutowa drzemka przyniosła natychmiastową poprawę subiektywnej czujności i wyników poznawczych, utrzymującą się co najmniej przez godzinę po przebudzeniu. Dłuższa, 30-minutowa drzemka skutkowała początkowo pogorszeniem sprawności (z powodu bezwładności snu tuż po obudzeniu), a dopiero po kilkudziesięciu minutach pojawiła się poprawa.
+Brak efektu z bardzo krótkich drzemek: Z kolei zbyt krótka drzemka (rzędu 1–5 minut) nie daje istotnych korzyści. Badania Amber Brooks (Flinders University) wykazały, że 5-minutowy „micronap” nie poprawiał mierników funkcji w porównaniu z brakiem drzemki, podczas gdy 10-minutowa drzemka okazała się najbardziej skuteczna ze wszystkich porównywanych czasów. Ultra-krótkie „drzemki” trwające kilkadziesiąt sekund lub 1–2 minuty nie przynoszą mierzalnych benefitów – sugeruje się, że korzyści pojawiają się dopiero gdy sen osiągnie co najmniej etap 2 NREM, czego tak krótki sen nie zapewnia.
+Poprawa czujności i funkcji kognitywnych: Już 10–15 minut snu może znacząco zredukować subiektywne odczucie zmęczenia, senności oraz poprawić sprawność umysłową. Uczestnicy badań po 10-minutowej drzemce zgłaszali mniejsze zmęczenie i wyższą czujność, a testy kognitywne (np. dodawanie/odejmowanie w pamięci) wypadały lepiej niż bez drzemki. Te pozytywne efekty były widoczne od razu po przebudzeniu i utrzymywały się przez pewien czas (do ~2–3 godzin).
+Unikanie głębokiego snu = brak inercji sennej: Kluczem do efektywnego „power nap” jest nie dopuścić do wejścia w fazy głębokie (N3). Drzemki >20 min zwiększają ryzyko, że śpiący wejdzie w wolnofalowy sen, z którego wybudzenie powoduje przejściowe upośledzenie reakcji (sleep inertia). Dlatego zaleca się utrzymywać drzemki regeneracyjne poniżej ~20 minut. Wspomniane badania potwierdziły, że 30-min drzemka wywoływała początkowo obniżenie sprawności tuż po wstaniu (grogginess), podczas gdy 10-min drzemka tego efektu uniknęła.
+
+Podsumowanie: Krótka drzemka rzędu 10 minut jest wystarczająca, by odczuć wzrost energii, poprawę nastroju, refleksu i zdolności poznawczych, a jednocześnie jest na tyle krótka, że nie powoduje „zamulenia” po przebudzeniu. Dłuższe drzemki (20–30 min) też pomagają zniwelować deficyt snu, ale wymagają czasu na otrząśnięcie się z senności. Drzemki krótsze niż ~5 minut z reguły nie dają zauważalnych korzyści, bo organizm nie zdąży wejść w korzystne fazy snu.
+
+Fizjologiczne oznaki zasypiania możliwe do wykrycia
+
+Aby wykryć moment zaśnięcia, warto znać objawy fizjologiczne, które towarzyszą przejściu z czuwania w sen. Głębokie monitorowanie snu w warunkach klinicznych opiera się na EEG, ruchach gałek ocznych (EOG) i tonusie mięśni (EMG). Smartwatche nie mają EEG, ale mogą śledzić inne parametry. Najważniejsze wskaźniki zasypiania (początkowe stadia NREM) możliwe do zaobserwowania za pomocą czujników zegarka to:
+
+Spowolnienie rytmu serca – Wraz z zapadaniem w sen następuje widoczny spadek częstości akcji serca. Badania pokazują, że tętno zaczyna zwalniać już kilkadziesiąt sekund przed zaśnięciem (tuż przed wejściem w stadium N1), a następnie dalej obniża się w ciągu pierwszej minuty stadium N2. Ogólnie, w porównaniu do czuwania, tętno w NREM jest wyraźnie niższe. W fazie N1 (pierwsze minuty snu) następuje zauważalne spowolnienie pracy serca i oddechu – organizm wchodzi w stan relaksacji. U dorosłych spoczynkowe tętno na jawie wynosi typowo 60–100 uderzeń/min, natomiast podczas snu często spada do ~40–50 uderzeń/min. To obniżanie tętna i ciśnienia krwi jest częścią normalnej reakcji fizjologicznej przy zapadaniu w sen (włącza się dominacja układu przywspółczulnego).
+Zmniejszenie ruchów ciała – Drugim charakterystycznym objawem jest ustanie świadomych ruchów i ogólne znieruchomienie ciała. Gdy osoba zasypia, mięśnie się rozluźniają, aktywność ruchowa gwałtownie maleje. W stadium N1 mięśnie tracą napięcie (choć mogą wystąpić krótkie mimowolne zrywy mięśniowe tzw. mioklonie zasypiania). Dla obserwatora zewnętrznego osoba wygląda na spokojnie leżącą; z perspektywy czujników ruchu, nadgarstek staje się niemal nieruchomy. Wykorzystuje to aktygrafia – metoda monitorowania snu poprzez czujnik ruchu. Algorytmy aktygraficzne zakładają, że brak lub minimalna ilość ruchów przez pewien okres oznacza początek snu. Przykładowo, klasyczne algorytmy (np. Cole-Kripke) analizują ciąg zapisów z akcelerometru i jeśli ruchy spadną poniżej ustalonego progu na >~1 minutę, liczą to jako moment zaśnięcia. Smartwatche mogą na bieżąco wykrywać, że użytkownik odłożył rękę w bezruchu – co jest warunkiem zaśnięcia.
+Zmiany w zmienności rytmu serca (HRV) – Choć zegarki nie mierzą bezpośrednio sygnałów EKG, to pośrednio z PPG można wnioskować o zmienności rytmu serca. Przy zasypianiu zazwyczaj rośnie komponent przywspółczulny (ton vagalny), co objawia się wzrostem HRV. Badania wskazują np., że obniżenie temperatury ciała przed snem idzie w parze ze wzrostem wariacji między uderzeniami serca i ten zwiększony HRV utrzymuje się w trakcie snu. W praktyce, niektóre urządzenia (Oura Ring, Fitbit) wykorzystują kombinację tętna i HRV do detekcji faz snu. Dla samego momentu zaśnięcia: stopniowy spadek tętna oraz wzrost regularności/HRV może sygnalizować, że użytkownik zapadł w lekki sen.
+Spłycenie oddechu i zmiana rytmu oddychania – Choć zegarek nie mierzy oddechu bezpośrednio, to pośrednio ruchy oddechowe mogą być wykryte przez czujnik akcelerometru (mikroruchy nadgarstka w rytm oddechu) lub przez zmiany w sygnale tętna (efekt RSA – arytmia oddechowa). W fazie zasypiania oddech staje się wolniejszy i bardziej regularny. Nowoczesne zegarki z czujnikiem SpO₂ potrafią monitorować częstość oddechów podczas snu na podstawie wahań utlenowania krwi i tętnie. Dla detekcji samego początku snu sygnał oddechowy ma jednak mniejsze znaczenie niż tętno i ruch.
+
+Podsumowanie fizjologii zasypiania: Moment przejścia w sen charakteryzuje się uspokojeniem organizmu – serce zwalnia, oddech i ruchy się stabilizują i redukują do minimum, a mięśnie się rozluźniają. Te zmiany mogą być monitorowane przez czujniki dostępne w typowym smartwatchu, zwłaszcza: optyczny czujnik tętna (PPG) oraz akcelerometr/żyroskop rejestrujący ruch. Na tej podstawie możliwe jest algorytmiczne wykrycie, że użytkownik prawdopodobnie zasnął.
+
+Czujniki w zegarkach Wear OS do wykrywania snu
+
+Współczesne smartwatche z systemem Wear OS są wyposażone w szereg sensorów, z których część może służyć do śledzenia snu i wykrywania momentu zaśnięcia. Kluczowe dostępne czujniki hardware to:
+
+Optyczny czujnik tętna (PPG) – większość zegarków posiada diodowy czujnik tętna, mierzący puls z nadgarstka. Pozwala on uzyskać częstość akcji serca w czasie rzeczywistym (zwykle z próbkowaniem co 1–5 s w trybie ciągłym) oraz po przetworzeniu wyznaczać parametry takie jak HRV czy poziom stresu. Do wykrycia zaśnięcia przydatne będzie monitorowanie spadku tętna oraz ewentualnie wzrostu stabilności rytmu. Pewne modele mierzą też natlenienie krwi (SpO₂) i mogą szacować oddech – choć nie jest to bezpośrednio potrzebne do stwierdzenia momentu zaśnięcia, może być dodatkową informacją o stanie fizjologicznym.
+Akcelerometr (3D) – standardowy czujnik ruchu mierzący przyspieszenia w trzech osiach. Wykorzystywany jest do aktygrafii nadgarstkowej, czyli wnioskowania o aktywności i śnie z ruchów ciała. Analiza danych z akcelerometru pozwala wykryć, kiedy użytkownik przestaje się ruszać (sygnał staje się bliski statycznemu) – co jest silną przesłanką, że zasnął lub co najmniej leży bez ruchu w celu snu. Nowe zegarki oferują też żyroskop, uzupełniający dane o ruchu obrotowym – jednak do celów detekcji snu sam akcelerometr zwykle wystarcza. Zegarek może stale rejestrować ruchy ręki i na bieżąco obliczać np. indeks aktywności w oknie kilkunastu sekund. Gdy spada on poniżej ustalonego progu, algorytm może zacząć odmierzać czas braku ruchu, aby potwierdzić zaśnięcie (np. brak istotnego ruchu przez 1–2 min).
+Czujnik żyroskopowy i kompas – jak wspomniano, żyroskop może pomóc w wykrywaniu drobnych zmian pozycji nadgarstka nawet gdy przyspieszenia są minimalne (np. pulsowanie tętnem). Nie jest on jednak niezbędny – wiele algorytmów snu opiera się na samym akcelerometrze. Kompas (magnetometr) raczej nie ma zastosowania w detekcji snu.
+Mikrofon – część zegarków ma mikrofon (np. do komend głosowych). Teoretycznie można by nasłuchiwać odgłosów świadczących o zaśnięciu (np. charakterystyczny oddech lub chrapnięcia). Jednak ciągłe użycie mikrofonu drenuje baterię i budzi wątpliwości prywatności. W praktyce rzadko wykorzystuje się audio do wykrywania momentu zaśnięcia na zegarku (chyba że aplikacja miałaby wykrywać chrapanie, ale to już po zaśnięciu, nie moment usypiania).
+Inne sensory: Nowe smartwatche mogą mieć dodatkowe czujniki jak termometr skóry, czujnik EDA (przewodność skóry) czy barometr. Ich rola w wykrywaniu zaśnięcia jest drugorzędna. Spadek temperatury obwodowej może towarzyszyć nocnemu cyklowi okołodobowemu, ale w kontekście 10-min drzemki raczej nie zdąży znacząco się zmienić. Pomiar EDA mógłby potencjalnie wykryć uspokojenie układu nerwowego (spadek przewodności związany z relaksem), lecz to nie jest standardowo używane w trackingu snu konsumenckiego.
+
+Dostęp do sensorów w Wear OS: Platforma Wear OS (bazująca na Androidzie) udostępnia API do odczytu danych z powyższych czujników. Programiści mogą korzystać z SensorManager aby subskrybować dane np. z akcelerometru lub z android.hardware.Sensor.TYPE_HEART_RATE aby otrzymywać odczyty tętna. Nowsze podejście to użycie Jetpack Health Services API, które pełni rolę pośrednika zapewniającego energooszczędny dostęp do danych zdrowotnych (tętno, kroki, aktywność itp.). W praktyce aplikacja może włączyć tryb pasywnego monitorowania tętna i aktywności – wówczas system sam zbiera te dane z czujników i dostarcza aplikacji w zadanych odstępach lub po wykryciu istotnej zmiany, co jest korzystne dla baterii.
+
+
+
+Podsumowując, typowy zegarek Wear OS posiada wszystkie niezbędne czujniki do wykrycia momentu zaśnięcia: pomiar rytmu serca i pomiar ruchu. Kombinacja tych danych pozwala implementować algorytmy podobne do stosowanych w opaskach fitness i urządzeniach do monitorowania snu (aktygrafia + tętno) w celu rozpoznania początku snu.
+
+API i dostępy do danych snu w Wear OS i Samsung Health
+
+Tworząc aplikację wykrywającą zaśnięcie, warto rozważyć, czy można skorzystać z istniejących API systemowych lub platform zdrowotnych, zamiast pisać całą logikę samodzielnie. Potencjalnie przydatne są:
+
+Google Sleep API (Android) – Google udostępnia bibliotekę Sleep API w ramach Google Play Services, umożliwiającą automatyczne wykrywanie zdarzeń związanych ze snem. Po uzyskaniu zgody użytkownika, Sleep API zbiera informacje z czujników telefonu/zegarka (m.in. jasność otoczenia, ruch urządzenia itp.) i inference’uje początek oraz koniec snu. Aplikacja może subskrybować SleepSegmentEvents, otrzymując powiadomienie, gdy system wykryje że użytkownik zasnął lub się obudził. To API zostało pomyślane głównie dla monitorowania nocnego snu, ale może teoretycznie wykrywać również drzemki, jeśli są wystarczająco długie. Niestety, w przypadku bardzo krótkiej drzemki (~10 min) skuteczność Sleep API może być ograniczona – algorytmy systemowe zwykle wymagają kilku(naście) minut danych, by z dużą pewnością potwierdzić sen. W kontekście aplikacji „power nap” (gdzie chcemy natychmiast po zaśnięciu odmierzać 10 min) korzystanie z Sleep API może okazać się zbyt mało responsywne. Mimo to, warto zauważyć istnienie tego API – daje ono łatwy dostęp do danych o porach snu użytkownika i może służyć do ogólnej analizy nawyków sennych w aplikacji.
+Google Fit / Health Connect – Alternatywnie, jeśli interesuje nas zapisywanie segmentów snu, można wykorzystać platformę Google Fit lub jej następcę Health Connect. Health Connect to nowe rozwiązanie Google do wymiany danych zdrowotnych między aplikacjami. Umożliwia np. odczyt i zapis informacji o snu (czas trwania snu, fazy) pod warunkiem, że użytkownik nada uprawnienia. Dla naszej aplikacji kluczowe pytanie: czy w czasie rzeczywistym można uzyskać z Fit/HealthConnect informację „użytkownik właśnie zasnął”. Niestety, Fit/HealthConnect raczej działają po fakcie – zapisują sesję snu, którą można odczytać po zakończeniu. Nie służą do triggerowania zdarzeń w czasie rzeczywistym. Czyli nie zastąpi to mechanizmu wykrywania w danej chwili – tu i tak potrzebna będzie analiza sensorów w samej aplikacji.
+Samsung Health SDK (dla Wear OS) – Smartwatche Samsunga (Galaxy Watch 4,5,6) działają na Wear OS, ale Samsung udostępnia własną aplikację Samsung Health do monitorowania zdrowia i snu. Pytanie, czy z poziomu aplikacji zewnętrznej można skorzystać z algorytmów Samsung Health do detekcji snu. Samsung oferował kiedyś Samsung Health SDK na Androida, pozwalający odczytywać dane aktywności, snu itp. Jednak w kontekście Wear OS sytuacja jest złożona. Według dyskusji deweloperów, bezpośredni dostęp do danych o fazach snu ze smartwatcha Galaxy przez aplikację firm trzecich nie jest udostępniony. Samsung nie umożliwia wywołania ich zaawansowanego algorytmu snu w trybie online w aplikacji zewnętrznej. Jedyną oficjalną drogą jest użycie wspomnianego Health Connect – tzn. Samsung Health może synchronizować zapisy snu do Health Connect, skąd aplikacja może je odczytać (ale to znów po zakończeniu snu, nie „na żywo”). Potwierdzono, że etapów snu w czasie rzeczywistym nie da się pobrać na Galaxy Watch przez SDK. (Aplikacja Sleep as Android znalazła sposób, by integrując się z Samsung Health, uzyskiwać pewne informacje, jednak prawdopodobnie odbywa się to via telefon i Health Connect lub poprzez własne monitorowanie sensorów, a nie jawne API Samsung Health).
+API czujników w Wear OS – Skoro gotowe usługi mają ograniczenia czasowe, najbardziej niezawodnym sposobem jest bezpośrednie użycie API sensorów lub Health Services i zaimplementowanie wykrywania zaśnięcia samemu. Wear OS jako system Android pozwala aplikacjom działać jako usługi zbierające dane z czujników takich jak tętno, akcelerometr. Wymaga to deklaracji odpowiednich uprawnień w aplikacji: m.in. BODY_SENSORS (dostęp do tętna) oraz android.permission.ACTIVITY_RECOGNITION (niezbędne np. dla Sleep API lub danych aktywności). Dzięki temu aplikacja może w czasie rzeczywistym analizować strumień danych i określić stan czuwanie/sen.
+
+Wnioski dot. API: Nie istnieje jeszcze publiczne API, które by w czasie rzeczywistym, natychmiast sygnalizowało moment zaśnięcia specjalnie na potrzeby drzemki. Trzeba polegać na własnym algorytmie działającym na sensorach. Można wspomagać się Sleep API od Google, ale raczej jako dodatkowa funkcja (np. zapisywanie statystyk), gdyż dla tak krótkiej drzemki jego wbudowana logika może być zbyt wolna. Samsung Health niestety nie udostępnia bezpośrednio live-danych o śnie dla deweloperów, więc posiadacze Galaxy Watch i tak musieliby polegać na mechanizmach naszej aplikacji. Podsumowując, najbardziej niezależnym i elastycznym rozwiązaniem jest wykorzystanie surowych danych czujników Wear OS lub biblioteki Health Services do ich pobierania i samodzielne wykrywanie momentu zaśnięcia.
+
+Projektowanie aplikacji monitorującej sen w tle – najlepsze praktyki
+
+Aplikacja na zegarek, która ma działać w tle i ciągle monitorować parametry biomedyczne, musi być zaprojektowana z uwzględnieniem ograniczeń urządzeń wearable. Najważniejsze wyzwania to żywotność baterii, ograniczenia systemowe dot. działania w tle, oraz wygoda i bezpieczeństwo użytkownika. Oto zalecane praktyki:
+
+Minimalizacja zużycia energii – Ciągłe śledzenie tętna i ruchu może szybko rozładować małą baterię zegarka, więc konieczne są optymalizacje. Zaleca się korzystanie z mechanizmów systemowych, które batchują (buforują) i dostarczają dane w paczkach zamiast ciągłego wybudzania procesora. Wear OS udostępnia wspomniane Health Services – jeśli możliwe, warto użyć np. PassiveMonitoringClient do otrzymywania okresowych uaktualnień tętna i aktywności w tle. Ta usługa wewnętrznie zadba o to, by np. odczyty czujnika były robione co pewien czas i żeby procesor usypiał pomiędzy nimi. Jeżeli używamy bezpośrednio SensorManager, warto włączyć sensor batching (na Androidzie 4.4+ jest możliwość ustawienia maksymalnego opóźnienia dostarczenia danych), tak aby np. akcelerometr zbierał dane przez 60 sekund i przekazywał je naraz zamiast generować zdarzenie co 20ms. W przypadku tętna – można zmniejszyć częstotliwość pomiaru (np. wystarczy 1 Hz czy nawet 0.2 Hz do wykrycia trendu spadkowego zamiast maksymalnej częstotliwości pomiarowej).
+Wykorzystanie trybu pasywnego i czuwania – Wear OS posiada mechanizmy takie jak Ambient mode (tryb przygaszonego ekranu) i pozwala aplikacjom działać pasywnie. Długotrwałe operacje powinny być wykonywane jako usługi działające w tle (Foreground Service z notyfikacją, jeśli muszą działać non-stop) lub jako zadania WorkManager/JobScheduler jeśli mogą być okresowe. W przypadku naszej aplikacji, najlepszym podejściem może być uruchomienie usługi foreground podczas trwania drzemki – gdy użytkownik aktywuje „monitorowanie drzemki”, startuje serwis z notyfikacją (np. "Drzemka w toku – monitorowanie snu"), co zapobiega uśmierceniu procesu przez system. Gdy drzemka się zakończy (albo użytkownik przerwie), serwis się zatrzyma. Dzięki temu unikamy ciągłego działania 24/7 – monitorujemy tylko w razie potrzeby.
+Szybkie reagowanie i warunki wybudzania – Aplikacja powinna uaktywniać się tylko wtedy, kiedy to potrzebne. Np. niech proces intensywnego nasłuchu zaczyna się dopiero po włączeniu trybu drzemki przez użytkownika. Można wykorzystać WakeLock aby podtrzymać działanie CPU podczas krytycznego momentu analizy (np. tuż po wykryciu zaśnięcia, aby ustawić alarm). Jednak generalnie warto zwolnić WakeLock jak najszybciej i polegać na systemowych alarmach, które same wybudzą urządzenie punktowo. Np. po stwierdzeniu, że użytkownik zasnął o 12:00:00, ustawiamy Alarm (AlarmManager) na 12:10:00, który w tym momencie obudzi urządzenie i uruchomi procedurę pobudki (wibracje, dźwięk). Dzięki temu nie musimy aktywnie czuwać przez całe 10 min – system sam wybudzi aplikację o odpowiednim czasie.
+Praca w tle a ograniczenia systemu – Nowsze wersje Androida/Wear OS mają restrykcje dla aplikacji działających w tle (ze względu na baterię). Trzeba upewnić się, że nasza aplikacja spełnia kryteria do działania w tle – np. użycie Foreground Service z notyfikacją, wyłączenie optymalizacji baterii (możliwie prosząc użytkownika o wyłączenie dla naszej appki, choć na Wear OS to rzadziej spotykane), ewentualnie korzystanie z WorkManager dla okresowego sprawdzania. W przypadku monitorowania w czasie rzeczywistym, Foreground Service wydaje się właściwym wyborem. System Wear OS od wersji 3 wzwyż preferuje, by aplikacje zdrowotne korzystały z Health Services (co może ukrywać pewne szczegóły w tle), niemniej własna implementacja również jest możliwa. W razie dłuższego działania warto co jakiś czas się odsypiać – np. jeśli monitorujemy przez godzinę i nic się nie stało (użytkownik nie zasnął), zatrzymać obserwację by oszczędzić baterię.
+Bezpieczeństwo i user experience – Aplikacja musi dbać o to, by nie przeszkadzać użytkownikowi. Jeśli użytkownik próbuje zasnąć, interfejs powinien być ciemny, nie wybudzać ekranu. Najlepiej, by użytkownik uruchomił tryb drzemki i odłożył rękę – ekran powinien wtedy zgasnąć, a aplikacja działać w tle. Można użyć trybu do not disturb automatycznie, by wyciszyć powiadomienia z innych aplikacji podczas drzemki (część zegarków/Wear OS ma API do włączenia DND, choć może wymagać uprawnień).
+Po wykryciu zaśnięcia i odczekaniu 10 min, pobudka powinna być delikatna lecz skuteczna – np. najpierw wibracja haptyczna, ewentualnie dźwięk alarmu jeśli użytkownik nie reaguje. Ważne, by zakończyć monitorowanie po zakończeniu drzemki, aby nie ciągnąć zbędnie czujników.
+Testowanie i kalibracja algorytmu – Należy przewidzieć różne scenariusze: co jeśli użytkownik się nie położy, albo tylko zamknie oczy ale nie zaśnie (fałszywy alarm)? Algorytm powinien mieć wbudowane filtry artefaktów – np. krótkotrwały ruch (przeciągnięcie się) nie powinien od razu anuluje stanu snu. Można zastosować pewien histerezę czasową: np. zaśnięcie deklarujemy dopiero gdy przez co najmniej X sekund utrzymują się typowe oznaki (niskie tętno, brak ruchu). Najlepsze praktyki z aktygrafii sugerują też użycie okna czasowego – np. uznajemy czas zaśnięcia z pewnym przesunięciem wstecz, gdy warunki spełnione. Trzeba też pomyśleć o różnicach indywidualnych – u niektórych spadek tętna może być mniejszy (np. sportowcy już spoczynkowo mają niskie tętno), więc algorytm może wymagać personalizacji (uczenia się typowego zakresu tętna użytkownika podczas czuwania vs snu).
+
+Podsumowując, projektowanie aplikacji „sleep monitor” na Wear OS musi iść w parze z dbałością o energooszczędność i stabilność działania w tle. Wykorzystanie dedykowanych API (Health Services, Sleep API) tam gdzie to możliwe ułatwi sprawę, a resztę należy zaimplementować z wykorzystaniem usług w tle i systemowych mechanizmów alarmów/wakelocków. Stosując powyższe praktyki, można zapewnić, że aplikacja będzie skutecznie działać, nie rozładuje zegarka zbyt szybko i nie zakłóci użytkownikowi odpoczynku.
+
+Koncepcja aplikacji „Power Nap” na Wear OS
+
+Na podstawie powyższych ustaleń można zaproponować ogólny zarys działania aplikacji, która pomoże użytkownikowi odbyć 10-minutową drzemkę regeneracyjną. Poniżej przedstawiono krok po kroku przykładowy scenariusz użycia i wewnętrzne działania aplikacji:
+
+Inicjacja drzemki przez użytkownika – Użytkownik czuje zmęczenie i chce odbyć szybką drzemkę. Uruchamia na zegarku aplikację „Power Nap”. Na ekranie pojawia się przycisk “Start drzemki”. Po jego naciśnięciu aplikacja przechodzi w tryb czuwania snu. Można też przewidzieć skrót, np. tile (kafel) na Wear OS lub komendę głosową, aby łatwo uruchomić drzemkę. Po aktywacji, ekran może wygasić się, by użytkownik mógł swobodnie zasnąć.
+Monitorowanie parametrów biomedycznych – Aplikacja uruchamia w tle moduł monitorowania tętna i ruchu. Działa on jako serwis foreground (z widoczną ikoną np. księżyca jako przypomnienie, że tryb drzemki jest włączony). W ciągu kolejnych minut, zegarek zbiera:
+Dane z akcelerometru – wykrywając, czy ręka jest nieruchoma. Na bieżąco obliczany jest np. ruch w 1-minutowym oknie.
+Dane z czujnika tętna – co kilka sekund pobierany jest puls użytkownika. Aplikacja może utrzymywać bufor ostatnich np. 30 s pomiarów tętna i sprawdzać trend.
+(Opcjonalnie) Dane z żyroskopu/HRV – jeśli dostępne, do zwiększenia pewności detekcji.
+Wykrywanie momentu zaśnięcia – Algorytm w aplikacji analizuje strumień danych i szuka sygnałów charakterystycznych dla zapadnięcia w sen:
+Jeżeli przez kilkadziesiąt sekund brak ruchu (akcelerometr pokazuje jedynie mikroruchy poniżej ustalonego progu) oraz
+Tętno użytkownika obniżyło się w stosunku do wartości sprzed kilku minut (np. spadek o pewien % lub poniżej indywidualnego progu),
+to aplikacja interpretuje to jako początek snu. Dla pewności może odczekać dodatkowe kilka-kilkanaście sekund aby potwierdzić, że trend się utrzymuje (nie był to np. chwilowy bezruch). Gdy warunki są spełnione, zapamiętuje znacznik czasu T0 = moment zaśnięcia.
+(Ewentualnie, zaawansowany algorytm mógłby tu wykorzystać model uczenia maszynowego wytrenowany do klasyfikacji stanu czuwanie/sen na podstawie wektorów cech: średnie tętno, odchylenie, wariancja ruchu itd. Jednak nawet prosta heurystyka oparta na progach powinna być wystarczająca.)
+Uruchomienie odliczania 10 minut – Natychmiast po zdetekowaniu zaśnięcia, aplikacja inicjuje timer. Najlepiej zrealizować to poprzez systemowy Alarm ustawiony na czas T0 + 10 minut. Przykładowo, jeśli zegarek wykrył sen o 12:00:30, to alarm zostanie ustawiony na 12:10:30. System AlarmManager zapewni, że urządzenie wybudzi się o tej godzinie, nawet jeśli aplikacja w międzyczasie przeszła w uśpienie. Dodatkowo, aplikacja może od razu zmienić status notyfikacji na np. „Drzemka rozpoczęta – pozostało 10 minut”, aby ewentualnie użytkownik (jeśli jeszcze nie zasnął) widział, że timer ruszył.
+Kontynuacja lekkiego monitorowania – Po uruchomieniu odliczania aplikacja może zmniejszyć częstotliwość monitorowania sensorów, aby oszczędzać baterię. Np. zamiast ciągłego czuwania może przełączyć się w tryb pasywny, co 1 minutę sprawdzając czy użytkownik nadal śpi czy może niespodziewanie się obudził wcześniej. (Jeśli by się obudził i zaczął ruszać przed upływem 10 min, aplikacja mogłaby wykryć ruch i anulować alarm, ale to dodatkowa funkcjonalność). Generalnie zakładamy, że użytkownik śpi te ~10 min, więc intensywne monitorowanie nie jest już potrzebne aż do momentu alarmu.
+Wybudzenie użytkownika po 10 minutach – Gdy minie 10 minut od zaśnięcia, następuje uruchomienie zaplanowanego alarmu:
+Zegarek zaczyna wibrować i/lub emitować dźwięk alarmu (zgodnie z preferencjami użytkownika – np. ciche wibracje aby nie przeszkadzać otoczeniu). To ma za zadanie delikatnie obudzić użytkownika z płytkiego snu. Ponieważ osoba jest w fazie lekkiej (N1/N2), wybudzenie powinno być stosunkowo łatwe i nieprzykre.
+Aplikacja zmienia ekran na komunikat „Koniec drzemki – minęło 10 minut” z opcją wyłączenia alarmu. Użytkownik może tapnąć, aby potwierdzić obudzenie.
+Dla pewności, alarm może trwać np. do 30 sekund lub do momentu reakcji użytkownika. Jeśli użytkownik zareaguje od razu, super. Jeśli nie, intensywność alarmu mogłaby narastać (to już szczegół implementacyjny).
+Zakończenie sesji drzemki – Po obudzeniu, aplikacja wyłącza monitorowanie sensorów i zwalnia wszystkie zasoby (np. wyłącza dalsze odczyty tętna, zwalnia WakeLock, anuluje ewentualne pozostałe notyfikacje). Prezentuje użytkownikowi podsumowanie: np. „Drzemka: 9 min 50 s snu. Samopoczucie: ?” – można tu zachęcić do oceny, jak się czuje po drzemce, co może służyć aplikacji do uczenia się optymalnych ustawień. Dane o drzemce (godzina, długość) można zapisać lokalnie lub do chmury/Google Fit, aby użytkownik miał historię swoich power napów.
+Dodatkowe funkcje (opcjonalnie) – Aplikacja może proponować opcje typu:
+„Inteligentne wykrycie momentu pobudki” – np. jeśli użytkownik wejdzie jednak w głębszy sen wcześniej niż 10 min (co rzadko, ale możliwe), można rozważyć obudzenie kilka minut wcześniej zamiast dokładnie o 10 min, by uniknąć inercji snu. To wymagałoby wykrywania wejścia w N3 (co samym zegarkiem jest trudne bez EEG). Raczej pozostaniemy przy sztywnych 10 minutach, bo taka jest idea power nap.
+Integracja z kalendarzem lub profilem – np. przypomnienie o drzemce, albo statystyki ile drzemek w tygodniu itp.
+Widget/komplikacja na tarczy zegarka pokazująca np. poziom zmęczenia i proponująca drzemkę (jeśli np. czujniki wykryją wysoki stres, duże tętno spoczynkowe itp.).
+
+Całość scenariusza kładzie nacisk na prostotę: jedno dotknięcie, a reszta dzieje się automatycznie – użytkownik nie musi ustawiać ręcznie timera, kłaść się i obawiać, że zaśnie za długo. Zegarek sam dopilnuje, by obudzić go o odpowiedniej porze, licząc czas od rzeczywistego zaśnięcia, a nie od momentu położenia się. To przewaga nad zwykłym budzikiem.
+
+Ocena wykonalności technicznej
+
+Technicznie realizacja takiej aplikacji na Wear OS jest wykonalna, ale wymaga starannego podejścia do sensorów i energooszczędności. Poniżej analiza wykonalności poszczególnych elementów:
+
+Dostępność czujników: Wszystkie wymagane czujniki (tętno, akcelerometr) są dostępne w API Android Wear OS. Wiele istniejących aplikacji (np. Sleep as Android, Google Fit) już wykorzystuje te dane do monitorowania snu, co dowodzi, że jest to osiągalne.
+Algorytm detekcji snu: Wykrycie momentu zaśnięcia na podstawie tętna i ruchu jest trudnym, ale rozwiązywalnym problemem. Aktygrafia jest uznaną metodą – cechuje się wysoką czułością w wykrywaniu snu (potrafi bardzo dobrze wykryć, kiedy śpimy, choć czasem ma niską specyficzność co do wykrycia przebudzeń). Dla naszych celów (wychwycić moment zaśnięcia) wysoka czułość jest atutem – lepiej zasygnalizować sen trochę za wcześnie (kilkadziesiąt sekund błąd nie zaszkodzi) niż za późno. Dane tętna dodatkowo zwiększają pewność. Literatura i praktyka wskazują, że połączenie czujnika ruchu i tętna daje dokładność porównywalną z profesjonalnymi urządzeniami. Wyzwanie to opracowanie algorytmu, który działa poprawnie u różnych osób. Jednak można zacząć od prostych reguł opartych na ruchu i tętnie – np. warunek X sekund braku ruchu + spadek tętna poniżej Y – i to prawdopodobnie zadziała dla większości przypadków. Ewentualnie, algorytm można iteracyjnie poprawiać w oparciu o zebrane dane (learning). Ważne jest gruntowne przetestowanie – ale nie ma tutaj fundamentalnej przeszkody naukowej; to głównie zagadnienie inżynierskie.
+Ograniczenia baterii: Ciągłe używanie PPG i akcelerometru przez kilkanaście minut jest jak najbardziej możliwe – wiele zegarków monitoruje tętno 24h na dobę (choć z przerwami). 10–15 minut ciągłego pomiaru tętna zużyje trochę baterii, ale w akceptowalnym stopniu. Zakładając, że użytkownik nie będzie robił tego wiele razy dziennie (typowo raz dziennie lub rzadziej), wpływ na baterię będzie znikomy. Jeśli jednak ktoś chciałby używać aplikacji często, to można zaimplementować dodatkowe optymalizacje opisane wcześniej (batching, redukcja częstotliwości po wykryciu snu etc.). Wear OS jest przystosowany do krótkich aktywności – nasza aplikacja idealnie wpisuje się w taką filozofię (krótka sesja monitoringu, potem koniec). Dlatego zarządzanie zasilaniem jest wykonalne pod warunkiem przestrzegania dobrych praktyk (np. wyłączanie sensorów natychmiast gdy nie są potrzebne).
+Działanie w tle: Potencjalnie trudniejszym aspektem są restrykcje systemowe. Wear OS, zwłaszcza nowsze, czasem agresywnie ubijają procesy w tle by oszczędzać baterię. Jednak użycie Foreground Service z notyfikacją znacząco redukuje to ryzyko – system traktuje to jak coś, co powinno działać (bo informuje użytkownika). Skoro takie aplikacje jak Google Fit, Strava czy Sleep as Android potrafią działać (np. śledzić sen całą noc, czy trening przez godzinę), to i nasza aplikacja działająca ~15-20 minut nie powinna mieć problemów, o ile poprawnie zaimplementujemy serwis. Google w dokumentacji wprost stwierdza, że jeśli aplikacja musi monitorować ciągle dane zdrowotne, powinna użyć PassiveMonitoring w Health Services. Możemy z tego skorzystać – PassiveMonitoringClient pozwala np. zarejestrować callback gdy tętno spadnie do pewnego poziomu lub gdy zostanie wykryty stan „użytkownik śpi”. Jeszcze nie wspominaliśmy o tym: czy Health Services ma wbudowany detektor snu? W obecnej wersji (2024) Sleep jest traktowany raczej jako dane do zapisu niż zdarzenie do nasłuchu, ale PassiveMonitoring umożliwia odbieranie zdarzeń tętna, kroków, kalorii itp. Być może w przyszłości pojawią się także sleep events. Mimo to, nasza własna logika może oprzeć się na PassiveMonitoring (pobierając co minutę uproszczone dane od Health Services) – co byłoby mniej energochłonne niż własny SensorManager.
+W ostateczności, gdyby system chciał ubijać naszą aplikację, zawsze można poprosić użytkownika o dodanie jej do listy “nie optymalizuj baterii”. Ale przy prawidłowym użyciu foregound service to nie powinno być potrzebne.
+Dokładność i fałszywe wykrycia: Wykonalność oznacza też, czy aplikacja spełni swoją rolę – tzn. obudzi w odpowiednim momencie. Tutaj trzeba szczerze przyznać, że detekcja dokładnego momentu zaśnięcia może obarczona być błędem rzędu minut. Np. jeśli użytkownik leży bez ruchu, ale jeszcze nie śpi, algorytm może go zaklasyfikować jako już śpiącego. Wtedy timer ruszyłby za wcześnie i obudziłby go np. po 10 min, podczas gdy on faktycznie spał tylko np. 8 min. Mimo to, w kontekście drzemki nie jest to krytyczne – nawet jak użytkownik tylko podrzemie 8 minut, efekt regeneracyjny i tak będzie odczuwalny. Z drugiej strony, jeśli aplikacja spóźni się z wykryciem (np. uzna zaśnięcie 2 min później), to drzemka wydłuży się do 12 min – wciąż bez większych negatywnych skutków. Tak więc pewna tolerancja w dokładności jest dopuszczalna. Najważniejsze, by nie przegapić znacząco (np. nie zacząć liczyć dopiero po 5 min snu, bo wtedy drzemka łącznie trwałaby 15 min – wciąż raczej OK, ale staramy się trzymać 10 min). Kalibracja progu ruchu i tętna powinna zminimalizować skrajne przypadki. Użytkownikowi można też dać możliwość ręcznego zakończenia drzemki wcześniej – jeżeli sam się obudzi przed alarmem, może dotknąć zegarka, co wykryjemy i od razu przerwiemy dalsze odliczanie.
+Zgodność i integracja: Aplikacja powinna działać na różnych modelach zegarków Wear OS (Samsung, Fossil, Mobvoi, Pixel, itd.). Ponieważ korzystamy z uniwersalnych API Androida, kompatybilność będzie szeroka. Integracja z Samsung Health czy Google Fit nie jest niezbędna dla funkcjonalności podstawowej, co upraszcza wykonanie – wszystkie potrzebne dane bierzemy z czujników bezpośrednio. Ewentualnie, po zakończonej drzemce możemy zapisać zapis do Google Fit (co jest proste przez Health Connect, bo tylko wpisujemy okres snu). To jednak dodatek.
+
+Ogólnie rzecz biorąc, taka aplikacja jest jak najbardziej możliwa do napisania przy dzisiejszej technologii. Wymaga połączenia wiedzy z zakresu biologii snu (do opracowania algorytmu wykrywającego sen) oraz solidnego wykorzystania API Androida (sensory, serwisy, alarmy). Nie ma tu oczywistych blokad (np. brak dostępu do sensora – bo dostęp jest; brak możliwości działania w tle – bo jest obejście Foreground Service).
+
+
+
+Ryzyko/wyzwania: Największe wyzwania to:
+
+Dostrojenie algorytmu, by uniknąć fałszywych alarmów (np. alarm włącza się mimo że nie zasnęliśmy, bo siedzieliśmy spokojnie 10 min – to byłoby irytujące). Można to rozwiązać poprzez proszenie użytkownika by położył się w sprzyjających warunkach (np. niech nie włącza trybu drzemki siedząc w pociągu gdzie nieruchomo patrzy w telefon – to mogłoby oszukać czujniki).
+Bateria – ale jak omówiono, krótkotrwałe użycie sensorów nie powinno zabić baterii, zwłaszcza jeśli optymalizujemy.
+
+Warto również wspomnieć, że podobne funkcjonalności są rozwijane przez producentów urządzeń. Np. firma Garmin w 2023 ogłosiła funkcję „nap detection” w swoich zegarkach – automatycznie rozpoznającą i zapisującą drzemki w ciągu dnia. To potwierdza, że jest zapotrzebowanie i techniczna możliwość realizacji. Nasza aplikacja idzie o krok dalej – nie tylko wykryje drzemkę, ale i aktywnie ją zakończy o odpowiednim czasie.
+
+
+
+Konkluzja: Realizacja aplikacji „Power Nap” na Wear OS jest technicznie wykonalna i praktycznie użyteczna. Wymaga uwzględnienia kilku aspektów technicznych (czujniki, API, oszczędzanie energii), ale wszystkie potrzebne narzędzia są dostępne na platformie. Odpowiednio zaprojektowana aplikacja mogłaby skutecznie pomóc użytkownikom korzystać z dobrodziejstw 10-minutowych drzemek, opierając się na naukowych podstawach ich efektywności i nowoczesnej technologii wearable.
+
+
+
+Źródła: Przy opracowaniu powyższych informacji korzystano z literatury naukowej dotyczącej drzemek (m.in. prace Tietzel & Lack) oraz dokumentacji deweloperskiej Wear OS i doświadczeń istniejących aplikacji. Poniżej zestawiono wybrane źródła:
+
+Tietzel, Lack (2001): badanie porównujące efekty 10-min vs 30-min drzemki.
+Brooks, Lack (2006): optymalny czas drzemki (5 min vs 10 min vs dłuższe).
+Pivik et al. (1996): zmiany tętna przy zasypianiu (spowolnienie HR przed N1).
+Opisy fizjologii snu – spowolnienie akcji serca, oddechu, rozluźnienie mięśni w stadium N1.
+Dokumentacja Google Sleep API (detekcja zdarzeń snu).
+Forum Samsung Developers – dostęp do danych snu z Samsung Health na Wear OS.
+Android Wear OS guidelines – użycie Health Services i czujników w tle.
+Porównania urządzeń wearables z PSG – dokładność wykrywania snu na podstawie akcelerometru i tętna.
+Źródła
+dzisiaj 19:22
+PowerNap.zip
+Archiwum zip
+NIestaty, ta aplikacja jakby trochę nie działa. Dodaj do jej UI wybór silnika odczytującego i dodatkowo przełącznik dla zapisywanie odczytów aby możbna było je pobrać a następnie przeanalizować aby wykryć anomalie, błędy w celu poprawienia, usunięcia błędów
+Przy próbie pobrania logów skrypt wisi ale na zegarku pojawia się taki komunikat
+20260924 201341
+08:38:54 user@fedora PowerNap ±|capital-rush ✗|→ adb devices
+List of devices attached
+adb-RFATB2D59AZ-2KhcS5 (2)._adb-tls-connect._tcp        device
+adb-RFATB2D59AZ-2KhcS5._adb-tls-connect._tcp    device
+
+08:39:56 user@fedora PowerNap ±|capital-rush ✗|→ adb shell "run-as com.example.powernapwatch sh -c 'ls -lah files/sessions/'"
+adb: more than one device/emulator
+08:41:43 user@fedora PowerNap ±|capital-rush ✗|→ adb devices
+List of devices attached
+adb-RFATB2D59AZ-2KhcS5 (2)._adb-tls-connect._tcp        device
+adb-RFATB2D59AZ-2KhcS5._adb-tls-connect._tcp    device
+
+08:41:46 user@fedora PowerNap ±|capital-rush ✗|→ export ANDROID_SERIAL='adb-RFATB2D59AZ-2KhcS5._adb-tls-connect._tcp'
+08:42:18 user@fedora PowerNap ±|capital-rush ✗|→ adb get-state
+device
+08:42:26 user@fedora PowerNap ±|capital-rush ✗|→ adb shell getprop ro.product.model
+SM-R925F
+08:42:36 user@fedora PowerNap ±|capital-rush ✗|→ adb shell "run-as com.example.powernapwatch sh -c 'ls -lah files/sessions/'"
+total 486
+drwx------ 2 u0_a50 u0_a50 3.3K 2026-09-24 20:13 .
+drwxrwx--x 3 u0_a50 u0_a50 3.3K 2026-09-23 20:14 ..
+-rw------- 1 u0_a50 u0_a50   79 2026-09-23 20:14 20260923-201414.csv
+-rw------- 1 u0_a50 u0_a50  208 2026-09-23 20:21 20260923-201652.csv
+-rw------- 1 u0_a50 u0_a50  208 2026-09-23 20:22 20260923-202103.csv
+-rw------- 1 u0_a50 u0_a50  208 2026-09-23 20:24 20260923-202345.csv
+-rw------- 1 u0_a50 u0_a50   79 2026-09-23 20:31 20260923-203116.csv
+-rw------- 1 u0_a50 u0_a50   79 2026-09-23 20:34 20260923-203407.csv
+-rw------- 1 u0_a50 u0_a50  32K 2026-09-23 22:03 20260923-220249.csv
+-rw------- 1 u0_a50 u0_a50 0.9K 2026-09-24 19:49 20260924-194934.csv
+-rw------- 1 u0_a50 u0_a50  37K 2026-09-24 19:50 20260924-195000.csv
+-rw------- 1 u0_a50 u0_a50 0.9K 2026-09-24 20:02 20260924-200217.csv
+-rw------- 1 u0_a50 u0_a50 368K 2026-09-24 20:17 20260924-201341.csv
+08:42:47 user@fedora PowerNap ±|capital-rush ✗|→ bash -x ./scripts/pull-sessions.sh \
+    com.example.powernapwatch \
+    --latest
++ set -euo pipefail
++ PKG=com.example.powernapwatch
++ MODE=--latest
++ OUT_DIR=powernap-sessions
++ mkdir -p powernap-sessions
++ mapfile -t FILES
+++ list_remote
+++ adb shell 'run-as com.example.powernapwatch sh -c '\''ls -t files/sessions/*.csv 2>/dev/null'\'''
+++ tr -d '\r'
++ [[ 11 -eq 0 ]]
++ [[ -z files/sessions/20260924-201341.csv ]]
++ [[ --latest != \-\-all ]]
++ FILES=("${FILES[0]}")
++ for remote in "${FILES[@]}"
++ [[ -z files/sessions/20260924-201341.csv ]]
+++ basename files/sessions/20260924-201341.csv
++ out=powernap-sessions/20260924-201341.csv
++ adb exec-out run-as com.example.powernapwatch cat files/sessions/20260924-201341.csv
++ echo 'Saved powernap-sessions/20260924-201341.csv'
+Saved powernap-sessions/20260924-201341.csv
+08:43:09 user@fedora PowerNap ±|capital-rush ✗|→ ll
+Permissions Size User Date Modified Name
+drwxr-xr-x@    - user 24 Sep 19:59  .gradle
+drwxr-xr-x@    - user 24 Sep 20:05  .idea
+drwxr-xr-x@    - user 24 Sep 19:18  app
+drwxr-xr-x@    - user 23 Sep 18:44  build
+.rw-r--r--@   73 user 23 Sep 14:55  build.gradle
+drwxr-xr-x@    - user 24 Sep 17:30  core-smoke
+.rw-r--r--@ 3.2k user 24 Sep 17:29  DIAGNOSTICS.md
+drwxr-xr-x@    - user 24 Sep 19:18  gradle
+.rw-r--r--@  107 user 23 Sep 14:55  gradle.properties
+.rwxr-xr-x@ 8.7k user 23 Sep 18:44  gradlew
+.rw-r--r--@ 2.9k user 23 Sep 18:44  gradlew.bat
+.rw-r--r--@ 1.8k user 23 Sep 14:58  IMPLEMENTATION_NOTES.md
+.rw-r--r--@  336 user 23 Sep 18:43  local.properties
+drwxr-xr-x@    - user 24 Sep 20:43  powernap-sessions
+.rw-r--r--@ 8.4k user 24 Sep 17:29  README.md
+drwxr-xr-x@    - user 24 Sep 17:29  scripts
+.rw-r--r--@  333 user 23 Sep 14:55  settings.gradle
+08:43:12 user@fedora PowerNap ±|capital-rush ✗|→ ll powernap-sessions/
+Permissions Size User Date Modified Name
+.rw-r--r--@ 377k user 24 Sep 20:43  20260924-201341.csv
+08:43:41 user@fedora PowerNap ±|capital-rush ✗|→
+
+20260924 220408
+
+Mam już ten plik
+
+10:23:57 user@fedora PowerNap ±|capital-rush ✗|→ PKG=com.example.powernapwatch
+
+LATEST=$(adb shell \
+  "run-as $PKG sh -c 'ls -t files/sessions/*.csv 2>/dev/null | head -n 1'" \
+  | tr -d '\r')
+
+echo "$LATEST"
+files/sessions/20260924-220408.csv
+10:25:31 user@fedora PowerNap ±|capital-rush ✗|→ mkdir -p powernap-sessions
+
+adb exec-out \
+  run-as "$PKG" \
+  cat "$LATEST" \
+  > "powernap-sessions/$(basename "$LATEST")"
+10:25:53 user@fedora PowerNap ±|capital-rush ✗|→
+
+
+Super — w takim razie mamy najnowszą sesję:
+
+20260924-220408.csv
+
+Wrzuć ten plik tutaj, a przeanalizuję go razem z poprzednim 20260924-201341.csv. Szczególnie interesuje mnie, czy ponownie wystąpiło fałszywe SLEEP_CONFIRMED, mimo że nie spałeś.
+
+I po Twojej uwadze zmieniłbym kierunek projektu w dwóch istotnych miejscach.
+
+Detekcja snu: wolniej, ale znacznie pewniej
+
+Skoro 2–3 minuty opóźnienia nie są krytyczne, nie warto walczyć o reakcję w kilka sekund. Wręcz przeciwnie: możemy wykorzystać ten czas do zmniejszenia liczby false-positive.
+
+Poprzednia sesja jest dla nas bardzo cenna, bo wiemy:
+
+detektor: SLEEP_CONFIRMED
+rzeczywistość: użytkownik NIE SPAŁ
+
+Czyli obecna kombinacja:
+
+bardzo mały ruch
++ spadek HR
+
+jest niewystarczająca.
+
+Nowy model powinien być bardziej konserwatywny:
+
+AWAKE
+  ↓
+QUIET
+  ↓
+POSSIBLE_SLEEP
+  ↓   2–3 min stabilności
+PROBABLE_SLEEP
+  ↓
+SLEEP_CONFIRMED
+
+I jeżeli sygnały nie są przekonujące:
+
+POSSIBLE_SLEEP → QUIET
+
+zamiast uruchamiać timer.
+
+Dla Power Nap znacznie lepiej pomylić się w tę stronę:
+
+zasnąłeś 20:15
+wykryliśmy 20:17
+alarm ~20:27
+
+niż:
+
+nie zasnąłeś
+ale uruchomiliśmy 10-minutowy timer
+
+To będzie zasadnicza zmiana następnej wersji detektora.
+
+Logowanie: też zmieniłbym podejście
+
+Masz rację, że godzinne zasypianie zmienia sytuację. Nie potrzebujemy przez cały czas zapisywać:
+
+ACC
+ACC
+ACC
+ACC
+...
+25 razy/s
+
+Do diagnostyki sprzętu było to świetne. Do normalnego użycia — nie.
+
+Zaproponowałbym 3 poziomy logowania:
+
+OFF
+DIAGNOSTIC
+RAW
+DIAGNOSTIC — domyślny
+
+Zamiast 25 surowych ACC/s robimy np. jedno podsumowanie na sekundę:
+
+t_ms,
+state,
+confidence,
+hr,
+hr_delta,
+rmssd,
+motion_rms,
+motion_max,
+movement_count,
+acc_samples,
+hr_samples,
+ibi_samples,
+delivery_delay_ms
+
+Przykład:
+
+65000,QUIET,0.41,68,-2,34,0.061,0.19,0,25,1,1,3200
+66000,QUIET,0.44,67,-3,36,0.054,0.16,0,25,1,1,3100
+67000,POSSIBLE_SLEEP,0.57,67,-3,38,0.049,0.14,0,25,1,2,3400
+
+Plus osobno zapisujemy wszystkie ważne zdarzenia:
+
+STATE_CHANGE
+SOURCE_ERROR
+SOURCE_STARTED
+FLUSH_REQUEST
+FLUSH_COMPLETE
+SCREEN_OFF
+SCREEN_ON
+ON_BODY_CHANGE
+ALARM_SET
+USER_STOP
+
+To da nam prawie wszystko, czego potrzeba do analizy algorytmu, a log będzie około 25× mniejszy.
+
+RAW
+
+Tylko do eksperymentów:
+
+każda próbka ACC
+każdy HR
+każdy IBI
+
+Czyli dokładnie to, co mamy teraz.
+
+Twój pomysł z czasem od początku sesji jest bardzo dobry
+
+Zamiast w każdym rekordzie:
+
+1758744865331
+1758744865371
+1758744865411
+
+możemy zapisać raz w nagłówku:
+
+session_start_epoch_ms=1758744800000
+
+a dalej:
+
+t_ms
+0
+1000
+2000
+3000
+...
+
+Dla diagnostyki opóźnień wystarczą dwie wartości względne:
+
+sensor_t_ms
+received_t_ms
+
+np.:
+
+65000,68340
+
+i:
+
+delay = 3340 ms
+
+Nie tracimy żadnej informacji.
+
+Co więcej, powinien to być czas monotoniczny (SystemClock.elapsedRealtimeNanos()), a nie zegar kalendarzowy, ponieważ zmiana czasu/system clock nie wpłynie na kolejność próbek.
+
+Nagłówek pliku może wyglądać:
+
+# PowerNap log v2
+# session_start=2026-09-24T22:04:08+02:00
+# device=SM-R925F
+# engine=SAMSUNG
+# mode=DIAGNOSTIC
+# sample_period_ms=1000
+
+t_ms,type,state,confidence,hr,hr_delta,rmssd,motion_rms,...
+
+To jest moim zdaniem lepszy format.
+
+Rotacja plików
+
+Tak — zamiast martwić się długością sesji, zrobiłbym rotację.
+
+Np.:
+
+20260924-220408-000.csv
+20260924-220408-001.csv
+20260924-220408-002.csv
+
+Nowy plik po:
+
+1 MB
+
+lub np.:
+
+30 minutach
+
+cokolwiek nastąpi wcześniej.
+
+Przy DIAGNOSTIC raczej nigdy nie osiągniemy 1 MB podczas normalnego power napa.
+
+Przy RAW rotacja ochroni nas przed bardzo dużymi plikami.
+
+Co zachowałbym mimo wszystko
+
+Nie wyrzucałbym całkowicie raw logowania.
+
+To właśnie dzięki pełnemu logowi znaleźliśmy:
+
+batching HR,
+ogromne delivery_delay,
+dziwny IBI=260 ms,
+błędne timestampowanie całego IBI batch,
+fałszywy SLEEP_CONFIRMED.
+
+Czyli RAW jest bardzo wartościowym trybem laboratoryjnym.
+
+Docelowo UI widziałbym np.:
+
+Data source
+[ Samsung Health Sensor SDK ▼ ]
+
+Logging
+[ Diagnostic ▼ ]
+
+Nap duration
+[ 10 min ]
+
+[ START ]
+
+z opcjami:
+
+Logging:
+○ Off
+● Diagnostic
+○ Raw sensors
+Jest też błąd w pull-sessions.sh
+
+Ten wynik:
+
+Pulling cache ...
+Pulling code_cache ...
+Pulling files ...
+Pulling shared_prefs ...
+
+pokazuje, że wersja skryptu, którą masz, źle sparsowała:
+
+--all powernap-sessions
+
+i zamiast plików z:
+
+files/sessions/*.csv
+
+zaczęła traktować katalogi aplikacji jako logi.
+
+Ręczne pobranie, które zrobiłeś:
+
+LATEST=$(adb shell ...)
+adb exec-out run-as ...
+
+jest poprawne.
+
+W następnej wersji poprawiłbym też skrypt tak, żeby normalna komenda była jednoznaczna:
+
+./scripts/pull-sessions.sh \
+    --package com.example.powernapwatch \
+    --latest \
+    --output powernap-sessions
+
+albo:
+
+./scripts/pull-sessions.sh \
+    --package com.example.powernapwatch \
+    --all \
+    --output powernap-sessions
+
+bez argumentów pozycyjnych.
+
+Co teraz
+
+Wrzuć 20260924-220408.csv.
+
+Mając dwie rzeczywiste sesje oraz informację, że w poprzedniej nie spałeś, możemy już zacząć robić coś znacznie ciekawszego niż strojenie „na oko”: porównam oba przebiegi, rozbiję sygnały na okna czasowe i sprawdzę, które dokładnie cechy spowodowały fałszywe rozpoznanie snu.
+
+Na tej podstawie przygotowałbym następną wersję z:
+
+konserwatywnym detektorem 2–3 min
+DIAGNOSTIC / RAW / OFF
+logowaniem agregatów 1 s
+czasem względnym
+rotacją logów
+poprawionym pull-sessions.sh
+
+To wydaje mi się znacznie lepszym kierunkiem niż dalsze skracanie czasu reakcji.
+
+20260924 220408(1)
+wrzucam ponownie
+
+Mam plik i udało mi się go poprawnie przeanalizować. Ten zapis jest nawet bardziej wartościowy niż poprzedni, bo pokazuje dwie rzeczy jednocześnie: Samsungowy tor pomiarowy działa już całkiem dobrze, natomiast nasz algorytm rozpoznawania zaśnięcia jest zdecydowanie zbyt naiwny.
+
+W sesji 20260924-220408.csv aplikacja wystartowała około 22:04:08. Już po ~46 s przeszła do SLEEP_CANDIDATE, a po ~93 s do SLEEP_CONFIRMED:
+
+~  0 s    START
+~ 45 s    koniec BASELINE
+~ 46 s    SLEEP_CANDIDATE     confidence=0.75
+~ 93 s    SLEEP_CONFIRMED     confidence=0.75
+
+Oszacowany przez nią początek snu był praktycznie dokładnie na granicy końca baseline:
+
+sleepOnset ≈ START + 45.0 s
+
+To bardzo mocna wskazówka, że algorytm robi w praktyce coś w rodzaju:
+
+baseline się skończył
++
+użytkownik leży nieruchomo
++
+tętno spadło
+=
+sen
+
+A to jest błędne założenie.
+
+Co dokładnie zobaczył algorytm
+
+Tętno wyglądało tak:
+
+czas od startu	HR, mniej więcej
+0–10 s	71
+10–20 s	74
+20–30 s	68
+30–40 s	61–62
+40–50 s	61
+50–60 s	59
+60–70 s	58
+70–80 s	59
+80–90 s	57
+90+ s	57
+
+Czyli organizm rzeczywiście mocno się uspokoił:
+
+~74 bpm → ~57 bpm
+
+Jednocześnie po pierwszych kilkunastu sekundach nadgarstek stał się niemal nieruchomy.
+
+To wygląda bardzo podobnie do zasypiania, ale może być zwyczajnym spokojnym leżeniem. I dokładnie tutaj jest fundamentalny problem aktygrafii: nieruchome czuwanie bywa klasyfikowane jako sen. To nie jest specyficzny błąd naszej aplikacji — to znane ograniczenie pomiaru snu z nadgarstka.
+
+Czyli mamy świetny negative training sample:
+
+ACC: "wygląda jak sen"
+HR : "wygląda jak sen"
+GROUND TRUTH: nie śpię
+
+Taki materiał jest dla nas bardzo wartościowy.
+
+Dobra wiadomość: problem z batchingiem jest właściwie rozwiązany
+
+W tej sesji Samsung SDK zachowywał się znacznie lepiej niż wcześniej.
+
+ACC:
+
+2322 próbki
+~25 Hz
+
+delivery delay:
+median   ~3.7 s
+p95      ~10.6 s
+max      ~12.2 s
+
+HR:
+
+90 próbek
+~1 Hz
+
+delivery delay:
+median   ~2.6 s
+p95      ~10.6 s
+max      ~12.6 s
+
+To jest już zupełnie akceptowalne.
+
+flush() również działa:
+
+HR flush:
+median completion ~68 ms
+max               ~198 ms
+
+ACC flush:
+median completion ~276 ms
+max               ~771 ms
+
+Wszystkie zarejestrowane żądania flush() zostały zaakceptowane.
+
+Czyli nie inwestowałbym już czasu w skracanie tych kilku sekund opóźnienia. Zgadzam się z Tobą: 2–3 minuty na pewniejsze rozpoznanie snu są znacznie bardziej wartościowe niż wykrycie w 10 sekund.
+
+Co więcej, możemy nawet zmienić:
+
+flush co 5 s
+
+na np.:
+
+flush co 15 s
+
+żeby mniej obciążać zegarek.
+
+Z logowaniem też się z Tobą zgadzam — ale nie robiłbym wyłącznie „zmian”
+
+Obecny plik:
+
+197 KB
+
+rejestruje tylko około:
+
+96 sekund
+
+Co daje orientacyjnie:
+
+~7.4 MB / godzinę
+
+Storage sam w sobie nie jest jeszcze dramatem, ale bez sensu zapisujemy ponad 2300 surowych ACC z półtoraminutowej próby.
+
+Jednocześnie nie zapisywałbym tylko zmian.
+
+Jeżeli przez cztery minuty mamy:
+
+motion ≈ const
+HR ≈ const
+
+to fakt, że nic się nie zmieniało przez cztery minuty, jest właśnie bardzo ważną informacją.
+
+Najlepszy byłby więc model hybrydowy:
+
+EVENT
+    zapisujemy tylko zmianę
+
+SNAPSHOT
+    zapisujemy okresowo, np. co 5 sekund
+
+RAW
+    opcjonalnie każdą próbkę
+
+Czyli normalny log diagnostyczny mógłby wyglądać:
+
+t_ms,type,state,confidence,hr,hr_delta,motion_rms,rmssd,acc_n,hr_n,ibi_n,delay_ms
+
+0,EVENT,BASELINE,...
+5000,SNAP,BASELINE,0.00,71,...
+10000,SNAP,BASELINE,0.00,74,...
+15000,SNAP,BASELINE,0.00,73,...
+...
+45000,STATE,POSSIBLE_SLEEP,0.51,...
+50000,SNAP,POSSIBLE_SLEEP,0.53,...
+
+To byłoby wielokrotnie mniejsze, a do analizy algorytmu nadal prawie idealne.
+
+Twój pomysł z czasem względnym jest lepszy
+
+Obecnie zapisujemy wszędzie:
+
+1790280336148
+1790280341148
+...
+
+Nie potrzebujemy tego.
+
+Wystarczy raz w nagłówku:
+
+session_start_epoch_ms=1790280248184
+session_start=2026-09-24T22:04:08+02:00
+
+a dalej:
+
+t_ms
+0
+5000
+10000
+15000
+...
+
+Jeśli interesuje nas opóźnienie dostarczenia próbki, wystarczy:
+
+t_ms,delivery_delay_ms
+
+Nie potrzebujemy dwóch 13-cyfrowych timestampów w każdym rekordzie.
+
+Wewnętrznie użyłbym przy tym zegara monotonicznego:
+
+SystemClock.elapsedRealtimeNanos()
+
+żeby zmiana czasu systemowego nie mogła popsuć sekwencji.
+
+Zrobiłbym trzy tryby logowania
+
+To jest teraz moim zdaniem właściwy kompromis:
+
+Logging
+
+○ OFF
+● DIAGNOSTIC
+○ RAW
+
+OFF — tylko normalna praca.
+
+DIAGNOSTIC — domyślny dla naszych testów: agregat co 5 s + wszystkie zmiany stanu i błędy.
+
+RAW — obecne zachowanie, czyli ACC 25 Hz + HR + IBI. Włączamy tylko wtedy, kiedy rzeczywiście badamy problem.
+
+Samsung oficjalnie udostępnia na Watch4+ ciągły ACC 25 Hz, HR+IBI i ciągły PPG 25 Hz, więc RAW nadal warto zachować jako narzędzie laboratoryjne.
+
+I rotacja plików jak najbardziej
+
+Zrobiłbym np.:
+
+DIAGNOSTIC:
+1 MB / plik
+
+RAW:
+5 MB / plik
+
+czyli:
+
+20260924-220408-000.csv
+20260924-220408-001.csv
+20260924-220408-002.csv
+
+Całość stanowi jedną sesję.
+
+Ale przy DIAGNOSTIC 1 MB prawdopodobnie wystarczy na wiele godzin.
+
+Najważniejsza zmiana: detektor
+
+Nie zwiększałbym teraz po prostu progu z:
+
+45 s → 180 s
+
+bo wtedy człowiek, który leży spokojnie trzy minuty, nadal zostanie uznany za śpiącego.
+
+Ten log pokazuje coś ważniejszego:
+
+spadek HR + nieruchomość oznacza relaks, a nie sen.
+
+Dlatego maszyna stanów powinna wyglądać raczej:
+
+AWAKE
+  │
+  ▼
+RELAXED_AWAKE
+  │
+  ▼
+POSSIBLE_SLEEP
+  │
+  │ dodatkowe dowody przez 2–3 min
+  ▼
+PROBABLE_SLEEP
+  │
+  ▼
+SLEEP_CONFIRMED
+
+RELAXED_AWAKE jest tutaj kluczowym nowym stanem.
+
+Aktualny zapis zostałby prawdopodobnie sklasyfikowany właśnie jako:
+
+RELAXED_AWAKE
+
+a nie sen.
+
+Co ciekawe, mamy jeszcze jeden sygnał do wykorzystania
+
+Galaxy Watch4+ poprzez Samsung Health Sensor SDK daje także:
+
+PPG_CONTINUOUS
+25 Hz
+GREEN
+RED
+IR
+
+Nie proponuję jednak włączać PPG na godzinę.
+
+Znacznie ciekawsze byłoby:
+
+ACC + HR
+     │
+     ▼
+RELAXED_AWAKE
+     │
+     ▼
+POSSIBLE_SLEEP
+     │
+     ├── uruchom PPG
+     │
+     └── obserwuj 2–3 min
+             │
+             ▼
+        confirmation
+
+Czyli kosztowniejszy sensor uruchamiamy dopiero wtedy, gdy tani algorytm stwierdzi „to może być sen”.
+
+Z PPG możemy próbować wydobywać dodatkowe cechy związane z pulsacją i modulacją oddechową. To nadal nie zrobi z zegarka EEG i wymaga walidacji, ale daje nam dodatkową informację, której w dwóch obecnych false-positive wyraźnie brakuje.
+
+Dla Watch5 Pro istnieje jeszcze ciągły pomiar temperatury skóry, ale ponieważ chcemy zachować kompatybilność od Watch4, nie budowałbym na nim podstawowego algorytmu. Samsung udostępnia continuous skin temperature dopiero od Watch5.
+
+Jest jeszcze artefakt w IBI
+
+W najnowszym nagraniu:
+
+IBI median ≈ 1025 ms
+
+co wygląda sensownie przy HR około 58–60.
+
+Ale pojawia się:
+
+IBI = 2300 ms
+
+To niemal na pewno nie powinno mieć pełnego wpływu na RMSSD. Może oznaczać utracone wykrycie uderzenia lub artefakt optyczny.
+
+Dlatego zamiast prostego:
+
+if (ibi >= 400) {
+    use(ibi);
+}
+
+powinniśmy mieć filtr odporny na outliery, np. medianowy i ograniczenie względnej zmiany IBI.
+
+Wniosek po tych dwóch sesjach
+
+Nie ruszałbym już infrastruktury Samsung SDK — ona zaczyna działać dobrze.
+
+Teraz mamy trzy priorytety:
+
+zastąpić SLEEP_CANDIDATE stanem pośrednim RELAXED_AWAKE / POSSIBLE_SLEEP i dać detektorowi 2–3 minuty na potwierdzenie;
+przejść z obecnego RAW jako domyślnego logowania na OFF / DIAGNOSTIC / RAW, z relatywnym czasem i rotacją plików;
+przygotować opcjonalny PPG uruchamiany tylko podczas POSSIBLE_SLEEP.
+
+I jeszcze bardzo ważna rzecz: nie stroiłbym dalej progów tylko na danych, na których nie było snu. Mamy już dwa świetne przykłady „jak wygląda użytkownik, który bardzo przypomina śpiącego, ale nie śpi”. Teraz potrzebujemy również przynajmniej 2–3 nagrania prawdziwego zasypiania. Dopiero porównanie quiet awake vs real sleep onset pokaże nam, które cechy naprawdę rozdzielają oba przypadki.
+
+Jeśli w tej właśnie sesji 22:04:08 również byłeś cały czas przytomny, to mamy drugi bardzo czysty false positive, a to dodatkowo potwierdza powyższy kierunek.
